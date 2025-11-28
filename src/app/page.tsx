@@ -1,12 +1,13 @@
 import Link from "next/link"
-import { ArrowRight, CheckCircle2, Zap, Shield, BarChart3, Activity } from "lucide-react"
+import {  Zap, Shield, BarChart3, Activity, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import HeroSection from "@/components/hero-section"
 
 export default function Home() {
   return (
     <div className="flex min-h-screen  flex-col bg-background text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-xl">
             <Activity className="h-6 w-6 text-primary" />
@@ -27,7 +28,7 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-20 md:py-32 lg:py-40">
+        {/* <section className="relative overflow-hidden py-20 md:py-32 lg:py-40">
           <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
           <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]"></div>
           
@@ -62,7 +63,8 @@ export default function Home() {
                />
             </div>
           </div>
-        </section>
+        </section> */}
+        <HeroSection/>
 
         {/* Features Section */}
         <section id="features" className="py-20 bg-muted/30">
@@ -112,7 +114,7 @@ export default function Home() {
         <section className="py-20">
           <div className="container mx-auto">
             <div className="bg-primary rounded-3xl p-8 md:p-16 text-center text-primary-foreground relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_25%,rgba(255,255,255,0.1)_50%,transparent_50%,transparent_75%,rgba(255,255,255,0.1)_75%,rgba(255,255,255,0.1)_100%)] bg-[length:20px_20px] opacity-20"></div>
+              <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_25%,rgba(255,255,255,0.1)_50%,transparent_50%,transparent_75%,rgba(255,255,255,0.1)_75%,rgba(255,255,255,0.1)_100%)] bg-size-[20px_20px] opacity-20"></div>
               
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6 relative z-10">Ready to upgrade your monitoring?</h2>
               <p className="text-primary-foreground/80 text-lg max-w-2xl mx-auto mb-8 relative z-10">
