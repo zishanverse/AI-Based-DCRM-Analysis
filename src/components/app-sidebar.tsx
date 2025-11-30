@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import {
+  IconAccessPointOff,
   IconCamera,
   IconChartBar,
   IconDashboard,
@@ -12,6 +13,7 @@ import {
   IconFolder,
   IconHelp,
   IconListDetails,
+  IconMap2,
   IconReport,
   IconSearch,
   IconSettings,
@@ -43,9 +45,14 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Upload Docu",
+      title: "Upload Document",
       url: "#",
       icon: IconFileDescription,
+    },
+    {
+      title: "Heat Map",
+      url: "/heat-map",
+      icon: IconMap2,
     },
   ],
   navClouds: [
