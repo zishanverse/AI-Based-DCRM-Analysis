@@ -112,7 +112,7 @@ export function DashboardSingleChart({ title, description, dataKey, color }: Das
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="aspect-[21/9] w-full max-h-[400px]">
+        <ChartContainer config={chartConfig} className="aspect-21/9 w-full max-h-[400px]">
           <LineChart data={dcrmData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
             <XAxis 
