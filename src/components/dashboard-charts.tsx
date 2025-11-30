@@ -97,113 +97,73 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+interface DashboardSingleChartProps {
+  title: string;
+  description: string;
+  dataKey: "primary" | "secondary" | "tertiary";
+  color: string;
+}
+
+export function DashboardSingleChart({ title, description, dataKey, color }: DashboardSingleChartProps) {
+  return (
+    <Card className={`border-t-4 shadow-md`} style={{ borderTopColor: color }}>
+      <CardHeader>
+        <CardTitle style={{ color: color }}>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig} className="aspect-[21/9] w-full max-h-[400px]">
+          <LineChart data={dcrmData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+            <XAxis 
+              dataKey="timestamp" 
+              tickFormatter={(value) => new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              stroke="#666"
+              fontSize={12}
+            />
+            <YAxis 
+              domain={['dataMin - 5', 'dataMax + 5']} 
+              stroke="#666"
+              fontSize={12}
+              label={{ value: 'Resistance (Ω)', angle: -90, position: 'insideLeft' }}
+            />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Line
+              dataKey={dataKey}
+              type="monotone"
+              stroke={color}
+              strokeWidth={3}
+              dot={{ r: 4, fill: color }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function DashboardCharts() {
   return (
     <div className="grid gap-6 grid-cols-1">
-      <Card className="border-t-4 border-t-[#003366] shadow-md">
-        <CardHeader>
-          <CardTitle className="text-[#003366]">Primary Resistance</CardTitle>
-          <CardDescription>Waveform Analysis - Circuit A</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig} className="aspect-[21/9] w-full max-h-[400px]">
-            <LineChart data={dcrmData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis 
-                dataKey="timestamp" 
-                tickFormatter={(value) => new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                stroke="#666"
-                fontSize={12}
-              />
-              <YAxis 
-                domain={['dataMin - 5', 'dataMax + 5']} 
-                stroke="#666"
-                fontSize={12}
-                label={{ value: 'Resistance (Ω)', angle: -90, position: 'insideLeft' }}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Line
-                dataKey="primary"
-                type="monotone"
-                stroke="var(--color-primary)"
-                strokeWidth={3}
-                dot={{ r: 4, fill: "var(--color-primary)" }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-
-      <Card className="border-t-4 border-t-[#FF9933] shadow-md">
-        <CardHeader>
-          <CardTitle className="text-[#d97706]">Secondary Resistance</CardTitle>
-          <CardDescription>Waveform Analysis - Circuit B</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig} className="aspect-[21/9] w-full max-h-[400px]">
-            <LineChart data={dcrmData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis 
-                dataKey="timestamp" 
-                tickFormatter={(value) => new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                stroke="#666"
-                fontSize={12}
-              />
-              <YAxis 
-                domain={['dataMin - 5', 'dataMax + 5']} 
-                stroke="#666"
-                fontSize={12}
-                label={{ value: 'Resistance (Ω)', angle: -90, position: 'insideLeft' }}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Line
-                dataKey="secondary"
-                type="monotone"
-                stroke="var(--color-secondary)"
-                strokeWidth={3}
-                dot={{ r: 4, fill: "var(--color-secondary)" }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-
-      <Card className="border-t-4 border-t-[#138808] shadow-md">
-        <CardHeader>
-          <CardTitle className="text-[#138808]">Tertiary Resistance</CardTitle>
-          <CardDescription>Waveform Analysis - Circuit C</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig} className="aspect-[21/9] w-full max-h-[400px]">
-            <LineChart data={dcrmData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis 
-                dataKey="timestamp" 
-                tickFormatter={(value) => new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                stroke="#666"
-                fontSize={12}
-              />
-              <YAxis 
-                domain={['dataMin - 5', 'dataMax + 5']} 
-                stroke="#666"
-                fontSize={12}
-                label={{ value: 'Resistance (Ω)', angle: -90, position: 'insideLeft' }}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Line
-                dataKey="tertiary"
-                type="monotone"
-                stroke="var(--color-tertiary)"
-                strokeWidth={3}
-                dot={{ r: 4, fill: "var(--color-tertiary)" }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+      <DashboardSingleChart 
+        title="Primary Resistance" 
+        description="Waveform Analysis - Circuit A" 
+        dataKey="primary" 
+        color="#003366" 
+      />
+      <DashboardSingleChart 
+        title="Secondary Resistance" 
+        description="Waveform Analysis - Circuit B" 
+        dataKey="secondary" 
+        color="#FF9933" 
+      />
+      <DashboardSingleChart 
+        title="Tertiary Resistance" 
+        description="Waveform Analysis - Circuit C" 
+        dataKey="tertiary" 
+        color="#138808" 
+      />
     </div>
   )
 }
