@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { ChatArea } from "@/components/chat-area"
 import { SiteHeader } from "@/components/site-header"
 import { DcrmStatsCards } from "@/components/DcrmStatsCards"
+import CsvUploader from "@/components/csv-uploader"
 import {
   SidebarInset,
   SidebarProvider,
@@ -27,6 +28,9 @@ export default function Page() {
               <div className="md:col-span-1">
                 <OverallScore />
               </div>
+            </div>
+            <div className="mt-4">
+              <CsvUploader />
             </div>
             <AdaboostCharts />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">

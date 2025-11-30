@@ -1,4 +1,4 @@
-from . import auth, devices, uploads, waveforms, analyses, simulate, reports
+from . import auth, devices, uploads, waveforms, analyses, simulate, reports, diagnostics
 
 __all__ = [
     "auth",
@@ -8,4 +8,5 @@ __all__ = [
     "analyses",
     "simulate",
     "reports",
+    "diagnostics",
 ]

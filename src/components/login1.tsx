@@ -1,8 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 "use client"
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { login } from "@/lib/api-client";
 
 interface Login1Props {
   heading?: string;
@@ -32,17 +34,28 @@ const Login1 = ({
 }: Login1Props) => {
   const [stationId, setStationId] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
 
-    // Log the credentials to console
-    console.log("Station ID:", stationId);
-    console.log("Password:", password);
-    
-    // If onSubmit prop is provided, call it with the credentials
-    if (onSubmit) {
-      onSubmit({ stationId, password });
+    try {
+      if (onSubmit) {
+        onSubmit({ stationId, password });
+        return;
+      }
+
+      await login(stationId, password);
+      router.push("/dashboard");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Login failed";
+      setError(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,7 +90,8 @@ const Login1 = ({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Button type="submit" className="w-full">
+            {error && <p className="text-sm text-red-500 w-full text-left">{error}</p>}
+            <Button type="submit" className="w-full" disabled={loading}>
               {buttonText}
             </Button>
           </form>

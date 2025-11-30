@@ -75,3 +75,17 @@ class SummaryResponse(BaseModel):
 class DevicesResponse(BaseModel):
     devices: list[Device]
     total: int
+
+
+class PresignUploadRequest(BaseModel):
+    filename: str
+    contentType: str = Field(..., alias="contentType")
+
+    class Config:
+        populate_by_name = True
+
+
+class PresignUploadResponse(BaseModel):
+    uploadUrl: str
+    key: str
+    bucket: str

@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import analyses, auth, devices, reports, simulate, uploads, waveforms
+from .routers import analyses, auth, devices, diagnostics, reports, simulate, uploads, waveforms
 
 app = FastAPI(title="DCRM Monitor API", version="0.1.0")
 
@@ -28,6 +28,7 @@ app.include_router(analyses.router)
 app.include_router(uploads.router)
 app.include_router(simulate.router)
 app.include_router(reports.router)
+app.include_router(diagnostics.router)
 
 
 @app.get("/healthz")

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getDiagnosticsFeatures, runDiagnostics } from "@/lib/api-client"
 
 type Message = {
   id: string
@@ -33,6 +34,22 @@ export function ChatArea() {
   ])
   const [input, setInput] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(false)
+  const [predictionLoading, setPredictionLoading] = React.useState(false)
+  const [featureNames, setFeatureNames] = React.useState<string[]>([])
+
+  React.useEffect(() => {
+    let mounted = true
+    getDiagnosticsFeatures()
+      .then((res) => {
+        if (mounted) setFeatureNames(res.features ?? [])
+      })
+      .catch(() => {
+        // Ignore for now; button will re-fetch when needed
+      })
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   const handleSend = async () => {
     if (!input.trim()) return
@@ -61,13 +78,68 @@ export function ChatArea() {
     }, 1500)
   }
 
+  const handleRunPrediction = async () => {
+    setIsLoading(true)
+    setPredictionLoading(true)
+    try {
+      let names = featureNames
+      if (!names.length) {
+        const response = await getDiagnosticsFeatures()
+        names = response.features ?? []
+        setFeatureNames(names)
+      }
+
+      if (!names.length) {
+        throw new Error("Model features unavailable")
+      }
+
+      const payload = Object.fromEntries(names.map((name) => [name, 50]))
+      const result = await runDiagnostics(payload)
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 2).toString(),
+          role: "assistant",
+          content: `Diagnosis: ${result.diagnosis} (${result.confidence.toFixed(1)}% confidence). Secondary: ${result.secondary_diagnosis}. Status: ${result.status}.`,
+          timestamp: new Date(),
+        },
+      ])
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to run diagnostics"
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 3).toString(),
+          role: "assistant",
+          content: `Error: ${message}`,
+          timestamp: new Date(),
+        },
+      ])
+    } finally {
+      setPredictionLoading(false)
+      setIsLoading(false)
+    }
+  }
+
   return (
     <Card className="flex flex-col h-[600px]">
-      <CardHeader>
-        <CardTitle>DCRM Assistant</CardTitle>
-        <CardDescription>
-          Add new DCRM waveforms and get instant results.
-        </CardDescription>
+      <CardHeader className="gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <CardTitle>DCRM Assistant</CardTitle>
+          <CardDescription>
+            Add new DCRM waveforms and get instant results.
+          </CardDescription>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          onClick={handleRunPrediction}
+          disabled={predictionLoading}
+        >
+          {predictionLoading ? "Running..." : "Run Model"}
+        </Button>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto space-y-4 p-4">
         {messages.map((message) => (
