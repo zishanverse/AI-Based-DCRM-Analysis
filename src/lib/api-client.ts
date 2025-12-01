@@ -15,7 +15,8 @@ export interface LoginResponse {
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
-  if (!headers.has("Content-Type") && init.body) {
+  const isFormData = typeof FormData !== "undefined" && init.body instanceof FormData;
+  if (!headers.has("Content-Type") && init.body && !isFormData) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -100,21 +101,31 @@ export function runDiagnostics(payload: DiagnosticsPayload) {
   });
 }
 
-export interface PresignRequest {
-  filename: string;
-  contentType: string;
+export interface DiagnosticResult {
+  rowIndex: number;
+  diagnosis: string;
+  confidence: number;
+  secondary_diagnosis: string;
+  probabilities: Record<string, number>;
+  status: string;
 }
 
-export interface PresignResponse {
-  uploadUrl: string;
-  key: string;
-  bucket: string;
+export interface UploadResponse {
+  assetId: string;
+  publicId: string;
+  secureUrl: string;
+  bytes: number;
+  format: string;
+  diagnostics?: DiagnosticResult[];
+  diagnosticsProcessedRows?: number;
+  diagnosticsTotalRows?: number;
 }
 
-export function presignUpload(filename: string, contentType: string) {
-  const body: PresignRequest = { filename, contentType };
-  return apiFetch<PresignResponse>("/api/v1/uploads/presign", {
+export function uploadCsv(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiFetch<UploadResponse>("/api/v1/uploads", {
     method: "POST",
-    body: JSON.stringify(body),
+    body: formData,
   });
 }

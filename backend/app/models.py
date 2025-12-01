@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import AnyUrl, BaseModel, Field
 
 
 class User(BaseModel):
@@ -77,15 +77,21 @@ class DevicesResponse(BaseModel):
     total: int
 
 
-class PresignUploadRequest(BaseModel):
-    filename: str
-    contentType: str = Field(..., alias="contentType")
+class DiagnosticResult(BaseModel):
+    rowIndex: int = Field(..., ge=0)
+    diagnosis: str
+    confidence: float
+    secondary_diagnosis: str
+    probabilities: dict[str, float]
+    status: str
 
-    class Config:
-        populate_by_name = True
 
-
-class PresignUploadResponse(BaseModel):
-    uploadUrl: str
-    key: str
-    bucket: str
+class UploadResponse(BaseModel):
+    assetId: str
+    publicId: str
+    secureUrl: AnyUrl
+    bytes: int
+    format: str
+    diagnostics: list[DiagnosticResult] | None = None
+    diagnosticsProcessedRows: int | None = Field(default=None, ge=0)
+    diagnosticsTotalRows: int | None = Field(default=None, ge=0)

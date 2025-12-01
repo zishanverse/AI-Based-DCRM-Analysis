@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Send, Paperclip, Bot, User } from "lucide-react"
+import { Send, Paperclip, Bot, User, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -14,7 +14,30 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { getDiagnosticsFeatures, runDiagnostics } from "@/lib/api-client"
+import { getDiagnosticsFeatures, runDiagnostics, uploadCsv } from "@/lib/api-client"
+import type { UploadResponse } from "@/lib/api-client"
+
+const formatDiagnosticsSummary = (response: UploadResponse): string | null => {
+  const diagnostics = response.diagnostics ?? []
+  if (!diagnostics.length) return null
+
+  const processed = response.diagnosticsProcessedRows ?? diagnostics.length
+  const total = response.diagnosticsTotalRows ?? processed
+  const preview = diagnostics.slice(0, 3).map((item) => {
+    const confidence = Number.isFinite(item.confidence) ? item.confidence.toFixed(1) : item.confidence
+    return `Row ${item.rowIndex + 1}: ${item.diagnosis} (${confidence}% confidence)`
+  })
+
+  let summary = `Model processed ${processed}${total > processed ? ` of ${total}` : ""} row(s). `
+  summary += preview.join(" | ")
+  if (processed > preview.length) {
+    summary += ` | …and ${processed - preview.length} more`
+  } else if (total > processed) {
+    summary += ` | …remaining rows skipped (increase UPLOAD_DIAGNOSTIC_ROW_LIMIT to process more)`
+  }
+
+  return summary
+}
 
 type Message = {
   id: string
@@ -36,6 +59,10 @@ export function ChatArea() {
   const [isLoading, setIsLoading] = React.useState(false)
   const [predictionLoading, setPredictionLoading] = React.useState(false)
   const [featureNames, setFeatureNames] = React.useState<string[]>([])
+  const [attachedFile, setAttachedFile] = React.useState<File | null>(null)
+  const [fileUploading, setFileUploading] = React.useState(false)
+  const [attachmentError, setAttachmentError] = React.useState<string | null>(null)
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null)
 
   React.useEffect(() => {
     let mounted = true
@@ -52,30 +79,118 @@ export function ChatArea() {
   }, [])
 
   const handleSend = async () => {
-    if (!input.trim()) return
+    const trimmed = input.trim()
+    const hasFile = Boolean(attachedFile)
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input,
-      timestamp: new Date(),
+    if (!trimmed && !hasFile) return
+
+    const outgoing: Message[] = []
+
+    if (trimmed) {
+      outgoing.push({
+        id: Date.now().toString(),
+        role: "user",
+        content: trimmed,
+        timestamp: new Date(),
+      })
     }
 
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-    setIsLoading(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      const assistantMessage: Message = {
+    if (attachedFile) {
+      outgoing.push({
         id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "I've received your data. Analyzing the waveform... The primary resistance shows a slight deviation, but it's within the healthy range.",
+        role: "user",
+        content: `Uploading CSV: ${attachedFile.name}`,
         timestamp: new Date(),
+      })
+    }
+
+    setMessages((prev) => [...prev, ...outgoing])
+    setInput("")
+    setAttachmentError(null)
+
+    if (attachedFile) {
+      setFileUploading(true)
+      try {
+        const result = await uploadCsv(attachedFile)
+        const summary = formatDiagnosticsSummary(result)
+        const uploadMessages: Message[] = [
+          {
+            id: (Date.now() + 2).toString(),
+            role: "assistant",
+            content: `CSV uploaded successfully. Access it at ${result.secureUrl}.`,
+            timestamp: new Date(),
+          },
+        ]
+
+        if (summary) {
+          uploadMessages.push({
+            id: (Date.now() + 3).toString(),
+            role: "assistant",
+            content: summary,
+            timestamp: new Date(),
+          })
+        }
+
+        setMessages((prev) => [...prev, ...uploadMessages])
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to upload CSV"
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 4).toString(),
+            role: "assistant",
+            content: `Upload error: ${message}`,
+            timestamp: new Date(),
+          },
+        ])
+      } finally {
+        setFileUploading(false)
+        setAttachedFile(null)
       }
-      setMessages((prev) => [...prev, assistantMessage])
-      setIsLoading(false)
-    }, 1500)
+    }
+
+    if (trimmed) {
+      setIsLoading(true)
+      setTimeout(() => {
+        const assistantMessage: Message = {
+          id: (Date.now() + 4).toString(),
+          role: "assistant",
+          content:
+            "I've received your data. Analyzing the waveform... The primary resistance shows a slight deviation, but it's within the healthy range.",
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, assistantMessage])
+        setIsLoading(false)
+      }, 1500)
+    }
+  }
+
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = event.target.files && event.target.files[0]
+    if (!selected) {
+      setAttachedFile(null)
+      return
+    }
+
+    if (!selected.name.toLowerCase().endsWith(".csv")) {
+      setAttachmentError("Please select a CSV file")
+      setAttachedFile(null)
+      event.target.value = ""
+      return
+    }
+
+    setAttachmentError(null)
+    setAttachedFile(selected)
+    event.target.value = ""
+  }
+
+  const removeAttachment = () => {
+    setAttachedFile(null)
+    setAttachmentError(null)
   }
 
   const handleRunPrediction = async () => {
@@ -173,13 +288,13 @@ export function ChatArea() {
             </div>
           </div>
         ))}
-        {isLoading && (
+          {(isLoading || fileUploading) && (
           <div className="flex gap-3">
              <Avatar className="h-8 w-8">
                 <AvatarFallback><Bot className="h-4 w-4" /></AvatarFallback>
              </Avatar>
              <div className="bg-muted rounded-lg px-3 py-2 text-sm">
-                Analyzing...
+               {fileUploading ? "Uploading CSV..." : "Analyzing..."}
              </div>
           </div>
         )}
@@ -192,7 +307,21 @@ export function ChatArea() {
           }}
           className="flex w-full items-center gap-2"
         >
-          <Button type="button" variant="outline" size="icon" className="shrink-0">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="shrink-0"
+            onClick={handleFileButtonClick}
+            disabled={fileUploading}
+          >
             <Paperclip className="h-4 w-4" />
             <span className="sr-only">Attach file</span>
           </Button>
@@ -202,11 +331,33 @@ export function ChatArea() {
             onChange={(e) => setInput(e.target.value)}
             className="flex-1"
           />
-          <Button type="submit" size="icon" disabled={isLoading}>
+          <Button
+            type="submit"
+            size="icon"
+            disabled={isLoading || fileUploading || (!input.trim() && !attachedFile)}
+          >
             <Send className="h-4 w-4" />
             <span className="sr-only">Send</span>
           </Button>
         </form>
+        {(attachedFile || attachmentError) && (
+          <div className="mt-2 text-xs text-muted-foreground flex items-center gap-2">
+            {attachedFile && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1">
+                {attachedFile.name}
+                <button
+                  type="button"
+                  onClick={removeAttachment}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Remove attachment"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {attachmentError && <span className="text-destructive">{attachmentError}</span>}
+          </div>
+        )}
       </CardFooter>
     </Card>
   )

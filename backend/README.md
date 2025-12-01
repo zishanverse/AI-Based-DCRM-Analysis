@@ -27,19 +27,31 @@ The server enables CORS for `http://localhost`, `http://localhost:3000`, and `ht
 
 > **Production note:** For deployment place the app behind HTTPS (FastAPI + uvicorn typically sits behind a reverse proxy such as Nginx or Azure Front Door).
 
-### AWS prerequisites for uploads
+### Cloudinary prerequisites for uploads
 
-CSV upload URLs require the following environment variables to be set before starting uvicorn:
+CSV uploads flow through Cloudinary. Create a `.env` file (you can copy `.env.example`) and populate either the single connection string or the individual variables before running the server:
 
-```powershell
-$env:AWS_ACCESS_KEY_ID = "..."
-$env:AWS_SECRET_ACCESS_KEY = "..."
-$env:AWS_S3_BUCKET_NAME = "my-bucket"
-# optional (defaults to ap-south-1)
-$env:AWS_REGION = "ap-south-1"
+```
+# Preferred one-line format
+CLOUDINARY_URL=cloudinary://your-api-key:your-api-secret@your-cloud-name
+
+# Optional overrides (used if CLOUDINARY_URL is absent or missing a field)
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-secret
+# optional (defaults to dcrm/csv)
+CLOUDINARY_UPLOAD_FOLDER=dcrm/csv
 ```
 
-Credentials must belong to an IAM principal with `s3:PutObject` permissions on the chosen bucket.
+> Alternatively, export the same variables in your shell if you prefer not to use a `.env` file.
+
+Optional tuning:
+
+```
+# Max rows evaluated per upload (defaults to 50)
+UPLOAD_DIAGNOSTIC_ROW_LIMIT=50
+```
+```
 
 ### Diagnostic model configuration
 
@@ -82,7 +94,7 @@ Reads the `refresh_token` cookie and returns a new access token without touching
 
 ## Upload endpoint
 
-`POST /api/v1/uploads/presign` accepts `{ "filename": "data.csv", "contentType": "text/csv" }` and returns a time-limited presigned URL for directly PUT-ing the CSV to S3 under `teacher/upload/<filename>`.
+`POST /api/v1/uploads` accepts `multipart/form-data` with a `file` field (CSV), streams it to Cloudinary, and simultaneously feeds the CSV rows (up to `UPLOAD_DIAGNOSTIC_ROW_LIMIT`, default 50) into the diagnostic models. The JSON response includes the Cloudinary asset identifiers plus a `diagnostics` array describing the per-row predictions (diagnosis, confidence, secondary diagnosis, and probability distribution) along with counters showing how many rows were processed. This allows the frontend to display model output immediately after the upload completes without making a second API call.
 
 ## Diagnostic endpoints
 
@@ -104,4 +116,4 @@ Reads the `refresh_token` cookie and returns a new access token without touching
 
 ## Placeholder routes
 
-Router modules for devices, uploads, waveforms, analyses, simulate, and reports are wired up but currently return stubbed data. They are ready to be fleshed out when additional requirements land.
+Router modules for devices, uploads, waveforms, analyses, simulate, and reports are wired up but (aside from uploads) currently return stubbed data. They are ready to be fleshed out when additional requirements land.

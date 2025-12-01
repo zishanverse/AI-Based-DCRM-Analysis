@@ -1,36 +1,129 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+# DCRM Condition Monitor
 
-First, run the development server:
+Digital Contact Resistance Monitoring platform with a Next.js front-end and FastAPI back-end that lets utilities upload breaker waveforms, visualize KPIs, and run on-demand ML diagnostics.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+</div>
+
+## Table of contents
+
+1. [Architecture](#architecture)
+2. [Key Features](#key-features)
+3. [Frontend (Next.js) Setup](#frontend-nextjs-setup)
+4. [Backend (FastAPI) Setup](#backend-fastapi-setup)
+5. [Environment Variables](#environment-variables)
+6. [Typical Workflow](#typical-workflow)
+7. [Available Scripts](#available-scripts)
+8. [Project Structure](#project-structure)
+
+## Architecture
+
+- **Frontend**: Next.js 14 App Router with Tailwind, shadcn/ui components, and client-side charts for dashboarding.
+- **Backend**: FastAPI service exposing authentication, device metadata, CSV uploads, and ML prediction endpoints.
+- **ML models**: Gradient boosted (XGBoost) + AdaBoost models trained offline under `backend/dcrm_models/`.
+- **Storage**: CSV waveforms upload to Cloudinary (raw asset type). Diagnostic results are returned immediately to the client.
+
+```
+Next.js UI  ─┐            ┌─>  FastAPI routers (auth, diagnostics, uploads, ...)
+			 ├─ REST ---> │    ├─ Cloudinary (raw CSV assets)
+Chat + CSV ─┘            └─>  │    └─ ML inference (joblib models)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **DCRM Dashboard**: Overview cards, overall score, model visualizations, and hero/header sections tailored to maintenance crews.
+- **Conversational Assistant**: Chat UI for questions plus CSV attachment button so operators can drop fresh waveform exports directly into the advisor.
+- **One-click Diagnostics**: Both manual model sweeps ("Run Model" button) and automatic inference after CSV upload. Predictions include primary label, confidence, secondary label, and class probabilities.
+- **Cloud-Backed Imports**: CSVs stream to Cloudinary and return secure URLs so the same file can be referenced later in reports.
+- **Configurable Limits**: `UPLOAD_DIAGNOSTIC_ROW_LIMIT` caps the number of rows scored per file to keep requests responsive.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Frontend (Next.js) Setup
 
-## Learn More
+```powershell
+cd frontend/company-assigmnet
+pnpm install
+pnpm dev        # starts on http://localhost:3000
+```
 
-To learn more about Next.js, take a look at the following resources:
+The frontend expects `NEXT_PUBLIC_API_BASE_URL` (defaults to `http://localhost:8000`). Update it in `.env.local` if the API runs elsewhere.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Backend (FastAPI) Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env   # fill in credentials
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-## Deploy on Vercel
+### ML Artifacts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Place `xgb_dcrm_model.pkl`, `adaboost_dcrm_model.pkl`, `feature_names.pkl`, and `label_map.json` under `backend/dcrm_models/`. Set `DCRM_MODEL_DIR` if you change the folder.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Environment Variables
+
+| Location | Variable | Description |
+|----------|----------|-------------|
+| Frontend | `NEXT_PUBLIC_API_BASE_URL` | Base URL of the FastAPI service |
+| Backend  | `CLOUDINARY_URL` | Preferred Cloudinary connection string (`cloudinary://key:secret@cloud`) |
+| Backend  | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Explicit overrides if you cannot use `CLOUDINARY_URL` |
+| Backend  | `CLOUDINARY_UPLOAD_FOLDER` | Folder for raw CSV assets (default `dcrm/csv`) |
+| Backend  | `UPLOAD_DIAGNOSTIC_ROW_LIMIT` | Rows scored per upload (default `50`) |
+| Backend  | `DCRM_MODEL_DIR` | Path to ML artifacts (default `dcrm_models`) |
+
+## Typical Workflow
+
+1. **Operator uploads CSV** via the chat paperclip.
+2. Frontend calls `POST /api/v1/uploads` with multipart form data.
+3. Backend validates CSV, runs the ML models row-by-row (respecting `UPLOAD_DIAGNOSTIC_ROW_LIMIT`), then streams the file to Cloudinary.
+4. Response returns Cloudinary metadata plus a `diagnostics` array (one entry per processed row) that the chat surfaces as a summary message.
+5. Operator can also trigger `GET /api/v1/diagnostics/features` + `POST /api/v1/diagnostics/predict` for ad-hoc what-if analyses.
+
+## Available Scripts
+
+### Frontend
+
+- `pnpm dev` – Start Next.js in dev mode.
+- `pnpm lint` – Run ESLint checks.
+- `pnpm build && pnpm start` – Production build + start.
+
+### Backend
+
+- `uvicorn app.main:app --reload` – Launch API with auto-reload.
+- `pytest` (if tests are added) – Run unit/integration tests.
+
+## Project Structure
+
+```
+frontend/company-assigmnet/
+├─ src/
+│  ├─ app/…                # Next.js routes (dashboard, auth, heat maps)
+│  ├─ components/…         # Reusable UI (chat, uploader, charts, etc.)
+│  ├─ lib/api-client.ts    # Typed API helpers hitting FastAPI
+│  └─ provider/            # Theme and layout providers
+└─ public/avatars          # Avatar assets for chat bubbles
+
+backend/
+├─ app/
+│  ├─ routers/             # FastAPI route modules (uploads, diagnostics, auth)
+│  ├─ services/            # Diagnostics service (model loading + inference)
+│  ├─ models.py            # Pydantic schemas shared across routers
+│  └─ config.py            # Settings loader (.env + Cloudinary helpers)
+├─ dcrm_models/            # ML artifacts (not checked in)
+├─ data/                   # Sample CSV + mapping utilities
+└─ README.md               # Backend-specific docs
+```
+
+## Talking to GPT or other copilots
+
+If you are feeding this repository into a coding assistant, mention:
+
+- FastAPI backend exposes `/api/v1/uploads` (multipart) and `/api/v1/diagnostics/*` (JSON) endpoints.
+- CSV uploads now include diagnostic results in the same response, so the frontend only makes a single round trip.
+- Cloudinary credentials are loaded via `CLOUDINARY_URL` or individual variables through `backend/app/config.py`.
+- DCRM models live under `backend/dcrm_models/` and are loaded lazily via `diagnostics_service`.
+
+This README should give enough context for any model (or teammate) to understand the moving pieces of the project.
