@@ -3,12 +3,6 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Dict
 
-# Hardcoded user store keyed by station id
-USERS: Dict[str, Dict[str, Any]] = {
-    "STN-0001": {"password": "pass123", "name": "Station One", "role": "engineer"},
-    "STN-0002": {"password": "demo", "name": "Station Demo", "role": "supervisor"},
-}
-
 # Token stores; values track ownership and expiry
 ACCESS_TOKENS: Dict[str, Dict[str, Any]] = {}
 REFRESH_TOKENS: Dict[str, str] = {}

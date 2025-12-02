@@ -119,6 +119,8 @@ export interface UploadResponse {
   diagnostics?: DiagnosticResult[];
   diagnosticsProcessedRows?: number;
   diagnosticsTotalRows?: number;
+  advancedDiagnostics?: AdvancedDiagnosticResultDto[];
+  waveformPreview?: WaveformPreviewDto;
 }
 
 export function uploadCsv(file: File) {
@@ -128,4 +130,125 @@ export function uploadCsv(file: File) {
     method: "POST",
     body: formData,
   });
+}
+
+export interface ClassifierResultDto {
+  label: string;
+  confidence: number;
+  probabilities: Record<string, number>;
+}
+
+export interface AutoencoderResultDto {
+  isAnomaly: boolean;
+  reconstructionError: number;
+  threshold: number;
+}
+
+export interface AdvancedDiagnosticResultDto {
+  rowIndex: number;
+  xgboost: ClassifierResultDto;
+  adaboost: ClassifierResultDto;
+  autoencoder: AutoencoderResultDto;
+}
+
+export interface AdvancedModelArtifactDto {
+  name: string;
+  kind: string;
+  sizeBytes: number;
+  modifiedAt: string;
+}
+
+export interface AdvancedModelsStatusDto {
+  directory: string;
+  artifactCount: number;
+  featureCount: number;
+  classLabels: string[];
+  availableModels: string[];
+  artifacts: AdvancedModelArtifactDto[];
+}
+
+export interface AdvancedFeaturesResponseDto {
+  features: string[];
+  classLabels: string[];
+  artifactCount: number;
+  availableModels: string[];
+}
+
+export interface AdvancedPredictionPayload {
+  features: Record<string, string | number>;
+}
+
+export interface AdvancedPredictionEnvelopeDto {
+  requestedAt: string;
+  featuresUsed: string[];
+  availableModels: string[];
+  result: AdvancedDiagnosticResultDto;
+}
+
+export interface AdvancedBatchRequest {
+  rows: Record<string, string | number>[];
+}
+
+export interface AdvancedBatchEnvelopeDto {
+  requestedAt: string;
+  rowCount: number;
+  availableModels: string[];
+  results: AdvancedDiagnosticResultDto[];
+}
+
+export interface WaveformPointDto {
+  timeMs: number;
+  values: Record<string, number | null | undefined>;
+}
+
+export interface WaveformPreviewDto {
+  rowCount: number;
+  sourceName?: string;
+  valueColumns: string[];
+  columnMap?: Record<string, string>;
+  points: WaveformPointDto[];
+}
+
+export function getAdvancedModelStatus() {
+  return apiFetch<AdvancedModelsStatusDto>("/api/v1/new-models/status");
+}
+
+export function getAdvancedModelFeatures() {
+  return apiFetch<AdvancedFeaturesResponseDto>("/api/v1/new-models/features");
+}
+
+export function runAdvancedModelSuite(features: AdvancedPredictionPayload["features"]) {
+  return apiFetch<AdvancedPredictionEnvelopeDto>("/api/v1/new-models/predict", {
+    method: "POST",
+    body: JSON.stringify({ features }),
+  });
+}
+
+export function runAdvancedBatchSuite(rows: AdvancedBatchRequest["rows"]) {
+  return apiFetch<AdvancedBatchEnvelopeDto>("/api/v1/new-models/batch", {
+    method: "POST",
+    body: JSON.stringify({ rows }),
+  });
+}
+
+export interface HeatmapPointDto {
+  lat: number;
+  lon: number;
+  intensity: number;
+  severity: number;
+  status: string;
+  deviceId: string;
+  timestamp: string | null;
+  healthScore: number | null;
+}
+
+export interface HeatmapResponse {
+  points: HeatmapPointDto[];
+  total: number;
+  generatedAt: string;
+}
+
+export function getHeatmapPoints(limit = 256) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  return apiFetch<HeatmapResponse>(`/api/v1/heatmap/points?${params.toString()}`);
 }

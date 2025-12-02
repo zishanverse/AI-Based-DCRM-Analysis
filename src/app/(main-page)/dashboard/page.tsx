@@ -12,6 +12,7 @@ import {
 import { OverallScore } from "@/components/OverallScore"
 
 import { AdaboostCharts } from "@/components/AdaboostCharts"
+import { DashboardCharts } from "@/components/dashboard-charts"
 
 export default function Page() {
 
@@ -30,6 +31,9 @@ export default function Page() {
             </div>
             <AdaboostCharts />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+              <div className="col-span-4 lg:col-span-7">
+                <DashboardCharts />
+              </div>
               <div className="col-span-4 lg:col-span-7">
                 <ChatArea />
               </div>

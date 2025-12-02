@@ -14,8 +14,12 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { getDiagnosticsFeatures, runDiagnostics, uploadCsv } from "@/lib/api-client"
-import type { UploadResponse } from "@/lib/api-client"
+import { getAdvancedModelFeatures, runAdvancedModelSuite, uploadCsv } from "@/lib/api-client"
+import { useWaveformPreview } from "@/provider/waveform-provider"
+import type {
+  AdvancedDiagnosticResultDto,
+  UploadResponse,
+} from "@/lib/api-client"
 
 const formatDiagnosticsSummary = (response: UploadResponse): string | null => {
   const diagnostics = response.diagnostics ?? []
@@ -39,6 +43,37 @@ const formatDiagnosticsSummary = (response: UploadResponse): string | null => {
   return summary
 }
 
+const formatProbabilitySnippet = (probabilities: Record<string, number>) => {
+  return Object.entries(probabilities)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([label, value]) => `${label}: ${value.toFixed(1)}%`)
+    .join(" | ")
+}
+
+const formatAdvancedMessages = (results?: AdvancedDiagnosticResultDto[]): string[] => {
+  if (!results || !results.length) return []
+  const [primary, ...rest] = results
+  const rowLabel = `Row ${primary.rowIndex + 1}`
+  const suffix = rest.length ? ` (${results.length} rows evaluated)` : ""
+
+  const xgbMsg = [
+    `${rowLabel} · Advanced XGBoost → ${primary.xgboost.label} (${primary.xgboost.confidence.toFixed(1)}% confidence)`,
+    `Top classes: ${formatProbabilitySnippet(primary.xgboost.probabilities)}`,
+    suffix,
+  ]
+    .filter(Boolean)
+    .join("\n")
+
+  const adaMsg = `${rowLabel} · Advanced AdaBoost → ${primary.adaboost.label} (${primary.adaboost.confidence.toFixed(1)}% confidence)`
+
+  const autoMsg = `${rowLabel} · Autoencoder → ${
+    primary.autoencoder.isAnomaly ? "Anomaly detected" : "No anomaly"
+  } (error ${primary.autoencoder.reconstructionError.toExponential(2)} vs threshold ${primary.autoencoder.threshold.toExponential(2)})`
+
+  return [xgbMsg, adaMsg, autoMsg]
+}
+
 type Message = {
   id: string
   role: "user" | "assistant"
@@ -47,18 +82,19 @@ type Message = {
 }
 
 export function ChatArea() {
+  const { setPreview } = useWaveformPreview()
   const [messages, setMessages] = React.useState<Message[]>([
     {
       id: "1",
       role: "assistant",
-      content: "Hello! You can upload a new DCRM waveform here or paste the data to get an analysis.",
+      content: "Hello! You can upload a waveform CSV or ask me to run the advanced model suite for a quick check.",
       timestamp: new Date(),
     },
   ])
   const [input, setInput] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(false)
   const [predictionLoading, setPredictionLoading] = React.useState(false)
-  const [featureNames, setFeatureNames] = React.useState<string[]>([])
+  const [advancedFeatureNames, setAdvancedFeatureNames] = React.useState<string[]>([])
   const [attachedFile, setAttachedFile] = React.useState<File | null>(null)
   const [fileUploading, setFileUploading] = React.useState(false)
   const [attachmentError, setAttachmentError] = React.useState<string | null>(null)
@@ -66,9 +102,9 @@ export function ChatArea() {
 
   React.useEffect(() => {
     let mounted = true
-    getDiagnosticsFeatures()
+    getAdvancedModelFeatures()
       .then((res) => {
-        if (mounted) setFeatureNames(res.features ?? [])
+        if (mounted) setAdvancedFeatureNames(res.features ?? [])
       })
       .catch(() => {
         // Ignore for now; button will re-fetch when needed
@@ -112,6 +148,7 @@ export function ChatArea() {
       setFileUploading(true)
       try {
         const result = await uploadCsv(attachedFile)
+        setPreview(result.waveformPreview ?? null)
         const summary = formatDiagnosticsSummary(result)
         const uploadMessages: Message[] = [
           {
@@ -127,6 +164,27 @@ export function ChatArea() {
             id: (Date.now() + 3).toString(),
             role: "assistant",
             content: summary,
+            timestamp: new Date(),
+          })
+        }
+
+        const advancedMessages = formatAdvancedMessages(result.advancedDiagnostics)
+        if (advancedMessages.length) {
+          advancedMessages.forEach((content, idx) => {
+            uploadMessages.push({
+              id: (Date.now() + 10 + idx).toString(),
+              role: "assistant",
+              content,
+              timestamp: new Date(),
+            })
+          })
+        }
+
+        if (result.waveformPreview?.points?.length) {
+          uploadMessages.push({
+            id: (Date.now() + 20).toString(),
+            role: "assistant",
+            content: `Waveform preview ready. ${result.waveformPreview.points.length} samples synced to the dashboard charts.`,
             timestamp: new Date(),
           })
         }
@@ -197,29 +255,40 @@ export function ChatArea() {
     setIsLoading(true)
     setPredictionLoading(true)
     try {
-      let names = featureNames
+      let names = advancedFeatureNames
       if (!names.length) {
-        const response = await getDiagnosticsFeatures()
+        const response = await getAdvancedModelFeatures()
         names = response.features ?? []
-        setFeatureNames(names)
+        setAdvancedFeatureNames(names)
       }
 
       if (!names.length) {
-        throw new Error("Model features unavailable")
+        throw new Error("Advanced model features unavailable")
       }
 
       const payload = Object.fromEntries(names.map((name) => [name, 50]))
-      const result = await runDiagnostics(payload)
+      const response = await runAdvancedModelSuite(payload)
+      const advancedMessages = formatAdvancedMessages([response.result])
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 2).toString(),
-          role: "assistant",
-          content: `Diagnosis: ${result.diagnosis} (${result.confidence.toFixed(1)}% confidence). Secondary: ${result.secondary_diagnosis}. Status: ${result.status}.`,
-          timestamp: new Date(),
-        },
-      ])
+      const summaryMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        role: "assistant",
+        content: [
+          "Advanced model suite completed.",
+          `Models: ${response.availableModels.join(", ") || "unavailable"}.`,
+          `Requested at: ${new Date(response.requestedAt).toLocaleString()}.`,
+        ].join("\n"),
+        timestamp: new Date(),
+      }
+
+      const detailMessages: Message[] = advancedMessages.map((content, idx) => ({
+        id: (Date.now() + 3 + idx).toString(),
+        role: "assistant",
+        content,
+        timestamp: new Date(),
+      }))
+
+      setMessages((prev) => [...prev, summaryMessage, ...detailMessages])
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to run diagnostics"
       setMessages((prev) => [
@@ -241,9 +310,9 @@ export function ChatArea() {
     <Card className="flex flex-col h-[600px]">
       <CardHeader className="gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <CardTitle>DCRM Assistant</CardTitle>
+          <CardTitle>Advanced Diagnostics Assistant</CardTitle>
           <CardDescription>
-            Add new DCRM waveforms and get instant results.
+            Upload breaker waveforms or ping the new model suite for instant insights.
           </CardDescription>
         </div>
         <Button

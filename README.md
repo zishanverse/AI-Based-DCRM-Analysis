@@ -14,8 +14,9 @@ Digital Contact Resistance Monitoring platform with a Next.js front-end and Fast
 4. [Backend (FastAPI) Setup](#backend-fastapi-setup)
 5. [Environment Variables](#environment-variables)
 6. [Typical Workflow](#typical-workflow)
-7. [Available Scripts](#available-scripts)
-8. [Project Structure](#project-structure)
+7. [Diagnostics Endpoints](#diagnostics-endpoints)
+8. [Available Scripts](#available-scripts)
+9. [Project Structure](#project-structure)
 
 ## Architecture
 
@@ -81,6 +82,23 @@ Place `xgb_dcrm_model.pkl`, `adaboost_dcrm_model.pkl`, `feature_names.pkl`, and 
 3. Backend validates CSV, runs the ML models row-by-row (respecting `UPLOAD_DIAGNOSTIC_ROW_LIMIT`), then streams the file to Cloudinary.
 4. Response returns Cloudinary metadata plus a `diagnostics` array (one entry per processed row) that the chat surfaces as a summary message.
 5. Operator can also trigger `GET /api/v1/diagnostics/features` + `POST /api/v1/diagnostics/predict` for ad-hoc what-if analyses.
+
+## Diagnostics Endpoints
+
+### `POST /api/v1/diagnostics/predict`
+
+- Accepts a JSON object where each key is one of the model feature names (see `GET /api/v1/diagnostics/features`).
+- The payload is converted into a pandas row and passed to both trained models stored under `backend/dcrm_models/`:
+	- **XGBoost (`xgb_dcrm_model.pkl`)** → primary `diagnosis`, `confidence`, `probabilities`, and derived `status`.
+	- **AdaBoost (`adaboost_dcrm_model.pkl`)** → `secondary_diagnosis` (used as an alternate opinion).
+- The endpoint returns the combined response so the frontend can show a single message summarizing both models.
+
+### Chat “Run Model” button
+
+- Lives in `src/components/chat-area.tsx` and now calls `runAdvancedModelSuite()` when clicked.
+- Pulls the advanced feature list (if not cached), builds a placeholder payload where every feature is set to `50`, and sends it to `/api/v1/new-models/predict`.
+- The chat assistant posts a summary describing which advanced models ran plus one bubble per model (XGBoost, AdaBoost, Autoencoder) with confidences/anomaly verdicts.
+- This flow validates the `new models` artifacts end-to-end without touching the legacy DCRM inference pipeline.
 
 ## Available Scripts
 

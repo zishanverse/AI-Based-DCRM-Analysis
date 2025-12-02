@@ -6,7 +6,8 @@ import secrets
 
 from fastapi import HTTPException, status
 
-from .storage import ACCESS_TOKENS, REFRESH_TOKENS, USERS
+from .repositories.stations import get_station_profile
+from .storage import ACCESS_TOKENS, REFRESH_TOKENS
 
 ACCESS_TOKEN_TTL_SECONDS = 60 * 60  # 1 hour
 
@@ -41,14 +42,7 @@ def validate_access_token(token: Optional[str]) -> dict:
 def require_user_from_token(token: Optional[str]) -> dict:
     record = validate_access_token(token)
     station_id = record["station_id"]
-    user = USERS.get(station_id)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User no longer exists")
-    return {
-        "id": station_id,
-        "name": user["name"],
-        "role": user["role"],
-    }
+    return get_station_profile(station_id)
 
 
 def parse_authorization_header(header_value: Optional[str]) -> Optional[str]:

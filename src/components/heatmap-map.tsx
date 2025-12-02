@@ -1,10 +1,12 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useMemo, useState } from "react"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 import { MapContainer, TileLayer, useMap } from "react-leaflet"
 import "leaflet.heat"
+
+import { getHeatmapPoints, HeatmapPointDto } from "@/lib/api-client"
 
 // Fix for default marker icon in Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -14,50 +16,28 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 })
 
-// Mock data for India heatmap
-// Format: [lat, lng, intensity]
-const addressPoints = [
-  [19.0760, 72.8777, 1000], // Mumbai (High intensity)
-  [28.6139, 77.2090, 800],  // Delhi
-  [12.9716, 77.5946, 700],  // Bangalore
-  [13.0827, 80.2707, 600],  // Chennai
-  [22.5726, 88.3639, 600],  // Kolkata
-  [17.3850, 78.4867, 500],  // Hyderabad
-  [23.0225, 72.5714, 400],  // Ahmedabad
-  [18.5204, 73.8567, 450],  // Pune
-  [26.9124, 75.7873, 300],  // Jaipur
-  [15.2993, 74.1240, 200],  // Goa
-  [9.9312, 76.2673, 350],   // Kochi
-  [21.1458, 79.0882, 400],  // Nagpur
-  [26.8467, 80.9462, 300],  // Lucknow
-  [25.3176, 82.9739, 250],  // Varanasi
-  
-  // Clusters around Mumbai
-  [19.08, 72.88, 900],
-  [19.07, 72.87, 850],
-  [19.06, 72.89, 800],
-  
-  // Clusters around Delhi
-  [28.62, 77.21, 750],
-  [28.60, 77.22, 700],
-  
-  // Clusters around Bangalore
-  [12.98, 77.60, 650],
-  [12.96, 77.58, 600],
-]
+type HeatmapLayerProps = {
+  points: HeatmapPointDto[]
+}
 
-function HeatmapLayer() {
+type StatusSummary = {
+  healthy: number
+  moderate: number
+  fault: number
+}
+
+function HeatmapLayer({ points }: HeatmapLayerProps) {
   const map = useMap()
 
   useEffect(() => {
-    const points = addressPoints
-      ? addressPoints.map((p) => {
-          return [p[0], p[1], p[2]] // lat, lng, intensity
-        })
-      : []
+    if (!points.length) {
+      return
+    }
+
+    const formatted = points.map((point) => [point.lat, point.lon, point.intensity])
 
     if ((L as any).heatLayer) {
-        const heat = (L as any).heatLayer(points, {
+        const heat = (L as any).heatLayer(formatted, {
             radius: 25,
             blur: 15,
             maxZoom: 10,
@@ -75,14 +55,69 @@ function HeatmapLayer() {
             map.removeLayer(heat)
         }
     }
-  }, [map])
+  }, [map, points])
 
   return null
 }
 
 export default function HeatmapMap() {
+  const [points, setPoints] = useState<HeatmapPointDto[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+    setLoading(true)
+    setError(null)
+
+    getHeatmapPoints()
+      .then((res) => {
+        if (!isMounted) return
+        setPoints(res.points)
+      })
+      .catch((err) => {
+        if (!isMounted) return
+        const message = err instanceof Error ? err.message : "Failed to load heatmap data"
+        setError(message)
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const statusSummary = useMemo<StatusSummary>(() => {
+    return points.reduce<StatusSummary>((acc, point) => {
+      const key = (point.status ?? "healthy") as keyof StatusSummary
+      if (acc[key] === undefined) {
+        acc[key] = 0
+      }
+      acc[key] += 1
+      return acc
+    }, { healthy: 0, moderate: 0, fault: 0 })
+  }, [points])
+
   return (
-    <div className="h-[calc(100vh-140px)] w-full rounded-lg overflow-hidden border shadow-md relative z-0">
+    <div className="relative z-0 h-[calc(100vh-140px)] w-full overflow-hidden rounded-lg border shadow-md">
+      {(loading || error) && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background/70 backdrop-blur-sm">
+          <p className="text-sm font-medium text-foreground">
+            {error ?? "Loading live heatmap data..."}
+          </p>
+        </div>
+      )}
+      <div className="pointer-events-none absolute left-4 top-4 z-20 space-y-1 rounded-md border bg-background/90 px-3 py-2 text-xs shadow-sm">
+        <p className="font-semibold uppercase tracking-wide text-muted-foreground">Live stations</p>
+        <div className="flex gap-3 text-muted-foreground">
+          <span className="text-foreground">Total: {points.length}</span>
+          <span className="text-green-600">Healthy: {statusSummary.healthy}</span>
+          <span className="text-amber-600">Moderate: {statusSummary.moderate}</span>
+          <span className="text-red-600">Fault: {statusSummary.fault}</span>
+        </div>
+      </div>
       <MapContainer 
         center={[20.5937, 78.9629]} 
         zoom={5} 
@@ -93,7 +128,7 @@ export default function HeatmapMap() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <HeatmapLayer />
+        {points.length > 0 && <HeatmapLayer points={points} />}
       </MapContainer>
     </div>
   )

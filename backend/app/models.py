@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import AnyUrl, BaseModel, Field
 
@@ -95,3 +95,99 @@ class UploadResponse(BaseModel):
     diagnostics: list[DiagnosticResult] | None = None
     diagnosticsProcessedRows: int | None = Field(default=None, ge=0)
     diagnosticsTotalRows: int | None = Field(default=None, ge=0)
+    advancedDiagnostics: list[AdvancedDiagnosticResult] | None = None
+    waveformPreview: WaveformPreview | None = None
+
+
+class HeatmapPoint(BaseModel):
+    lat: float
+    lon: float
+    intensity: float = Field(..., description="Scaled value used by the Leaflet heat layer")
+    severity: float = Field(..., ge=0.0, le=1.0)
+    status: str
+    deviceId: str
+    timestamp: datetime | None = None
+    healthScore: float | None = None
+
+
+class HeatmapResponse(BaseModel):
+    points: list[HeatmapPoint]
+    total: int
+    generatedAt: datetime
+
+
+class ClassifierOutput(BaseModel):
+    label: str
+    confidence: float = Field(..., ge=0.0, le=100.0)
+    probabilities: dict[str, float]
+
+
+class AutoencoderOutput(BaseModel):
+    isAnomaly: bool
+    reconstructionError: float
+    threshold: float
+
+
+class AdvancedDiagnosticResult(BaseModel):
+    rowIndex: int = Field(..., ge=0)
+    xgboost: ClassifierOutput
+    adaboost: ClassifierOutput
+    autoencoder: AutoencoderOutput
+
+
+class AdvancedModelArtifact(BaseModel):
+    name: str
+    kind: str
+    sizeBytes: int = Field(..., ge=0)
+    modifiedAt: datetime
+
+
+class AdvancedModelsStatus(BaseModel):
+    directory: str
+    artifactCount: int = Field(..., ge=0)
+    featureCount: int = Field(..., ge=0)
+    classLabels: list[str]
+    availableModels: list[str]
+    artifacts: list[AdvancedModelArtifact]
+
+
+class AdvancedFeaturesResponse(BaseModel):
+    features: list[str]
+    classLabels: list[str]
+    artifactCount: int = Field(..., ge=0)
+    availableModels: list[str]
+
+
+class AdvancedPredictionEnvelope(BaseModel):
+    requestedAt: datetime
+    featuresUsed: list[str]
+    availableModels: list[str]
+    result: AdvancedDiagnosticResult
+
+
+class AdvancedBatchPredictionEnvelope(BaseModel):
+    requestedAt: datetime
+    rowCount: int = Field(..., ge=0)
+    availableModels: list[str]
+    results: list[AdvancedDiagnosticResult]
+
+
+class AdvancedPredictionRequest(BaseModel):
+    features: dict[str, Any]
+
+
+class AdvancedBatchPredictionRequest(BaseModel):
+    rows: list[dict[str, Any]]
+
+
+class WaveformPoint(BaseModel):
+    timeMs: float
+    values: dict[str, float | None]
+
+
+class WaveformPreview(BaseModel):
+    rowCount: int = Field(..., ge=1)
+    sourceName: str | None = None
+    valueColumns: list[str]
+    columnMap: dict[str, str] | None = None
+    points: list[WaveformPoint]

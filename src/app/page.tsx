@@ -19,7 +19,7 @@ export default function Home() {
             <Link href="#pricing" className="hover:text-primary transition-colors">Pricing</Link>
           </nav>
           <div className="flex items-center gap-4">
-            <Link href="/dashboard">
+            <Link href="/sign-in">
               <Button>Get Started</Button>
             </Link>
           </div>
@@ -44,7 +44,7 @@ export default function Home() {
               Ensure the health of your circuit breakers with real-time dynamic contact resistance measurement analysis. Detect faults before they happen.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-4">
-              <Link href="/dashboard">
+              <Link href="/sign-in">
                 <Button size="lg" className="h-12 px-8 text-base gap-2">
                   Go to Dashboard <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -121,7 +121,7 @@ export default function Home() {
                 Join leading power stations using our platform to ensure grid reliability and safety.
               </p>
               <div className="relative z-10">
-                <Link href="/dashboard">
+                <Link href="/sign-in">
                   <Button size="lg" variant="secondary" className="h-12 px-8 text-base font-semibold">
                     Get Started Now
                   </Button>
