@@ -1,11 +1,10 @@
 // app/dcrm-analysis/page.tsx
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -80,6 +79,34 @@ export default function DCRMAnalysis() {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // State for controlling visible lines on the chart
+  const [visibleLines, setVisibleLines] = useState<Record<string, boolean>>({
+    resistanceCH1: true,
+    resistanceCH2: true,
+    resistanceCH3: true,
+    resistanceCH4: false,
+    resistanceCH5: false,
+    resistanceCH6: false,
+    currentCH1: false,
+    currentCH2: false,
+    currentCH3: false,
+    currentCH4: false,
+    currentCH5: false,
+    currentCH6: false,
+    travelT1: false,
+    travelT2: false,
+    travelT3: false,
+    travelT4: false,
+    travelT5: false,
+    travelT6: false,
+    coilCurrentC1: false,
+    coilCurrentC2: false,
+    coilCurrentC3: false,
+    coilCurrentC4: false,
+    coilCurrentC5: false,
+    coilCurrentC6: false,
+  });
+
   // Handle file upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -130,82 +157,73 @@ export default function DCRMAnalysis() {
 
   // Function to determine assessment based on test results
   const determineAssessment = (results: TestResult, dataPoints: DCRMDataPoint[]) => {
-    // Check for abnormal resistance values
-    const hasHighResistance = dataPoints.some(point => 
-      point.resistanceCH1 > 100 || 
-      point.resistanceCH2 > 100 || 
-      point.resistanceCH3 > 100 || 
-      point.resistanceCH4 > 100
-    );
     
-    // Check for abnormal coil current
-    const hasAbnormalCoilCurrent = 
-      results.coilCurrentC1Avg < 1 || results.coilCurrentC1Avg > 10 ||
-      results.coilCurrentC2Avg < 1 || results.coilCurrentC2Avg > 25;
+    // Helper to calculate statistics including Trimmed StdDev for stability analysis
+    const calculateStats = (values: number[]) => {
+      const valid = values.filter(v => v < 8000 && v > 0).sort((a, b) => a - b);
+      if (valid.length === 0) return { robustMax: 0, trimmedStdDev: 0 };
+      
+      // Robust Max (95th percentile)
+      const maxIndex = Math.floor(valid.length * 0.95);
+      const robustMax = valid[maxIndex];
+
+      // Trimmed StdDev (remove top/bottom 10% to ignore transitions)
+      const q10 = Math.floor(valid.length * 0.1);
+      const q90 = Math.floor(valid.length * 0.9);
+      const trimmed = valid.slice(q10, q90);
+      
+      if (trimmed.length === 0) return { robustMax, trimmedStdDev: 0 };
+
+      const trimmedMean = trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
+      const trimmedSquareDiffs = trimmed.map(value => Math.pow(value - trimmedMean, 2));
+      const trimmedStdDev = Math.sqrt(trimmedSquareDiffs.reduce((a, b) => a + b, 0) / trimmed.length);
+
+      return { robustMax, trimmedStdDev };
+    };
+
+    // Calculate stats for each channel
+    const statsCH1 = calculateStats(dataPoints.map(p => p.resistanceCH1));
+    const statsCH2 = calculateStats(dataPoints.map(p => p.resistanceCH2));
+    const statsCH3 = calculateStats(dataPoints.map(p => p.resistanceCH3));
     
-    // Check for abnormal travel
-    const hasAbnormalTravel = 
-      results.travelT3Max < 150 || results.travelT3Max > 190 ||
-      results.travelT4Max < 150 || results.travelT4Max > 190;
-    
-    // Determine assessment
-    if (hasHighResistance && hasAbnormalCoilCurrent && hasAbnormalTravel) {
-      return "CRITICAL";
-    } else if (hasHighResistance || hasAbnormalCoilCurrent || hasAbnormalTravel) {
-      return "NEEDS MAINTENANCE";
-    } else {
-      return "HEALTHY";
+    // Check if valid data exists
+    const hasData = statsCH1.robustMax > 0 || statsCH2.robustMax > 0 || statsCH3.robustMax > 0;
+    if (!hasData) {
+       return "HEALTHY"; // No valid resistance data available
     }
+
+    // 1. CRITICAL CHECK: High Fluctuation / Instability
+    // If resistance is fluctuating wildly after closing, it's a contact issue.
+    // Threshold: Trimmed StdDev > 50 µOhm (Healthy is typically ~15-20)
+    const hasHighFluctuation = (statsCH1.trimmedStdDev > 50 || statsCH2.trimmedStdDev > 50 || statsCH3.trimmedStdDev > 50);
+
+    // 2. CRITICAL CHECK: Absolute High Resistance
+    // Safety fallback: if resistance is consistently high even if stable.
+    const hasCriticalResistance = (statsCH1.robustMax > 1000 || statsCH2.robustMax > 1000 || statsCH3.robustMax > 1000);
+
+    // 3. MAINTENANCE CHECK: Moderate Fluctuation or Resistance
+    const hasModerateFluctuation = (statsCH1.trimmedStdDev > 30 || statsCH2.trimmedStdDev > 30 || statsCH3.trimmedStdDev > 30);
+    const hasHighResistance = (statsCH1.robustMax > 500 || statsCH2.robustMax > 500 || statsCH3.robustMax > 500);
+
+    // Check for abnormal coil current or travel (existing logic)
+    const hasAbnormalCoilCurrent =
+      (results.coilCurrentC1Avg > 0 && (results.coilCurrentC1Avg < 0.3 || results.coilCurrentC1Avg > 5)) ||
+      (results.coilCurrentC2Avg > 0 && (results.coilCurrentC2Avg < 0.3 || results.coilCurrentC2Avg > 5));
+
+    const hasAbnormalTravel =
+      (results.travelT1Max > 0 && (results.travelT1Max < 80 || results.travelT1Max > 250)) ||
+      (results.travelT2Max > 0 && (results.travelT2Max < 80 || results.travelT2Max > 250)) ||
+      (results.travelT3Max > 0 && (results.travelT3Max < 80 || results.travelT3Max > 250));
+
+    // Determine assessment
+    if (hasHighFluctuation || hasCriticalResistance) {
+      return "CRITICAL";
+    } else if (hasModerateFluctuation || hasHighResistance || hasAbnormalCoilCurrent || hasAbnormalTravel) {
+      return "NEEDS MAINTENANCE";
+    }
+    return "HEALTHY";
   };
 
-  // Prepare data for charts
-  const resistanceChartData = useMemo(() => {
-    return data.map((point) => ({
-      time: point.time,
-      CH1: point.resistanceCH1,
-      CH2: point.resistanceCH2,
-      CH3: point.resistanceCH3,
-      CH4: point.resistanceCH4,
-      CH5: point.resistanceCH5,
-      CH6: point.resistanceCH6
-    }));
-  }, [data]);
-
-  const currentChartData = useMemo(() => {
-    return data.map((point) => ({
-      time: point.time,
-      CH1: point.currentCH1,
-      CH2: point.currentCH2,
-      CH3: point.currentCH3,
-      CH4: point.currentCH4,
-      CH5: point.currentCH5,
-      CH6: point.currentCH6
-    }));
-  }, [data]);
-
-  const travelChartData = useMemo(() => {
-    return data.map((point) => ({
-      time: point.time,
-      T1: point.travelT1,
-      T2: point.travelT2,
-      T3: point.travelT3,
-      T4: point.travelT4,
-      T5: point.travelT5,
-      T6: point.travelT6
-    }));
-  }, [data]);
-
-  const coilCurrentChartData = useMemo(() => {
-    return data.map((point) => ({
-      time: point.time,
-      C1: point.coilCurrentC1,
-      C2: point.coilCurrentC2,
-      C3: point.coilCurrentC3,
-      C4: point.coilCurrentC4,
-      C5: point.coilCurrentC5,
-      C6: point.coilCurrentC6
-    }));
-  }, [data]);
 
   // Custom tooltip for the charts
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -374,154 +392,185 @@ export default function DCRMAnalysis() {
             </Card>
           </div>
 
-          <Tabs defaultValue="resistance" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="resistance">Resistance</TabsTrigger>
-              <TabsTrigger value="current">Current</TabsTrigger>
-              <TabsTrigger value="travel">Travel</TabsTrigger>
-              <TabsTrigger value="coilCurrent">Coil Current</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="resistance" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Contact Resistance Over Time</CardTitle>
-                  <CardDescription>
-                    Resistance values for each channel during the test (in µOhm)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={resistanceChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="time" 
-                        label={{ value: 'Time (ms)', position: 'insideBottom', offset: -5 }} 
-                        domain={[0, 400]}
+          <Card>
+            <CardHeader>
+              <CardTitle>DCRM Test Data Visualization</CardTitle>
+              <CardDescription>
+                Toggle the checkboxes below to show/hide different measurements
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Checkbox Controls */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">Resistance (µOhm)</h4>
+                  {[1, 2, 3, 4, 5, 6].map(ch => (
+                    <label key={`res-${ch}`} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={visibleLines[`resistanceCH${ch}`]}
+                        onChange={(e) => setVisibleLines({...visibleLines, [`resistanceCH${ch}`]: e.target.checked})}
+                        className="w-4 h-4"
                       />
-                      <YAxis 
-                        label={{ value: 'Resistance (µOhm)', angle: -90, position: 'insideLeft' }}
-                        domain={[0, 100]}
+                      <span className="text-sm">Channel {ch}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">DCRM Current (A)</h4>
+                  {[1, 2, 3, 4, 5, 6].map(ch => (
+                    <label key={`cur-${ch}`} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={visibleLines[`currentCH${ch}`]}
+                        onChange={(e) => setVisibleLines({...visibleLines, [`currentCH${ch}`]: e.target.checked})}
+                        className="w-4 h-4"
                       />
+                      <span className="text-sm">Channel {ch}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">Travel (mm)</h4>
+                  {[1, 2, 3, 4, 5, 6].map(t => (
+                    <label key={`travel-${t}`} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={visibleLines[`travelT${t}`]}
+                        onChange={(e) => setVisibleLines({...visibleLines, [`travelT${t}`]: e.target.checked})}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">Phase T{t}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">Coil Current (A)</h4>
+                  {[1, 2, 3, 4, 5, 6].map(c => (
+                    <label key={`coil-${c}`} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={visibleLines[`coilCurrentC${c}`]}
+                        onChange={(e) => setVisibleLines({...visibleLines, [`coilCurrentC${c}`]: e.target.checked})}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">Coil C{c}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* CSS Overlapped Stacked Waveforms */}
+              <div className="relative">
+                {/* Resistance Graph */}
+                <div className="space-y-1 mb-2">
+                  <h3 className="text-xs font-semibold text-red-700 px-2 bg-red-50 inline-block rounded">Resistance (µOhm)</h3>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart data={data} margin={{ top: 5, right: 30, left: 10, bottom: 0 }} syncId="dcrmSync">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#fee" vertical={false} />
+                      <XAxis
+                        dataKey="time"
+                        type="number"
+                        domain={[0, 600]}
+                        hide
+                      />
+                      <YAxis hide domain={['auto', 'auto']} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      <Line type="monotone" dataKey="CH1" stroke="#8884d8" name="Channel 1" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="CH2" stroke="#82ca9d" name="Channel 2" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="CH3" stroke="#ffc658" name="Channel 3" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="CH4" stroke="#ff7300" name="Channel 4" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="CH5" stroke="#00ff00" name="Channel 5" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="CH6" stroke="#ff00ff" name="Channel 6" strokeWidth={2} dot={false} />
+                      <Legend wrapperStyle={{ fontSize: '11px' }} iconType="line" iconSize={12} />
+                      {visibleLines.resistanceCH1 && <Line type="monotone" dataKey="resistanceCH1" stroke="#FF0000" name="CH1" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.resistanceCH2 && <Line type="monotone" dataKey="resistanceCH2" stroke="#DC143C" name="CH2" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.resistanceCH3 && <Line type="monotone" dataKey="resistanceCH3" stroke="#FF6347" name="CH3" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.resistanceCH4 && <Line type="monotone" dataKey="resistanceCH4" stroke="#FF4500" name="CH4" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.resistanceCH5 && <Line type="monotone" dataKey="resistanceCH5" stroke="#CD5C5C" name="CH5" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.resistanceCH6 && <Line type="monotone" dataKey="resistanceCH6" stroke="#8B0000" name="CH6" strokeWidth={2} dot={false} isAnimationActive={false} />}
                     </LineChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="current" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Current Over Time</CardTitle>
-                  <CardDescription>
-                    Current values for each channel during the test (in Amp)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={currentChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="time" 
-                        label={{ value: 'Time (ms)', position: 'insideBottom', offset: -5 }} 
-                        domain={[0, 400]}
+                </div>
+
+                {/* DCRM Current Graph */}
+                <div className="space-y-1 mb-2">
+                  <h3 className="text-xs font-semibold text-blue-700 px-2 bg-blue-50 inline-block rounded">DCRM Current (A)</h3>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart data={data} margin={{ top: 5, right: 30, left: 10, bottom: 0 }} syncId="dcrmSync">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#eef" vertical={false} />
+                      <XAxis
+                        dataKey="time"
+                        type="number"
+                        domain={[0, 600]}
+                        hide
                       />
-                      <YAxis 
-                        label={{ value: 'Current (A)', angle: -90, position: 'insideLeft' }}
-                        domain={[0, 5000]}
-                      />
+                      <YAxis hide domain={['auto', 'auto']} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      <Line type="monotone" dataKey="CH1" stroke="#8884d8" name="Channel 1" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="CH2" stroke="#82ca9d" name="Channel 2" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="CH3" stroke="#ffc658" name="Channel 3" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="CH4" stroke="#ff7300" name="Channel 4" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="CH5" stroke="#00ff00" name="Channel 5" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="CH6" stroke="#ff00ff" name="Channel 6" strokeWidth={2} dot={false} />
+                      <Legend wrapperStyle={{ fontSize: '11px' }} iconType="line" iconSize={12} />
+                      {visibleLines.currentCH1 && <Line type="monotone" dataKey="currentCH1" stroke="#0000FF" name="CH1" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.currentCH2 && <Line type="monotone" dataKey="currentCH2" stroke="#4169E1" name="CH2" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.currentCH3 && <Line type="monotone" dataKey="currentCH3" stroke="#1E90FF" name="CH3" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.currentCH4 && <Line type="monotone" dataKey="currentCH4" stroke="#00BFFF" name="CH4" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.currentCH5 && <Line type="monotone" dataKey="currentCH5" stroke="#5F9EA0" name="CH5" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.currentCH6 && <Line type="monotone" dataKey="currentCH6" stroke="#000080" name="CH6" strokeWidth={2} dot={false} isAnimationActive={false} />}
                     </LineChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="travel" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Contact Travel Over Time</CardTitle>
-                  <CardDescription>
-                    Contact travel values for each phase during the test (in mm)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={travelChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="time" 
-                        label={{ value: 'Time (ms)', position: 'insideBottom', offset: -5 }} 
-                        domain={[0, 400]}
+                </div>
+
+                {/* Contact Travel Graph */}
+                <div className="space-y-1 mb-2">
+                  <h3 className="text-xs font-semibold text-green-700 px-2 bg-green-50 inline-block rounded">Contact Travel (mm)</h3>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart data={data} margin={{ top: 5, right: 30, left: 10, bottom: 0 }} syncId="dcrmSync">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#efe" vertical={false} />
+                      <XAxis
+                        dataKey="time"
+                        type="number"
+                        domain={[0, 600]}
+                        hide
                       />
-                      <YAxis 
-                        label={{ value: 'Travel (mm)', angle: -90, position: 'insideLeft' }}
-                        domain={[-1, 1]}
-                      />
+                      <YAxis hide domain={['auto', 'auto']} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      <Line type="monotone" dataKey="T1" stroke="#8884d8" name="Phase T1" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="T2" stroke="#82ca9d" name="Phase T2" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="T3" stroke="#ffc658" name="Phase T3" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="T4" stroke="#ff7300" name="Phase T4" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="T5" stroke="#00ff00" name="Phase T5" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="T6" stroke="#ff00ff" name="Phase T6" strokeWidth={2} dot={false} />
+                      <Legend wrapperStyle={{ fontSize: '11px' }} iconType="line" iconSize={12} />
+                      {visibleLines.travelT1 && <Line type="monotone" dataKey="travelT1" stroke="#00FF00" name="T1" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.travelT2 && <Line type="monotone" dataKey="travelT2" stroke="#32CD32" name="T2" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.travelT3 && <Line type="monotone" dataKey="travelT3" stroke="#00FA9A" name="T3" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.travelT4 && <Line type="monotone" dataKey="travelT4" stroke="#90EE90" name="T4" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.travelT5 && <Line type="monotone" dataKey="travelT5" stroke="#3CB371" name="T5" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.travelT6 && <Line type="monotone" dataKey="travelT6" stroke="#006400" name="T6" strokeWidth={2} dot={false} isAnimationActive={false} />}
                     </LineChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="coilCurrent" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Coil Current Over Time</CardTitle>
-                  <CardDescription>
-                    Coil current values for each coil during the test (in A)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={coilCurrentChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="time" 
-                        label={{ value: 'Time (ms)', position: 'insideBottom', offset: -5 }} 
-                        domain={[0, 400]}
+                </div>
+
+                {/* Coil Current Graph (with X-axis) */}
+                <div className="space-y-1">
+                  <h3 className="text-xs font-semibold text-purple-700 px-2 bg-purple-50 inline-block rounded">Coil Current (A)</h3>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <LineChart data={data} margin={{ top: 5, right: 30, left: 10, bottom: 35 }} syncId="dcrmSync">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#fef" vertical={false} />
+                      <XAxis
+                        dataKey="time"
+                        type="number"
+                        domain={[0, 600]}
+                        label={{
+                          value: 'Time (ms)',
+                          position: 'insideBottom',
+                          offset: -22,
+                          style: { fontSize: 14, fontWeight: 'bold' }
+                        }}
+                        tick={{ fontSize: 11 }}
+                        tickLine={{ stroke: '#666' }}
                       />
-                      <YAxis 
-                        label={{ value: 'Current (A)', angle: -90, position: 'insideLeft' }}
-                        domain={[-1, 1]}
-                      />
+                      <YAxis hide domain={['auto', 'auto']} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      <Line type="monotone" dataKey="C1" stroke="#8884d8" name="Coil C1" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="C2" stroke="#82ca9d" name="Coil C2" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="C3" stroke="#ffc658" name="Coil C3" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="C4" stroke="#ff7300" name="Coil C4" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="C5" stroke="#00ff00" name="Coil C5" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="C6" stroke="#ff00ff" name="Coil C6" strokeWidth={2} dot={false} />
+                      <Legend wrapperStyle={{ fontSize: '11px' }} iconType="line" iconSize={12} />
+                      {visibleLines.coilCurrentC1 && <Line type="monotone" dataKey="coilCurrentC1" stroke="#FF00FF" name="C1" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.coilCurrentC2 && <Line type="monotone" dataKey="coilCurrentC2" stroke="#DA70D6" name="C2" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.coilCurrentC3 && <Line type="monotone" dataKey="coilCurrentC3" stroke="#BA55D3" name="C3" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.coilCurrentC4 && <Line type="monotone" dataKey="coilCurrentC4" stroke="#9370DB" name="C4" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.coilCurrentC5 && <Line type="monotone" dataKey="coilCurrentC5" stroke="#8B008B" name="C5" strokeWidth={2} dot={false} isAnimationActive={false} />}
+                      {visibleLines.coilCurrentC6 && <Line type="monotone" dataKey="coilCurrentC6" stroke="#4B0082" name="C6" strokeWidth={2} dot={false} isAnimationActive={false} />}
                     </LineChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           <Card className="mt-6">
             <CardHeader>
