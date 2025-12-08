@@ -1,31 +1,61 @@
 // app/api/dcrm-data/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get('file') as File;
-    
+    const file = formData.get("file") as File;
+    const referenceUrl = formData.get("referenceUrl") as string;
+
     if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
-    
+
     const text = await file.text();
-    
-    // Parse the CSV data
+
+    // Parse the main CSV data
     const data = parseCSV(text);
-    
-    return NextResponse.json({ 
+
+    let referenceData = null;
+    if (referenceUrl) {
+      try {
+        const refResponse = await fetch(referenceUrl);
+        if (refResponse.ok) {
+          const refText = await refResponse.text();
+          referenceData = parseCSV(refText);
+        } else {
+          console.error(
+            "Failed to fetch reference CSV:",
+            refResponse.statusText
+          );
+        }
+      } catch (refError) {
+        console.error("Error processing reference CSV:", refError);
+      }
+    }
+
+    return NextResponse.json({
       success: true,
-      data 
+      data: {
+        ...data,
+        referenceData: referenceData
+          ? {
+              dataPoints: referenceData.dataPoints,
+              testResults: referenceData.testResults,
+            }
+          : null,
+      },
     });
   } catch (error) {
-    console.error('Error parsing CSV:', error);
-    return NextResponse.json({ 
-      success: false,
-      error: 'Failed to parse CSV file',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    console.error("Error parsing CSV:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to parse CSV file",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -59,7 +89,7 @@ interface DataPoint {
 
 function parseCSV(csvText: string) {
   // Split the text into lines and filter out empty lines
-  const lines = csvText.split('\n').filter(line => line.trim() !== '');
+  const lines = csvText.split("\n").filter((line) => line.trim() !== "");
 
   // Initialize empty objects for test info and results
   const testInfo: Record<string, string> = {};
@@ -71,14 +101,14 @@ function parseCSV(csvText: string) {
   // Find the header line to determine where data starts
   let dataStartIndex = -1;
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i].includes('Coil Current C1 (A)')) {
+    if (lines[i].includes("Coil Current C1 (A)")) {
       dataStartIndex = i + 1; // Data starts on next line
       break;
     }
   }
 
   if (dataStartIndex === -1) {
-    throw new Error('Could not find data header in CSV file');
+    throw new Error("Could not find data header in CSV file");
   }
 
   // Extract test info from header section
@@ -86,11 +116,14 @@ function parseCSV(csvText: string) {
     const line = lines[i].trim();
     if (!line) continue;
 
-    const parts = line.split(',').map(p => p.trim()).filter(p => p);
+    const parts = line
+      .split(",")
+      .map((p) => p.trim())
+      .filter((p) => p);
     if (parts.length >= 2) {
       // Store key-value pairs from header
       for (let j = 0; j < parts.length - 1; j += 2) {
-        if (parts[j] && parts[j + 1] && !parts[j].includes(':')) {
+        if (parts[j] && parts[j + 1] && !parts[j].includes(":")) {
           testInfo[parts[j]] = parts[j + 1];
         }
       }
@@ -103,7 +136,7 @@ function parseCSV(csvText: string) {
     if (!line) continue;
 
     // Split by comma and parse values
-    const parts = line.split(',');
+    const parts = line.split(",");
 
     // Skip if we don't have enough columns
     if (parts.length < 26) continue;
@@ -155,7 +188,7 @@ function parseCSV(csvText: string) {
         currentCH3: parseNum(parts[19]),
         currentCH4: parseNum(parts[21]),
         currentCH5: parseNum(parts[23]),
-        currentCH6: parseNum(parts[25])
+        currentCH6: parseNum(parts[25]),
       };
 
       // Add all data points to show the full waveform
@@ -164,14 +197,14 @@ function parseCSV(csvText: string) {
       console.error(`Error parsing line ${i}:`, error);
     }
   }
-  
+
   // If we have data points, calculate some basic statistics for test results
   if (dataPoints.length > 0) {
     // Calculate averages for each channel (excluding 8000 values which are out of range)
     const calculateAverage = (key: keyof DataPoint) => {
       const validValues = dataPoints
-        .map(point => point[key])
-        .filter(val => val < 8000 && val > 0);
+        .map((point) => point[key])
+        .filter((val) => val < 8000 && val > 0);
       if (validValues.length === 0) return 0;
       const sum = validValues.reduce((acc, val) => acc + val, 0);
       return sum / validValues.length;
@@ -180,52 +213,52 @@ function parseCSV(csvText: string) {
     // Calculate max values for each channel (excluding 8000 values)
     const calculateMax = (key: keyof DataPoint) => {
       const validValues = dataPoints
-        .map(point => point[key])
-        .filter(val => val < 8000);
+        .map((point) => point[key])
+        .filter((val) => val < 8000);
       return validValues.length > 0 ? Math.max(...validValues) : 0;
     };
 
     // Calculate min values for each channel (excluding 8000 and 0 values)
     const calculateMin = (key: keyof DataPoint) => {
       const validValues = dataPoints
-        .map(point => point[key])
-        .filter(val => val < 8000 && val > 0);
+        .map((point) => point[key])
+        .filter((val) => val < 8000 && val > 0);
       return validValues.length > 0 ? Math.min(...validValues) : 0;
     };
 
     // Populate test results with calculated values
     Object.assign(testResults, {
       // Resistance values - use min instead of avg as per DCRM standards
-      resistanceCH1Avg: calculateMin('resistanceCH1'),
-      resistanceCH2Avg: calculateMin('resistanceCH2'),
-      resistanceCH3Avg: calculateMin('resistanceCH3'),
-      resistanceCH4Avg: calculateMin('resistanceCH4'),
-      resistanceCH5Avg: calculateMin('resistanceCH5'),
-      resistanceCH6Avg: calculateMin('resistanceCH6'),
+      resistanceCH1Avg: calculateMin("resistanceCH1"),
+      resistanceCH2Avg: calculateMin("resistanceCH2"),
+      resistanceCH3Avg: calculateMin("resistanceCH3"),
+      resistanceCH4Avg: calculateMin("resistanceCH4"),
+      resistanceCH5Avg: calculateMin("resistanceCH5"),
+      resistanceCH6Avg: calculateMin("resistanceCH6"),
 
       // Travel values
-      travelT1Max: calculateMax('travelT1'),
-      travelT2Max: calculateMax('travelT2'),
-      travelT3Max: calculateMax('travelT3'),
-      travelT4Max: calculateMax('travelT4'),
-      travelT5Max: calculateMax('travelT5'),
-      travelT6Max: calculateMax('travelT6'),
+      travelT1Max: calculateMax("travelT1"),
+      travelT2Max: calculateMax("travelT2"),
+      travelT3Max: calculateMax("travelT3"),
+      travelT4Max: calculateMax("travelT4"),
+      travelT5Max: calculateMax("travelT5"),
+      travelT6Max: calculateMax("travelT6"),
 
       // Current values
-      currentCH1Max: calculateMax('currentCH1'),
-      currentCH2Max: calculateMax('currentCH2'),
-      currentCH3Max: calculateMax('currentCH3'),
-      currentCH4Max: calculateMax('currentCH4'),
-      currentCH5Max: calculateMax('currentCH5'),
-      currentCH6Max: calculateMax('currentCH6'),
+      currentCH1Max: calculateMax("currentCH1"),
+      currentCH2Max: calculateMax("currentCH2"),
+      currentCH3Max: calculateMax("currentCH3"),
+      currentCH4Max: calculateMax("currentCH4"),
+      currentCH5Max: calculateMax("currentCH5"),
+      currentCH6Max: calculateMax("currentCH6"),
 
       // Coil Current values
-      coilCurrentC1Avg: calculateAverage('coilCurrentC1'),
-      coilCurrentC2Avg: calculateAverage('coilCurrentC2'),
-      coilCurrentC3Avg: calculateAverage('coilCurrentC3'),
-      coilCurrentC4Avg: calculateAverage('coilCurrentC4'),
-      coilCurrentC5Avg: calculateAverage('coilCurrentC5'),
-      coilCurrentC6Avg: calculateAverage('coilCurrentC6')
+      coilCurrentC1Avg: calculateAverage("coilCurrentC1"),
+      coilCurrentC2Avg: calculateAverage("coilCurrentC2"),
+      coilCurrentC3Avg: calculateAverage("coilCurrentC3"),
+      coilCurrentC4Avg: calculateAverage("coilCurrentC4"),
+      coilCurrentC5Avg: calculateAverage("coilCurrentC5"),
+      coilCurrentC6Avg: calculateAverage("coilCurrentC6"),
     });
   }
 

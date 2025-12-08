@@ -310,26 +310,7 @@ export default function PowergridLandingPage() {
                 </div>
 
                 {/* Floating Stat Card */}
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                  className="absolute -bottom-6 -left-6 bg-white p-4 rounded-lg shadow-xl border border-slate-100 hidden lg:block"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="bg-green-100 p-2 rounded-full text-green-700">
-                      <Gauge className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-500 font-medium uppercase">
-                        System Efficiency
-                      </div>
-                      <div className="text-2xl font-bold text-slate-900">
-                        98.2%
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+                
               </motion.div>
             </div>
           </div>

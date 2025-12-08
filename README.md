@@ -1,147 +1,137 @@
 <div align="center">
 
-# DCRM Condition Monitor
+# SIH 2025 - Powergrid DCRM Analysis & Monitoring Platform
 
-Digital Contact Resistance Monitoring platform with a Next.js front-end and FastAPI back-end that lets utilities upload breaker waveforms, visualize KPIs, and run on-demand ML diagnostics.
+A comprehensive Digital Contact Resistance Monitoring (DCRM) platform built for the Smart India Hackathon 2025. This application empowers utilities to monitor breaker health, visualize waveforms, and perform advanced comparative analysis.
 
 </div>
 
-## Table of contents
+## Table of Contents
 
 1. [Architecture](#architecture)
 2. [Key Features](#key-features)
-3. [Frontend (Next.js) Setup](#frontend-nextjs-setup)
-4. [Backend (FastAPI) Setup](#backend-fastapi-setup)
-5. [Environment Variables](#environment-variables)
-6. [Typical Workflow](#typical-workflow)
-7. [Diagnostics Endpoints](#diagnostics-endpoints)
-8. [Available Scripts](#available-scripts)
-9. [Project Structure](#project-structure)
+3. [Tech Stack](#tech-stack)
+4. [Getting Started](#getting-started)
+5. [DCRM Analysis Workflow](#dcrm-analysis-workflow)
+6. [Project Structure](#project-structure)
 
 ## Architecture
 
-- **Frontend**: Next.js 14 App Router with Tailwind, shadcn/ui components, and client-side charts for dashboarding.
-- **Backend**: FastAPI service exposing authentication, device metadata, CSV uploads, and ML prediction endpoints.
-- **ML models**: Gradient boosted (XGBoost) + AdaBoost models trained offline under `backend/dcrm_models/`.
-- **Storage**: CSV waveforms upload to Cloudinary (raw asset type). Diagnostic results are returned immediately to the client.
-
-```
-Next.js UI  ─┐            ┌─>  FastAPI routers (auth, diagnostics, uploads, ...)
-			 ├─ REST ---> │    ├─ Cloudinary (raw CSV assets)
-Chat + CSV ─┘            └─>  │    └─ ML inference (joblib models)
-```
+- **Frontend**: Next.js 14 (App Router) with TypeScript, Tailwind CSS, and Shadcn UI.
+- **Backend**: FastAPI (Python) for heavy computational tasks, file processing, and ML inference.
+- **Database**: PostgreSQL (via Supabase) managed with Prisma ORM.
+- **Visualizations**: Recharts for interactive waveform graphing.
 
 ## Key Features
 
-- **DCRM Dashboard**: Overview cards, overall score, model visualizations, and hero/header sections tailored to maintenance crews.
-- **Conversational Assistant**: Chat UI for questions plus CSV attachment button so operators can drop fresh waveform exports directly into the advisor.
-- **One-click Diagnostics**: Both manual model sweeps ("Run Model" button) and automatic inference after CSV upload. Predictions include primary label, confidence, secondary label, and class probabilities.
-- **Cloud-Backed Imports**: CSVs stream to Cloudinary and return secure URLs so the same file can be referenced later in reports.
-- **Configurable Limits**: `UPLOAD_DIAGNOSTIC_ROW_LIMIT` caps the number of rows scored per file to keep requests responsive.
+### 🔍 Advanced DCRM Analysis
 
-## Frontend (Next.js) Setup
+- **3-Column Comparison Layout**: Simultaneously view "Ideal/Reference" data, "New/Test" data, and a "Superimposed" overlay.
+- **Velocity Calculation**: Automatically computes contact velocity (m/s) from travel data.
+- **Waveform Visualization**: Interactive graphs for Resistance, Travel, Velocity, and Current.
+- **Direct Breaker Selection**: Select breakers directly to load their linking "Ideal" dataset automatically.
 
-```powershell
-cd frontend/company-assigmnet
-pnpm install
-pnpm dev        # starts on http://localhost:3000
+### 📊 Modern Dashboard
+
+- **Bento Grid Layout**: Apple-style grid for high-density information display.
+- **Ministry of Power Theming**: Professional color scheme (Deep Blue, Saffron, Green).
+- **Interactive Widgets**: Real-time comparison metrics (Max Travel, Max Velocity, Avg Resistance).
+
+### 🛠️ Admin & Management
+
+- **Breaker Management**: Link CSV files to specific breakers as "Ideal Data" for future comparisons.
+- **User Management**: Admin panel for managing user access and profiles.
+
+## Tech Stack
+
+| Component    | Technology                                     |
+| ------------ | ---------------------------------------------- |
+| **Frontend** | Next.js 14, React, TypeScript                  |
+| **Styling**  | Tailwind CSS, Shadcn UI, Framer Motion         |
+| **Backend**  | Python, FastAPI, Uvicorn                       |
+| **Database** | PostgreSQL, Prisma ORM                         |
+| **Storage**  | ImageKit (File Storage)                        |
+| **ML/Data**  | NumPy, Pandas, Scikit-learn (XGBoost/AdaBoost) |
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18+)
+- Python (v3.10+)
+- PostgreSQL Database URL
+
+### 1. Frontend Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+# Opens http://localhost:3000
 ```
 
-The frontend expects `NEXT_PUBLIC_API_BASE_URL` (defaults to `http://localhost:8000`). Update it in `.env.local` if the API runs elsewhere.
+### 2. Backend Setup
 
-## Backend (FastAPI) Setup
-
-```powershell
+```bash
 cd backend
+
+# Create virtual environment
 python -m venv .venv
-.\.venv\Scripts\activate
+.\.venv\Scripts\activate  # Windows
+# source .venv/bin/activate # Mac/Linux
+
+# Install requirements
 pip install -r requirements.txt
-cp .env.example .env   # fill in credentials
+
+# Run FastAPI server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### ML Artifacts
+### 3. Database Setup (Prisma)
 
-Place `xgb_dcrm_model.pkl`, `adaboost_dcrm_model.pkl`, `feature_names.pkl`, and `label_map.json` under `backend/dcrm_models/`. Set `DCRM_MODEL_DIR` if you change the folder.
+```bash
+# Generate Prisma Client
+npx prisma generate
 
-## Environment Variables
+# Push schema to database
+npx prisma db push
 
-| Location | Variable | Description |
-|----------|----------|-------------|
-| Frontend | `NEXT_PUBLIC_API_BASE_URL` | Base URL of the FastAPI service |
-| Backend  | `CLOUDINARY_URL` | Preferred Cloudinary connection string (`cloudinary://key:secret@cloud`) |
-| Backend  | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Explicit overrides if you cannot use `CLOUDINARY_URL` |
-| Backend  | `CLOUDINARY_UPLOAD_FOLDER` | Folder for raw CSV assets (default `dcrm/csv`) |
-| Backend  | `UPLOAD_DIAGNOSTIC_ROW_LIMIT` | Rows scored per upload (default `50`) |
-| Backend  | `DCRM_MODEL_DIR` | Path to ML artifacts (default `dcrm_models`) |
+# (Optional) Open Prisma Studio to manage data
+npx prisma studio
+```
 
-## Typical Workflow
+## DCRM Analysis Workflow
 
-1. **Operator uploads CSV** via the chat paperclip.
-2. Frontend calls `POST /api/v1/uploads` with multipart form data.
-3. Backend validates CSV, runs the ML models row-by-row (respecting `UPLOAD_DIAGNOSTIC_ROW_LIMIT`), then streams the file to Cloudinary.
-4. Response returns Cloudinary metadata plus a `diagnostics` array (one entry per processed row) that the chat surfaces as a summary message.
-5. Operator can also trigger `GET /api/v1/diagnostics/features` + `POST /api/v1/diagnostics/predict` for ad-hoc what-if analyses.
-
-## Diagnostics Endpoints
-
-### `POST /api/v1/diagnostics/predict`
-
-- Accepts a JSON object where each key is one of the model feature names (see `GET /api/v1/diagnostics/features`).
-- The payload is converted into a pandas row and passed to both trained models stored under `backend/dcrm_models/`:
-	- **XGBoost (`xgb_dcrm_model.pkl`)** → primary `diagnosis`, `confidence`, `probabilities`, and derived `status`.
-	- **AdaBoost (`adaboost_dcrm_model.pkl`)** → `secondary_diagnosis` (used as an alternate opinion).
-- The endpoint returns the combined response so the frontend can show a single message summarizing both models.
-
-### Chat “Run Model” button
-
-- Lives in `src/components/chat-area.tsx` and now calls `runAdvancedModelSuite()` when clicked.
-- Pulls the advanced feature list (if not cached), builds a placeholder payload where every feature is set to `50`, and sends it to `/api/v1/new-models/predict`.
-- The chat assistant posts a summary describing which advanced models ran plus one bubble per model (XGBoost, AdaBoost, Autoencoder) with confidences/anomaly verdicts.
-- This flow validates the `new models` artifacts end-to-end without touching the legacy DCRM inference pipeline.
-
-## Available Scripts
-
-### Frontend
-
-- `pnpm dev` – Start Next.js in dev mode.
-- `pnpm lint` – Run ESLint checks.
-- `pnpm build && pnpm start` – Production build + start.
-
-### Backend
-
-- `uvicorn app.main:app --reload` – Launch API with auto-reload.
-- `pytest` (if tests are added) – Run unit/integration tests.
+1.  **Navigate to DCRM Analysis**: Go to the Analysis page from the dashboard.
+2.  **Select Configuration**: Choose a Station and Breaker from the dropdowns.
+    - _Note: If the breaker has "Ideal Data" linked, it will load automatically in the BLUE column._
+3.  **Upload New Data**: Use the "New Data (Test)" input to upload a CSV file from a recent field test.
+4.  **Analyze & Compare**:
+    - The system parses both files.
+    - **Blue Column**: Shows Reference/Ideal waveforms.
+    - **Red Column**: Shows the newly uploaded test waveforms.
+    - **Purple Column**: Superimposes both for direct visual comparison.
+    - **Metrics**: Compare Max Travel, Velocity, and Resistance side-by-side.
+5.  **Set Ideal Data**: If a breaker has no data, you can upload a file via "Update Ideal Data (DB)" to save it as the new baseline.
 
 ## Project Structure
 
 ```
-frontend/company-assigmnet/
-├─ src/
-│  ├─ app/…                # Next.js routes (dashboard, auth, heat maps)
-│  ├─ components/…         # Reusable UI (chat, uploader, charts, etc.)
-│  ├─ lib/api-client.ts    # Typed API helpers hitting FastAPI
-│  └─ provider/            # Theme and layout providers
-└─ public/avatars          # Avatar assets for chat bubbles
-
-backend/
-├─ app/
-│  ├─ routers/             # FastAPI route modules (uploads, diagnostics, auth)
-│  ├─ services/            # Diagnostics service (model loading + inference)
-│  ├─ models.py            # Pydantic schemas shared across routers
-│  └─ config.py            # Settings loader (.env + Cloudinary helpers)
-├─ dcrm_models/            # ML artifacts (not checked in)
-├─ data/                   # Sample CSV + mapping utilities
-└─ README.md               # Backend-specific docs
+.
+├── src/
+│   ├── app/                    # Next.js App Router pages
+│   │   ├── (main-page)/        # Dashboard & Analysis routes
+│   │   ├── api/                # Next.js API Routes (upload, dcrm-data)
+│   ├── components/             # React components (Charts, UI elements)
+│   ├── lib/                    # Utilities (Prisma, DB connection)
+│   └── scripts/                # Seeding and maintenance scripts
+├── backend/
+│   ├── app/                    # FastAPI application
+│   │   ├── services/           # Business logic & ML services
+│   │   └── main.py             # Entry point
+│   ├── dcrm_models/            # Trained ML models
+├── prisma/                     # Database schema & migrations
+└── public/                     # Static assets
 ```
-
-## Talking to GPT or other copilots
-
-If you are feeding this repository into a coding assistant, mention:
-
-- FastAPI backend exposes `/api/v1/uploads` (multipart) and `/api/v1/diagnostics/*` (JSON) endpoints.
-- CSV uploads now include diagnostic results in the same response, so the frontend only makes a single round trip.
-- Cloudinary credentials are loaded via `CLOUDINARY_URL` or individual variables through `backend/app/config.py`.
-- DCRM models live under `backend/dcrm_models/` and are loaded lazily via `diagnostics_service`.
-
-This README should give enough context for any model (or teammate) to understand the moving pieces of the project.
