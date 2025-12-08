@@ -27,27 +27,68 @@ model Station {
   @@map("stations")
 }
 
+// Add this new model to your schema
+
+model TestResult {
+  id        String   @id @default(cuid())
+  breakerId String
+  breaker   Breaker  @relation(fields: [breakerId], references: [id], onDelete: Cascade)
+  
+  // Test metadata
+  testDate     DateTime @default(now())
+  testType     String   @default("DCRM") // Type of test performed
+  operator     String?  // Who performed the test
+  notes        String?  // Any additional notes
+  
+  // File information
+  fileName     String
+  fileUrl      String?  // If you want to store the original file
+  
+  // Reference data info
+  referenceFileName String?
+  referenceFileUrl  String?
+  
+  // Complete test data stored as JSON
+  testData     Json     // Stores the entire parsed data
+  
+  // Key metrics for quick querying (denormalized for performance)
+  travelT1Max  Float?
+  velocityT1Max Float?
+  resistanceCH1Avg Float?
+  
+  // Pass/Fail status
+  status       String   @default("COMPLETED") // COMPLETED, FAILED, etc.
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("test_results")
+  @@index([breakerId, testDate])
+}
+
+// Update the Breaker model to include the relation
 model Breaker {
   id           String   @id @default(cuid())
   name         String
-  type         String   // e.g., "Oil Circuit Breaker", "Air Blast Circuit Breaker", etc.
+  type         String
   manufacturer String
   model        String?
-  voltage      Float?   // in kV
-  current      Float?   // in A
-  status       String?  // e.g., "Active", "Maintenance", "Decommissioned"
+  voltage      Float?
+  current      Float?
+  status       String?
   installationDate DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  // Relations
   stationId    String
   station      Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
   components   BreakerComponent[]
   
-  // --- NEW RELATION ---
-  dataSourceId String? // Foreign key to the DataSource model. It's optional.
-  dataSource   DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: SetNull) // Defines the relation
+  dataSourceId String?
+  dataSource   DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: SetNull)
+  
+  // NEW: Relation to test results
+  testResults  TestResult[]
 
   @@map("breakers")
 }

@@ -3,26 +3,40 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-export function DcrmStatsCards() {
+interface DcrmStatsCardsProps {
+  stats?: {
+    critical: number;
+    learning: number;
+    healthy: number;
+    total: number;
+  };
+}
+
+export function DcrmStatsCards({ stats }: DcrmStatsCardsProps) {
+  // Default values if no stats provided
+  const data = stats || { critical: 0, learning: 0, healthy: 0, total: 0 };
+
   const cards = [
     {
       title: "Critical Pending",
-      value: 337,
-      description: "Awaiting resolution",
-      className: "!bg-orange-700 !text-white !border-orange-600",
-    },
-
-    {
-      title: "Resolved",
-      value: 987,
-      description: "Successfully resolved",
-      className: "!bg-yellow-400 !text-black !border-yellow-400",
+      value: data.critical,
+      description: "Immediate attention required",
+      // Red/Deep Orange for Critical
+      className: "!bg-red-600 !text-white !border-red-600",
     },
     {
-      title: "Total Complaints",
-      value: 1324,
-      description: "All complaints received this month",
-      className: "!bg-lime-600 !text-white !border-lime-600",
+      title: "Needs Maintenance",
+      value: data.learning,
+      description: "Scheduled maintenance",
+      // Saffron (Orange) for Warning/Maintenance
+      className: "!bg-orange-500 !text-white !border-orange-500",
+    },
+    {
+      title: "Healthy",
+      value: data.healthy,
+      description: "Operating normally",
+      // Green for Healthy
+      className: "!bg-emerald-600 !text-white !border-emerald-600",
     },
   ];
 

@@ -9,6 +9,7 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Station'
+export type * from './models/TestResult'
 export type * from './models/Breaker'
 export type * from './models/BreakerComponent'
 export type * from './models/DataSource'

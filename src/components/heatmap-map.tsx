@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 import { MapContainer, TileLayer, useMap } from "react-leaflet"
-import "leaflet.heat"
 
 import { getHeatmapPoints, HeatmapPointDto } from "@/lib/api-client"
 

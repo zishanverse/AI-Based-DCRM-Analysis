@@ -385,6 +385,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Station: 'Station',
+  TestResult: 'TestResult',
   Breaker: 'Breaker',
   BreakerComponent: 'BreakerComponent',
   DataSource: 'DataSource'
@@ -403,7 +404,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "station" | "breaker" | "breakerComponent" | "dataSource"
+    modelProps: "station" | "testResult" | "breaker" | "breakerComponent" | "dataSource"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -478,6 +479,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.StationCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.StationCountAggregateOutputType> | number
+        }
+      }
+    }
+    TestResult: {
+      payload: Prisma.$TestResultPayload<ExtArgs>
+      fields: Prisma.TestResultFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TestResultFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestResultPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TestResultFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestResultPayload>
+        }
+        findFirst: {
+          args: Prisma.TestResultFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestResultPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TestResultFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestResultPayload>
+        }
+        findMany: {
+          args: Prisma.TestResultFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestResultPayload>[]
+        }
+        create: {
+          args: Prisma.TestResultCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestResultPayload>
+        }
+        createMany: {
+          args: Prisma.TestResultCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TestResultCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestResultPayload>[]
+        }
+        delete: {
+          args: Prisma.TestResultDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestResultPayload>
+        }
+        update: {
+          args: Prisma.TestResultUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestResultPayload>
+        }
+        deleteMany: {
+          args: Prisma.TestResultDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TestResultUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TestResultUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestResultPayload>[]
+        }
+        upsert: {
+          args: Prisma.TestResultUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestResultPayload>
+        }
+        aggregate: {
+          args: Prisma.TestResultAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTestResult>
+        }
+        groupBy: {
+          args: Prisma.TestResultGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TestResultGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TestResultCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TestResultCountAggregateOutputType> | number
         }
       }
     }
@@ -754,6 +829,29 @@ export const StationScalarFieldEnum = {
 export type StationScalarFieldEnum = (typeof StationScalarFieldEnum)[keyof typeof StationScalarFieldEnum]
 
 
+export const TestResultScalarFieldEnum = {
+  id: 'id',
+  breakerId: 'breakerId',
+  testDate: 'testDate',
+  testType: 'testType',
+  operator: 'operator',
+  notes: 'notes',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  referenceFileName: 'referenceFileName',
+  referenceFileUrl: 'referenceFileUrl',
+  testData: 'testData',
+  travelT1Max: 'travelT1Max',
+  velocityT1Max: 'velocityT1Max',
+  resistanceCH1Avg: 'resistanceCH1Avg',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TestResultScalarFieldEnum = (typeof TestResultScalarFieldEnum)[keyof typeof TestResultScalarFieldEnum]
+
+
 export const BreakerScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -809,6 +907,13 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -823,6 +928,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -856,6 +970,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -982,6 +1110,7 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   station?: Prisma.StationOmit
+  testResult?: Prisma.TestResultOmit
   breaker?: Prisma.BreakerOmit
   breakerComponent?: Prisma.BreakerComponentOmit
   dataSource?: Prisma.DataSourceOmit

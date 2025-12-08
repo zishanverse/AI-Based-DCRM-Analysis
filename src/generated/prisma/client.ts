@@ -45,6 +45,11 @@ export { Prisma }
  */
 export type Station = Prisma.StationModel
 /**
+ * Model TestResult
+ * 
+ */
+export type TestResult = Prisma.TestResultModel
+/**
  * Model Breaker
  * 
  */

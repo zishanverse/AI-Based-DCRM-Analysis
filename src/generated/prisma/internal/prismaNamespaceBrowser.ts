@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Station: 'Station',
+  TestResult: 'TestResult',
   Breaker: 'Breaker',
   BreakerComponent: 'BreakerComponent',
   DataSource: 'DataSource'
@@ -83,6 +84,29 @@ export const StationScalarFieldEnum = {
 } as const
 
 export type StationScalarFieldEnum = (typeof StationScalarFieldEnum)[keyof typeof StationScalarFieldEnum]
+
+
+export const TestResultScalarFieldEnum = {
+  id: 'id',
+  breakerId: 'breakerId',
+  testDate: 'testDate',
+  testType: 'testType',
+  operator: 'operator',
+  notes: 'notes',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  referenceFileName: 'referenceFileName',
+  referenceFileUrl: 'referenceFileUrl',
+  testData: 'testData',
+  travelT1Max: 'travelT1Max',
+  velocityT1Max: 'velocityT1Max',
+  resistanceCH1Avg: 'resistanceCH1Avg',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TestResultScalarFieldEnum = (typeof TestResultScalarFieldEnum)[keyof typeof TestResultScalarFieldEnum]
 
 
 export const BreakerScalarFieldEnum = {
@@ -140,6 +164,13 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const JsonNullValueInput = {
+  JsonNull: 'JsonNull'
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -154,4 +185,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: 'DbNull',
+  JsonNull: 'JsonNull',
+  AnyNull: 'AnyNull'
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

@@ -1,176 +1,173 @@
 import { db } from "@/lib/db";
 
+const STATIONS_DATA = [
+  {
+    name: "Northern Grid Substation",
+    location: "Delhi, India",
+    desc: "Key node for Northern Region transmission.",
+  },
+  {
+    name: "Southern Grid Substation",
+    location: "Bangalore, India",
+    desc: "Primary distribution hub for Southern Region.",
+  },
+  {
+    name: "Western Grid Substation",
+    location: "Mumbai, India",
+    desc: "Critical infrastructure for Western Industrial corridor.",
+  },
+  {
+    name: "Eastern Grid Substation",
+    location: "Kolkata, India",
+    desc: "Gateway for Eastern Region power flow.",
+  },
+];
+
+const BREAKER_TYPES = [
+  "SF6 Circuit Breaker",
+  "Vacuum Circuit Breaker",
+  "Oil Circuit Breaker",
+  "Air Blast Circuit Breaker",
+];
+const MANUFACTURERS = [
+  "Siemens",
+  "ABB",
+  "Schneider Electric",
+  "BHEL",
+  "GE Grid Solutions",
+];
+const STATUSES = [
+  "Active",
+  "Healthy",
+  "Good",
+  "Optimal",
+  "Warning",
+  "Needs Maintenance",
+  "Pending Inspection",
+  "Critical",
+  "Failure",
+  "Bad",
+];
+
+function getRandomItem<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function getRandomStatus(): string {
+  const rand = Math.random();
+  if (rand < 0.15) return "Critical (Failure)"; // 15% Critical
+  if (rand < 0.45) return "Warning (Needs Maintenance)"; // 30% Warning
+  return "Healthy (Active)"; // 55% Healthy
+}
+
 async function main() {
-  console.log("Start seeding...");
+  console.log("🚀 Start seeding (APPEND MODE)...");
 
-  // Clean the database
-  await db.breakerComponent.deleteMany();
-  await db.breaker.deleteMany();
-  await db.station.deleteMany();
-  await db.dataSource.deleteMany();
-  console.log("🧹 Database cleaned");
-
-  // 1. Create a DataSource entry.
-  // This record represents the CSV file itself.
-  const csvDataSource = await db.dataSource.create({
-    data: {
-      fileName: "initial_breaker_data.csv",
-      fileUrl:
-        "https://ik.imagekit.io/hckvycynl/109000055719_20241016172337.csv", // IMPORTANT: Replace with your actual file URL
-      description: "Initial data load for circuit breakers and components",
-    },
+  // 1. Get or Create DataSource (re-use if exists to avoid clutter)
+  let dataSource = await db.dataSource.findFirst({
+    where: { fileName: "generated_bulk_data.csv" },
   });
 
-  console.log(`✅ Created data source with id: ${csvDataSource.id}`);
-
-  // 2. Create a Station.
-  // A station is a physical location where breakers are installed.
-  const station = await db.station.create({
-    data: {
-      name: "Central Power Station",
-      location: "Industrial District, Block A",
-      description: "Main power distribution station for the industrial zone",
-    },
-  });
-
-  console.log(`✅ Created station with id: ${station.id}`);
-
-  // 3. Create Breakers and link them to both the Station and the DataSource.
-  const oilBreaker = await db.breaker.create({
-    data: {
-      name: "Oil Circuit Breaker 1",
-      type: "Oil Circuit Breaker",
-      manufacturer: "Siemens",
-      model: "OCB-2000",
-      voltage: 33.0,
-      current: 1250.0,
-      status: "Active",
-      installationDate: new Date("2020-05-15"),
-      stationId: station.id,
-      dataSourceId: csvDataSource.id,
-    },
-  });
-
-  const vacuumBreaker = await db.breaker.create({
-    data: {
-      name: "Vacuum Circuit Breaker 1",
-      type: "Vacuum Circuit Breaker",
-      manufacturer: "ABB",
-      model: "VCB-12",
-      voltage: 11.0,
-      current: 630.0,
-      status: "Active",
-      installationDate: new Date("2021-08-22"),
-      stationId: station.id,
-      dataSourceId: csvDataSource.id,
-    },
-  });
-
-  // --- NEW: Create an SF6 Circuit Breaker ---
-  const sf6Breaker = await db.breaker.create({
-    data: {
-      name: "SF6 Circuit Breaker 1",
-      type: "SF6 Circuit Breaker",
-      manufacturer: "Schneider Electric",
-      model: "SF6-220",
-      voltage: 220.0,
-      current: 2000.0,
-      status: "Active",
-      installationDate: new Date("2019-11-10"),
-      stationId: station.id,
-      dataSourceId: csvDataSource.id,
-    },
-  });
-
-  console.log(`✅ Created 3 breakers (Oil, Vacuum, and SF6).`);
-
-  // 4. Create Components for each Breaker.
-
-  // Components for the Oil Circuit Breaker
-  await db.breakerComponent.createMany({
-    data: [
-      {
-        name: "Main Contact",
-        type: "Contact",
-        description: "Primary electrical contact for current interruption",
-        partNumber: "OCB-MC-001",
-        status: "Good",
-        breakerId: oilBreaker.id,
+  if (!dataSource) {
+    dataSource = await db.dataSource.create({
+      data: {
+        fileName: "generated_bulk_data.csv",
+        fileUrl: "https://example.com/bulk_data.csv",
+        description: "Bulk generated data for stress testing",
       },
-      {
-        name: "Trip Coil",
-        type: "Coil",
-        description: "Electromagnetic coil that triggers breaker opening",
-        partNumber: "OCB-TC-001",
-        status: "Good",
-        breakerId: oilBreaker.id,
-      },
-    ],
-  });
+    });
+    console.log(`✅ Created new Data Source: ${dataSource.id}`);
+  } else {
+    console.log(`ℹ️ Using existing Data Source: ${dataSource.id}`);
+  }
 
-  // --- NEW: Components for the Vacuum Circuit Breaker ---
-  await db.breakerComponent.createMany({
-    data: [
-      {
-        name: "Vacuum Interrupter",
-        type: "Interrupter",
-        description: "Sealed vacuum chamber for arc extinction",
-        partNumber: "VCB-VI-001",
-        status: "Good",
-        breakerId: vacuumBreaker.id,
-      },
-      {
-        name: "Operating Mechanism",
-        type: "Mechanism",
-        description: "Spring-charged mechanism for breaker operation",
-        partNumber: "VCB-OM-001",
-        status: "Good",
-        breakerId: vacuumBreaker.id,
-      },
-    ],
-  });
+  // 2. Create Stations and Breakers
+  for (const stationInfo of STATIONS_DATA) {
+    // Check if station exists to avoid duplicates if run multiple times,
+    // or just create new ones slightly differently if user really wants "more" data.
+    // User said "add in the new data", so let's check by name, if exists, append breakers to it.
+    let station = await db.station.findFirst({
+      where: { name: stationInfo.name },
+    });
 
-  // --- NEW: Components for the SF6 Circuit Breaker ---
-  await db.breakerComponent.createMany({
-    data: [
-      {
-        name: "SF6 Interrupter",
-        type: "Interrupter",
-        description: "SF6 gas-filled chamber for arc extinction",
-        partNumber: "SF6-I-001",
-        status: "Good",
-        breakerId: sf6Breaker.id,
-      },
-      {
-        name: "Gas Pressure Monitor",
-        type: "Monitor",
-        description: "Monitors SF6 gas pressure and density",
-        partNumber: "SF6-GPM-001",
-        status: "Good",
-        breakerId: sf6Breaker.id,
-      },
-      {
-        name: "Compressor Unit",
-        type: "Compressor",
-        description: "Compresses SF6 gas for operation",
-        partNumber: "SF6-CU-001",
-        status: "Needs Maintenance",
-        breakerId: sf6Breaker.id,
-      },
-    ],
-  });
+    if (!station) {
+      station = await db.station.create({
+        data: {
+          name: stationInfo.name,
+          location: stationInfo.location,
+          description: stationInfo.desc,
+        },
+      });
+      console.log(`✅ Created Station: ${station.name}`);
+    } else {
+      console.log(`ℹ️ Appending to Station: ${station.name}`);
+    }
 
-  console.log(`✅ Created components for all breakers.`);
-  console.log("🎉 Database seeded successfully!");
+    // Generate 30 breakers per station
+    const breakersPayload = [];
+    for (let i = 0; i < 30; i++) {
+      const type = getRandomItem(BREAKER_TYPES);
+      const maker = getRandomItem(MANUFACTURERS);
+      const status = getRandomStatus();
+
+      breakersPayload.push({
+        name: `${type} - ${station.name.substring(0, 3)}-${1000 + i}`,
+        type: type,
+        manufacturer: maker,
+        model: `Gen-X-${Math.floor(Math.random() * 100)}`,
+        voltage: Math.floor(Math.random() * 400) + 11, // 11kV to 400kV
+        current: Math.floor(Math.random() * 2000) + 600, // 600A to 2600A
+        status: status,
+        installationDate: new Date(2015 + Math.floor(Math.random() * 9), 0, 1),
+        stationId: station.id,
+        dataSourceId: dataSource!.id,
+      });
+    }
+
+    // Prisma createMany does not return created IDs easily for relations in all drivers,
+    // but creates are fast. For components, we strictly need IDs.
+    // So we loop create unless we use a nested write or separate query.
+    // Loop create is safer for relations here.
+
+    console.log(`   Detailed seeding for ${station.name}...`);
+    for (const bData of breakersPayload) {
+      await db.breaker.create({
+        data: {
+          ...bData,
+          components: {
+            create: [
+              {
+                name: "Main Contact",
+                type: "Contact",
+                status: bData.status.includes("Critical") ? "Worn" : "Good",
+              },
+              {
+                name: "Operating Mechanism",
+                type: "Mechanism",
+                status: "Good",
+              },
+              {
+                name: "Control Circuit",
+                type: "Circuit",
+                status: bData.status.includes("Warning")
+                  ? "Check Required"
+                  : "Good",
+              },
+            ],
+          },
+        },
+      });
+    }
+  }
+
+  console.log("🎉 Bulk data appended successfully!");
 }
 
 main()
   .catch((e) => {
     console.error("SEEDING ERROR:", JSON.stringify(e, null, 2));
-    console.error(e.message);
     process.exit(1);
   })
   .finally(async () => {
-    // Disconnect from the database to ensure the process exits cleanly
     await db.$disconnect();
   });

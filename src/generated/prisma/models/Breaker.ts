@@ -287,6 +287,7 @@ export type BreakerWhereInput = {
   station?: Prisma.XOR<Prisma.StationScalarRelationFilter, Prisma.StationWhereInput>
   components?: Prisma.BreakerComponentListRelationFilter
   dataSource?: Prisma.XOR<Prisma.DataSourceNullableScalarRelationFilter, Prisma.DataSourceWhereInput> | null
+  testResults?: Prisma.TestResultListRelationFilter
 }
 
 export type BreakerOrderByWithRelationInput = {
@@ -306,6 +307,7 @@ export type BreakerOrderByWithRelationInput = {
   station?: Prisma.StationOrderByWithRelationInput
   components?: Prisma.BreakerComponentOrderByRelationAggregateInput
   dataSource?: Prisma.DataSourceOrderByWithRelationInput
+  testResults?: Prisma.TestResultOrderByRelationAggregateInput
 }
 
 export type BreakerWhereUniqueInput = Prisma.AtLeast<{
@@ -328,6 +330,7 @@ export type BreakerWhereUniqueInput = Prisma.AtLeast<{
   station?: Prisma.XOR<Prisma.StationScalarRelationFilter, Prisma.StationWhereInput>
   components?: Prisma.BreakerComponentListRelationFilter
   dataSource?: Prisma.XOR<Prisma.DataSourceNullableScalarRelationFilter, Prisma.DataSourceWhereInput> | null
+  testResults?: Prisma.TestResultListRelationFilter
 }, "id">
 
 export type BreakerOrderByWithAggregationInput = {
@@ -385,6 +388,7 @@ export type BreakerCreateInput = {
   station: Prisma.StationCreateNestedOneWithoutBreakersInput
   components?: Prisma.BreakerComponentCreateNestedManyWithoutBreakerInput
   dataSource?: Prisma.DataSourceCreateNestedOneWithoutBreakersInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutBreakerInput
 }
 
 export type BreakerUncheckedCreateInput = {
@@ -402,6 +406,7 @@ export type BreakerUncheckedCreateInput = {
   stationId: string
   dataSourceId?: string | null
   components?: Prisma.BreakerComponentUncheckedCreateNestedManyWithoutBreakerInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutBreakerInput
 }
 
 export type BreakerUpdateInput = {
@@ -419,6 +424,7 @@ export type BreakerUpdateInput = {
   station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
   components?: Prisma.BreakerComponentUpdateManyWithoutBreakerNestedInput
   dataSource?: Prisma.DataSourceUpdateOneWithoutBreakersNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutBreakerNestedInput
 }
 
 export type BreakerUncheckedUpdateInput = {
@@ -436,6 +442,7 @@ export type BreakerUncheckedUpdateInput = {
   stationId?: Prisma.StringFieldUpdateOperationsInput | string
   dataSourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   components?: Prisma.BreakerComponentUncheckedUpdateManyWithoutBreakerNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutBreakerNestedInput
 }
 
 export type BreakerCreateManyInput = {
@@ -492,6 +499,11 @@ export type BreakerListRelationFilter = {
 
 export type BreakerOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type BreakerScalarRelationFilter = {
+  is?: Prisma.BreakerWhereInput
+  isNot?: Prisma.BreakerWhereInput
 }
 
 export type BreakerCountOrderByAggregateInput = {
@@ -552,11 +564,6 @@ export type BreakerSumOrderByAggregateInput = {
   current?: Prisma.SortOrder
 }
 
-export type BreakerScalarRelationFilter = {
-  is?: Prisma.BreakerWhereInput
-  isNot?: Prisma.BreakerWhereInput
-}
-
 export type BreakerCreateNestedManyWithoutStationInput = {
   create?: Prisma.XOR<Prisma.BreakerCreateWithoutStationInput, Prisma.BreakerUncheckedCreateWithoutStationInput> | Prisma.BreakerCreateWithoutStationInput[] | Prisma.BreakerUncheckedCreateWithoutStationInput[]
   connectOrCreate?: Prisma.BreakerCreateOrConnectWithoutStationInput | Prisma.BreakerCreateOrConnectWithoutStationInput[]
@@ -599,12 +606,18 @@ export type BreakerUncheckedUpdateManyWithoutStationNestedInput = {
   deleteMany?: Prisma.BreakerScalarWhereInput | Prisma.BreakerScalarWhereInput[]
 }
 
-export type NullableFloatFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type BreakerCreateNestedOneWithoutTestResultsInput = {
+  create?: Prisma.XOR<Prisma.BreakerCreateWithoutTestResultsInput, Prisma.BreakerUncheckedCreateWithoutTestResultsInput>
+  connectOrCreate?: Prisma.BreakerCreateOrConnectWithoutTestResultsInput
+  connect?: Prisma.BreakerWhereUniqueInput
+}
+
+export type BreakerUpdateOneRequiredWithoutTestResultsNestedInput = {
+  create?: Prisma.XOR<Prisma.BreakerCreateWithoutTestResultsInput, Prisma.BreakerUncheckedCreateWithoutTestResultsInput>
+  connectOrCreate?: Prisma.BreakerCreateOrConnectWithoutTestResultsInput
+  upsert?: Prisma.BreakerUpsertWithoutTestResultsInput
+  connect?: Prisma.BreakerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BreakerUpdateToOneWithWhereWithoutTestResultsInput, Prisma.BreakerUpdateWithoutTestResultsInput>, Prisma.BreakerUncheckedUpdateWithoutTestResultsInput>
 }
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -681,6 +694,7 @@ export type BreakerCreateWithoutStationInput = {
   updatedAt?: Date | string
   components?: Prisma.BreakerComponentCreateNestedManyWithoutBreakerInput
   dataSource?: Prisma.DataSourceCreateNestedOneWithoutBreakersInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutBreakerInput
 }
 
 export type BreakerUncheckedCreateWithoutStationInput = {
@@ -697,6 +711,7 @@ export type BreakerUncheckedCreateWithoutStationInput = {
   updatedAt?: Date | string
   dataSourceId?: string | null
   components?: Prisma.BreakerComponentUncheckedCreateNestedManyWithoutBreakerInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutBreakerInput
 }
 
 export type BreakerCreateOrConnectWithoutStationInput = {
@@ -744,6 +759,90 @@ export type BreakerScalarWhereInput = {
   dataSourceId?: Prisma.StringNullableFilter<"Breaker"> | string | null
 }
 
+export type BreakerCreateWithoutTestResultsInput = {
+  id?: string
+  name: string
+  type: string
+  manufacturer: string
+  model?: string | null
+  voltage?: number | null
+  current?: number | null
+  status?: string | null
+  installationDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  station: Prisma.StationCreateNestedOneWithoutBreakersInput
+  components?: Prisma.BreakerComponentCreateNestedManyWithoutBreakerInput
+  dataSource?: Prisma.DataSourceCreateNestedOneWithoutBreakersInput
+}
+
+export type BreakerUncheckedCreateWithoutTestResultsInput = {
+  id?: string
+  name: string
+  type: string
+  manufacturer: string
+  model?: string | null
+  voltage?: number | null
+  current?: number | null
+  status?: string | null
+  installationDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stationId: string
+  dataSourceId?: string | null
+  components?: Prisma.BreakerComponentUncheckedCreateNestedManyWithoutBreakerInput
+}
+
+export type BreakerCreateOrConnectWithoutTestResultsInput = {
+  where: Prisma.BreakerWhereUniqueInput
+  create: Prisma.XOR<Prisma.BreakerCreateWithoutTestResultsInput, Prisma.BreakerUncheckedCreateWithoutTestResultsInput>
+}
+
+export type BreakerUpsertWithoutTestResultsInput = {
+  update: Prisma.XOR<Prisma.BreakerUpdateWithoutTestResultsInput, Prisma.BreakerUncheckedUpdateWithoutTestResultsInput>
+  create: Prisma.XOR<Prisma.BreakerCreateWithoutTestResultsInput, Prisma.BreakerUncheckedCreateWithoutTestResultsInput>
+  where?: Prisma.BreakerWhereInput
+}
+
+export type BreakerUpdateToOneWithWhereWithoutTestResultsInput = {
+  where?: Prisma.BreakerWhereInput
+  data: Prisma.XOR<Prisma.BreakerUpdateWithoutTestResultsInput, Prisma.BreakerUncheckedUpdateWithoutTestResultsInput>
+}
+
+export type BreakerUpdateWithoutTestResultsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  manufacturer?: Prisma.StringFieldUpdateOperationsInput | string
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voltage?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  current?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  installationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
+  components?: Prisma.BreakerComponentUpdateManyWithoutBreakerNestedInput
+  dataSource?: Prisma.DataSourceUpdateOneWithoutBreakersNestedInput
+}
+
+export type BreakerUncheckedUpdateWithoutTestResultsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  manufacturer?: Prisma.StringFieldUpdateOperationsInput | string
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voltage?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  current?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  installationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stationId?: Prisma.StringFieldUpdateOperationsInput | string
+  dataSourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  components?: Prisma.BreakerComponentUncheckedUpdateManyWithoutBreakerNestedInput
+}
+
 export type BreakerCreateWithoutComponentsInput = {
   id?: string
   name: string
@@ -758,6 +857,7 @@ export type BreakerCreateWithoutComponentsInput = {
   updatedAt?: Date | string
   station: Prisma.StationCreateNestedOneWithoutBreakersInput
   dataSource?: Prisma.DataSourceCreateNestedOneWithoutBreakersInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutBreakerInput
 }
 
 export type BreakerUncheckedCreateWithoutComponentsInput = {
@@ -774,6 +874,7 @@ export type BreakerUncheckedCreateWithoutComponentsInput = {
   updatedAt?: Date | string
   stationId: string
   dataSourceId?: string | null
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutBreakerInput
 }
 
 export type BreakerCreateOrConnectWithoutComponentsInput = {
@@ -806,6 +907,7 @@ export type BreakerUpdateWithoutComponentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
   dataSource?: Prisma.DataSourceUpdateOneWithoutBreakersNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutBreakerNestedInput
 }
 
 export type BreakerUncheckedUpdateWithoutComponentsInput = {
@@ -822,6 +924,7 @@ export type BreakerUncheckedUpdateWithoutComponentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stationId?: Prisma.StringFieldUpdateOperationsInput | string
   dataSourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutBreakerNestedInput
 }
 
 export type BreakerCreateWithoutDataSourceInput = {
@@ -838,6 +941,7 @@ export type BreakerCreateWithoutDataSourceInput = {
   updatedAt?: Date | string
   station: Prisma.StationCreateNestedOneWithoutBreakersInput
   components?: Prisma.BreakerComponentCreateNestedManyWithoutBreakerInput
+  testResults?: Prisma.TestResultCreateNestedManyWithoutBreakerInput
 }
 
 export type BreakerUncheckedCreateWithoutDataSourceInput = {
@@ -854,6 +958,7 @@ export type BreakerUncheckedCreateWithoutDataSourceInput = {
   updatedAt?: Date | string
   stationId: string
   components?: Prisma.BreakerComponentUncheckedCreateNestedManyWithoutBreakerInput
+  testResults?: Prisma.TestResultUncheckedCreateNestedManyWithoutBreakerInput
 }
 
 export type BreakerCreateOrConnectWithoutDataSourceInput = {
@@ -911,6 +1016,7 @@ export type BreakerUpdateWithoutStationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   components?: Prisma.BreakerComponentUpdateManyWithoutBreakerNestedInput
   dataSource?: Prisma.DataSourceUpdateOneWithoutBreakersNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutBreakerNestedInput
 }
 
 export type BreakerUncheckedUpdateWithoutStationInput = {
@@ -927,6 +1033,7 @@ export type BreakerUncheckedUpdateWithoutStationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataSourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   components?: Prisma.BreakerComponentUncheckedUpdateManyWithoutBreakerNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutBreakerNestedInput
 }
 
 export type BreakerUncheckedUpdateManyWithoutStationInput = {
@@ -973,6 +1080,7 @@ export type BreakerUpdateWithoutDataSourceInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
   components?: Prisma.BreakerComponentUpdateManyWithoutBreakerNestedInput
+  testResults?: Prisma.TestResultUpdateManyWithoutBreakerNestedInput
 }
 
 export type BreakerUncheckedUpdateWithoutDataSourceInput = {
@@ -989,6 +1097,7 @@ export type BreakerUncheckedUpdateWithoutDataSourceInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stationId?: Prisma.StringFieldUpdateOperationsInput | string
   components?: Prisma.BreakerComponentUncheckedUpdateManyWithoutBreakerNestedInput
+  testResults?: Prisma.TestResultUncheckedUpdateManyWithoutBreakerNestedInput
 }
 
 export type BreakerUncheckedUpdateManyWithoutDataSourceInput = {
@@ -1013,10 +1122,12 @@ export type BreakerUncheckedUpdateManyWithoutDataSourceInput = {
 
 export type BreakerCountOutputType = {
   components: number
+  testResults: number
 }
 
 export type BreakerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   components?: boolean | BreakerCountOutputTypeCountComponentsArgs
+  testResults?: boolean | BreakerCountOutputTypeCountTestResultsArgs
 }
 
 /**
@@ -1034,6 +1145,13 @@ export type BreakerCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exte
  */
 export type BreakerCountOutputTypeCountComponentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.BreakerComponentWhereInput
+}
+
+/**
+ * BreakerCountOutputType without action
+ */
+export type BreakerCountOutputTypeCountTestResultsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TestResultWhereInput
 }
 
 
@@ -1054,6 +1172,7 @@ export type BreakerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
   components?: boolean | Prisma.Breaker$componentsArgs<ExtArgs>
   dataSource?: boolean | Prisma.Breaker$dataSourceArgs<ExtArgs>
+  testResults?: boolean | Prisma.Breaker$testResultsArgs<ExtArgs>
   _count?: boolean | Prisma.BreakerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["breaker"]>
 
@@ -1114,6 +1233,7 @@ export type BreakerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
   components?: boolean | Prisma.Breaker$componentsArgs<ExtArgs>
   dataSource?: boolean | Prisma.Breaker$dataSourceArgs<ExtArgs>
+  testResults?: boolean | Prisma.Breaker$testResultsArgs<ExtArgs>
   _count?: boolean | Prisma.BreakerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type BreakerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1131,6 +1251,7 @@ export type $BreakerPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     station: Prisma.$StationPayload<ExtArgs>
     components: Prisma.$BreakerComponentPayload<ExtArgs>[]
     dataSource: Prisma.$DataSourcePayload<ExtArgs> | null
+    testResults: Prisma.$TestResultPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1543,6 +1664,7 @@ export interface Prisma__BreakerClient<T, Null = never, ExtArgs extends runtime.
   station<T extends Prisma.StationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StationDefaultArgs<ExtArgs>>): Prisma.Prisma__StationClient<runtime.Types.Result.GetResult<Prisma.$StationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   components<T extends Prisma.Breaker$componentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Breaker$componentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BreakerComponentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dataSource<T extends Prisma.Breaker$dataSourceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Breaker$dataSourceArgs<ExtArgs>>): Prisma.Prisma__DataSourceClient<runtime.Types.Result.GetResult<Prisma.$DataSourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  testResults<T extends Prisma.Breaker$testResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Breaker$testResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2021,6 +2143,30 @@ export type Breaker$dataSourceArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   include?: Prisma.DataSourceInclude<ExtArgs> | null
   where?: Prisma.DataSourceWhereInput
+}
+
+/**
+ * Breaker.testResults
+ */
+export type Breaker$testResultsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TestResult
+   */
+  select?: Prisma.TestResultSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TestResult
+   */
+  omit?: Prisma.TestResultOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TestResultInclude<ExtArgs> | null
+  where?: Prisma.TestResultWhereInput
+  orderBy?: Prisma.TestResultOrderByWithRelationInput | Prisma.TestResultOrderByWithRelationInput[]
+  cursor?: Prisma.TestResultWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TestResultScalarFieldEnum | Prisma.TestResultScalarFieldEnum[]
 }
 
 /**
