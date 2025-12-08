@@ -1,4 +1,3 @@
-// app/dcrm-analysis/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -87,6 +86,12 @@ interface TestResult {
   coilCurrentC4Avg: number;
   coilCurrentC5Avg: number;
   coilCurrentC6Avg: number;
+  velocityT1Max: number;
+  velocityT2Max: number;
+  velocityT3Max: number;
+  velocityT4Max: number;
+  velocityT5Max: number;
+  velocityT6Max: number;
 }
 
 interface TestInfo {
@@ -97,6 +102,7 @@ export default function DCRMAnalysis() {
   const [data, setData] = useState<DCRMDataPoint[]>([]);
   const [testResults, setTestResults] = useState<TestResult | null>(null);
   const [testInfo, setTestInfo] = useState<TestInfo | null>(null);
+  const [comparison, setComparison] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [assessment, setAssessment] = useState<
     "HEALTHY" | "NEEDS MAINTENANCE" | "CRITICAL"
@@ -109,6 +115,8 @@ export default function DCRMAnalysis() {
   const [breakers, setBreakers] = useState<any[]>([]);
   const [selectedStation, setSelectedStation] = useState<string>("");
   const [selectedBreaker, setSelectedBreaker] = useState<string>("");
+  const [selectedBreakerDetails, setSelectedBreakerDetails] =
+    useState<any>(null);
 
   useEffect(() => {
     async function loadStations() {
@@ -133,6 +141,16 @@ export default function DCRMAnalysis() {
     }
     loadBreakers();
   }, [selectedStation]);
+
+  // Update details when breaker is selected
+  useEffect(() => {
+    if (selectedBreaker) {
+      const breaker = breakers.find((b) => b.id === selectedBreaker);
+      setSelectedBreakerDetails(breaker || null);
+    } else {
+      setSelectedBreakerDetails(null);
+    }
+  }, [selectedBreaker, breakers]);
 
   // State for controlling visible lines on the chart
   const [visibleLines, setVisibleLines] = useState<Record<string, boolean>>({
@@ -167,48 +185,6 @@ export default function DCRMAnalysis() {
     if (e.target.files) {
       setFile(e.target.files[0]);
       setError(null);
-    }
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      if (selectedStation) formData.append("stationId", selectedStation);
-      if (selectedBreaker) formData.append("breakerId", selectedBreaker);
-
-      const response = await fetch("/api/dcrm-data", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || "Failed to parse CSV file");
-      }
-
-      const { testInfo, testResults, dataPoints } = result.data;
-
-      setTestInfo(testInfo);
-      setTestResults(testResults);
-      setData(dataPoints);
-
-      // Determine assessment based on the data
-      const assessmentResult = determineAssessment(testResults, dataPoints);
-      setAssessment(assessmentResult);
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      setError(error instanceof Error ? error.message : "Unknown error");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -314,6 +290,57 @@ export default function DCRMAnalysis() {
     return "HEALTHY";
   };
 
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (selectedStation) formData.append("stationId", selectedStation);
+      if (selectedBreaker) formData.append("breakerId", selectedBreaker);
+
+      // Explicitly send referenceUrl if available from the selected breaker
+      if (selectedBreakerDetails?.dataSource?.fileUrl) {
+        formData.append(
+          "referenceUrl",
+          selectedBreakerDetails.dataSource.fileUrl
+        );
+      }
+
+      const response = await fetch("/api/dcrm-data", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Failed to parse CSV file");
+      }
+
+      const { testInfo, testResults, dataPoints, comparison } = result.data;
+
+      setTestInfo(testInfo);
+      setTestResults(testResults);
+      setData(dataPoints);
+      setComparison(comparison);
+
+      // Determine assessment based on the data
+      const assessmentResult = determineAssessment(testResults, dataPoints);
+      setAssessment(assessmentResult);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setError(error instanceof Error ? error.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Custom tooltip for the charts
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -365,7 +392,10 @@ export default function DCRMAnalysis() {
                 <div className="space-y-2">
                   <Label htmlFor="station-select">Station</Label>
                   <Select
-                    onValueChange={setSelectedStation}
+                    onValueChange={(val) => {
+                      setSelectedStation(val);
+                      setSelectedBreaker(""); // Reset breaker when station changes
+                    }}
                     value={selectedStation}
                   >
                     <SelectTrigger id="station-select">
@@ -401,6 +431,40 @@ export default function DCRMAnalysis() {
                   </Select>
                 </div>
               </div>
+
+              {selectedBreakerDetails && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-md border border-blue-100 text-sm">
+                  <h3 className="font-semibold text-blue-800 mb-2">
+                    Breaker Details
+                  </h3>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                    <div>
+                      <span className="font-medium">Manufacturer:</span>{" "}
+                      {selectedBreakerDetails.manufacturer}
+                    </div>
+                    <div>
+                      <span className="font-medium">Type:</span>{" "}
+                      {selectedBreakerDetails.type}
+                    </div>
+                    <div>
+                      <span className="font-medium">Voltage:</span>{" "}
+                      {selectedBreakerDetails.voltage} kV
+                    </div>
+                    <div>
+                      <span className="font-medium">Ref Data:</span>{" "}
+                      {selectedBreakerDetails.dataSource
+                        ? "Available ✅"
+                        : "Not Linked ❌"}
+                    </div>
+                    {selectedBreakerDetails.dataSource && (
+                      <div className="col-span-2 truncate text-xs text-gray-500 mt-1">
+                        Ref URL: {selectedBreakerDetails.dataSource.fileUrl}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {error && (
                 <Alert variant="destructive">
                   <AlertTitle>Error</AlertTitle>
@@ -469,9 +533,25 @@ export default function DCRMAnalysis() {
                     <span className="font-medium">Travel T4 Max (mm):</span>
                     <span>{testResults?.travelT4Max?.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="font-medium">Travel T1 Max (mm):</span>
-                    <span>{testResults?.travelT1Max?.toFixed(2)}</span>
+                    <div className="text-right">
+                      <span className="font-mono block">
+                        {testResults?.travelT1Max?.toFixed(2)}
+                      </span>
+                      {comparison && (
+                        <span
+                          className={`text-[10px] ${
+                            Math.abs(comparison.metrics.travelT1MaxDiff) > 5
+                              ? "text-red-600 font-bold"
+                              : "text-green-600"
+                          }`}
+                        >
+                          {comparison.metrics.travelT1MaxDiff > 0 ? "+" : ""}
+                          {comparison.metrics.travelT1MaxDiff.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-medium">Travel T2 Max (mm):</span>
@@ -518,11 +598,30 @@ export default function DCRMAnalysis() {
                     </span>
                     <span>{testResults?.coilCurrentC2Avg?.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="font-medium">
                       Resistance CH1 Avg (µOhm):
                     </span>
-                    <span>{testResults?.resistanceCH1Avg?.toFixed(2)}</span>
+                    <div className="text-right">
+                      <span className="font-mono block">
+                        {testResults?.resistanceCH1Avg?.toFixed(2)}
+                      </span>
+                      {comparison && (
+                        <span
+                          className={`text-[10px] ${
+                            Math.abs(comparison.metrics.resistanceCH1AvgDiff) >
+                            10
+                              ? "text-red-600 font-bold"
+                              : "text-green-600"
+                          }`}
+                        >
+                          {comparison.metrics.resistanceCH1AvgDiff > 0
+                            ? "+"
+                            : ""}
+                          {comparison.metrics.resistanceCH1AvgDiff.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-medium">
@@ -740,6 +839,80 @@ export default function DCRMAnalysis() {
                           isAnimationActive={false}
                         />
                       )}
+
+                      {/* Reference Lines (Dashed) */}
+                      {visibleLines.resistanceCH1 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_resistanceCH1"
+                          stroke="#FF0000"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH1"
+                        />
+                      )}
+                      {visibleLines.resistanceCH2 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_resistanceCH2"
+                          stroke="#DC143C"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH2"
+                        />
+                      )}
+                      {visibleLines.resistanceCH3 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_resistanceCH3"
+                          stroke="#FF6347"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH3"
+                        />
+                      )}
+                      {visibleLines.resistanceCH4 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_resistanceCH4"
+                          stroke="#FF4500"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH4"
+                        />
+                      )}
+                      {visibleLines.resistanceCH5 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_resistanceCH5"
+                          stroke="#CD5C5C"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH5"
+                        />
+                      )}
+                      {visibleLines.resistanceCH6 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_resistanceCH6"
+                          stroke="#8B0000"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH6"
+                        />
+                      )}
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -839,6 +1012,80 @@ export default function DCRMAnalysis() {
                           isAnimationActive={false}
                         />
                       )}
+
+                      {/* Reference Lines (Dashed) */}
+                      {visibleLines.currentCH1 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_currentCH1"
+                          stroke="#0000FF"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH1"
+                        />
+                      )}
+                      {visibleLines.currentCH2 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_currentCH2"
+                          stroke="#4169E1"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH2"
+                        />
+                      )}
+                      {visibleLines.currentCH3 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_currentCH3"
+                          stroke="#1E90FF"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH3"
+                        />
+                      )}
+                      {visibleLines.currentCH4 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_currentCH4"
+                          stroke="#00BFFF"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH4"
+                        />
+                      )}
+                      {visibleLines.currentCH5 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_currentCH5"
+                          stroke="#5F9EA0"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH5"
+                        />
+                      )}
+                      {visibleLines.currentCH6 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_currentCH6"
+                          stroke="#000080"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal CH6"
+                        />
+                      )}
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -936,6 +1183,80 @@ export default function DCRMAnalysis() {
                           strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
+                        />
+                      )}
+
+                      {/* Reference Lines (Dashed) */}
+                      {visibleLines.travelT1 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_travelT1"
+                          stroke="#00FF00"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal T1"
+                        />
+                      )}
+                      {visibleLines.travelT2 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_travelT2"
+                          stroke="#32CD32"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal T2"
+                        />
+                      )}
+                      {visibleLines.travelT3 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_travelT3"
+                          stroke="#00FA9A"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal T3"
+                        />
+                      )}
+                      {visibleLines.travelT4 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_travelT4"
+                          stroke="#90EE90"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal T4"
+                        />
+                      )}
+                      {visibleLines.travelT5 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_travelT5"
+                          stroke="#3CB371"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal T5"
+                        />
+                      )}
+                      {visibleLines.travelT6 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_travelT6"
+                          stroke="#006400"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal T6"
                         />
                       )}
                     </LineChart>
@@ -1042,6 +1363,80 @@ export default function DCRMAnalysis() {
                           strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
+                        />
+                      )}
+
+                      {/* Reference Lines (Dashed) */}
+                      {visibleLines.coilCurrentC1 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_coilCurrentC1"
+                          stroke="#FF00FF"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal C1"
+                        />
+                      )}
+                      {visibleLines.coilCurrentC2 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_coilCurrentC2"
+                          stroke="#DA70D6"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal C2"
+                        />
+                      )}
+                      {visibleLines.coilCurrentC3 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_coilCurrentC3"
+                          stroke="#BA55D3"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal C3"
+                        />
+                      )}
+                      {visibleLines.coilCurrentC4 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_coilCurrentC4"
+                          stroke="#9370DB"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal C4"
+                        />
+                      )}
+                      {visibleLines.coilCurrentC5 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_coilCurrentC5"
+                          stroke="#8B008B"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal C5"
+                        />
+                      )}
+                      {visibleLines.coilCurrentC6 && (
+                        <Line
+                          type="monotone"
+                          dataKey="ref_coilCurrentC6"
+                          stroke="#4B0082"
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Ideal C6"
                         />
                       )}
                     </LineChart>
