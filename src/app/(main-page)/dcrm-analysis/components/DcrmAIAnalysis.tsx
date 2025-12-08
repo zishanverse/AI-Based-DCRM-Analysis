@@ -1,0 +1,256 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Brain, Sparkles, Activity, Settings, Zap } from "lucide-react";
+
+interface ComponentHealth {
+  score: number;
+  status: "Healthy" | "Observation Required" | "Critical";
+  reasoning: string;
+}
+
+interface AIAnalysisData {
+  arcContacts: ComponentHealth;
+  mainContacts: ComponentHealth;
+  operatingMechanism: ComponentHealth;
+  overallScore: number;
+  maintenanceRecommendation: string;
+}
+
+interface DcrmAIAnalysisProps {
+  analysis: AIAnalysisData | null;
+  loading: boolean;
+  onAnalyze: () => void;
+}
+
+function HealthGauge({
+  score,
+  label,
+  icon: Icon,
+}: {
+  score: number;
+  label: string;
+  icon: any;
+}) {
+  const radius = 30;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (score / 100) * circumference;
+
+  let colorClass = "text-emerald-500";
+  if (score < 50) colorClass = "text-red-500";
+  else if (score < 80) colorClass = "text-amber-500";
+
+  return (
+    <div className="flex flex-col items-center justify-center p-2">
+      <div className="relative w-20 h-20 mb-2">
+        {/* Background Circle */}
+        <svg className="w-full h-full transform -rotate-90">
+          <circle
+            cx="40"
+            cy="40"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth="8"
+            fill="transparent"
+            className="text-gray-200"
+          />
+          {/* Progress Circle */}
+          <circle
+            cx="40"
+            cy="40"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth="8"
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            className={`transition-all duration-1000 ease-out ${colorClass}`}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center flex-col">
+          <Icon className={`w-5 h-5 mb-1 ${colorClass}`} />
+          <span className="text-sm font-bold text-gray-700">{score}%</span>
+        </div>
+      </div>
+      <span className="text-xs font-medium text-center text-gray-600">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+export function DcrmAIAnalysis({
+  analysis,
+  loading,
+  onAnalyze,
+}: DcrmAIAnalysisProps) {
+  if (!analysis && !loading) {
+    return (
+      <Card className="mb-6 bg-linear-to-r from-violet-50 to-indigo-50 border-indigo-100 print:hidden">
+        <CardContent className="flex items-center justify-between p-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white rounded-full shadow-sm">
+              <Brain className="w-8 h-8 text-indigo-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-indigo-900">
+                AI Diagnostics Available
+              </h3>
+              <p className="text-sm text-indigo-700">
+                Use GLM-4 AI to analyze component health (Contacts, Mechanism).
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onAnalyze}
+            className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-lg shadow-indigo-200 transition-all flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            Run AI Analysis
+          </button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Card className="mb-6 border-indigo-100">
+        <CardContent className="p-8 flex flex-col items-center justify-center text-center space-y-4">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            <Brain className="w-6 h-6 text-indigo-600 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-700">
+            Analyzing Circuit Breaker Health...
+          </h3>
+          <p className="text-sm text-gray-500 max-w-md">
+            The AI is examining the waveform data for Arc Contact wear, Main
+            Contact resistance, and Mechanism travel irregularities.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!analysis) return null;
+
+  return (
+    <Card className="mb-6 border-2 border-indigo-100 shadow-md overflow-hidden print:shadow-none print:border">
+      <CardHeader className="bg-linear-to-r from-indigo-50 to-white border-b border-indigo-50 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="flex items-center gap-2 text-indigo-900">
+            <Brain className="w-5 h-5 text-indigo-600" />
+            AI Health Assessment
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Generated by GLM-4 • Component-wise Analysis
+          </p>
+        </div>
+        <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full border border-indigo-100 shadow-sm">
+          <span className="text-sm text-gray-600 font-medium">
+            Overall Health Score:
+          </span>
+          <span
+            className={`text-lg font-bold ${
+              analysis.overallScore >= 80
+                ? "text-emerald-600"
+                : analysis.overallScore >= 50
+                ? "text-amber-600"
+                : "text-red-600"
+            }`}
+          >
+            {analysis.overallScore}/100
+          </span>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+          {/* Arc Contacts */}
+          <div className="p-4 flex flex-col items-center text-center hover:bg-gray-50 transition-colors group">
+            <HealthGauge
+              score={analysis.arcContacts.score}
+              label="Arc Contacts"
+              icon={Zap}
+            />
+            <div className="mt-3">
+              <span
+                className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mb-2 ${
+                  analysis.arcContacts.status === "Healthy"
+                    ? "bg-green-100 text-green-700"
+                    : analysis.arcContacts.status === "Critical"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {analysis.arcContacts.status}
+              </span>
+              <p className="text-xs text-gray-500 leading-snug px-2">
+                {analysis.arcContacts.reasoning}
+              </p>
+            </div>
+          </div>
+
+          {/* Main Contacts */}
+          <div className="p-4 flex flex-col items-center text-center hover:bg-gray-50 transition-colors group">
+            <HealthGauge
+              score={analysis.mainContacts.score}
+              label="Main Contacts"
+              icon={Activity}
+            />
+            <div className="mt-3">
+              <span
+                className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mb-2 ${
+                  analysis.mainContacts.status === "Healthy"
+                    ? "bg-green-100 text-green-700"
+                    : analysis.mainContacts.status === "Critical"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {analysis.mainContacts.status}
+              </span>
+              <p className="text-xs text-gray-500 leading-snug px-2">
+                {analysis.mainContacts.reasoning}
+              </p>
+            </div>
+          </div>
+
+          {/* Mechanism */}
+          <div className="p-4 flex flex-col items-center text-center hover:bg-gray-50 transition-colors group">
+            <HealthGauge
+              score={analysis.operatingMechanism.score}
+              label="Mechanism"
+              icon={Settings}
+            />
+            <div className="mt-3">
+              <span
+                className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mb-2 ${
+                  analysis.operatingMechanism.status === "Healthy"
+                    ? "bg-green-100 text-green-700"
+                    : analysis.operatingMechanism.status === "Critical"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {analysis.operatingMechanism.status}
+              </span>
+              <p className="text-xs text-gray-500 leading-snug px-2">
+                {analysis.operatingMechanism.reasoning}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Recommendation Footer */}
+        <div className="bg-indigo-50/50 p-4 border-t border-indigo-100">
+          <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1 flex items-center gap-2">
+            <Sparkles className="w-3 h-3" /> AI Recommendation
+          </h4>
+          <p className="text-sm text-indigo-800 italic">
+            "{analysis.maintenanceRecommendation}"
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

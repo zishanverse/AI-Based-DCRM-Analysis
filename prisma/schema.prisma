@@ -8,7 +8,7 @@ generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
- 
+
 datasource db {
   provider = "postgresql"
 }
@@ -30,65 +30,69 @@ model Station {
 // Add this new model to your schema
 
 model TestResult {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   breakerId String
-  breaker   Breaker  @relation(fields: [breakerId], references: [id], onDelete: Cascade)
-  
+  breaker   Breaker @relation(fields: [breakerId], references: [id], onDelete: Cascade)
+
   // Test metadata
-  testDate     DateTime @default(now())
-  testType     String   @default("DCRM") // Type of test performed
-  operator     String?  // Who performed the test
-  notes        String?  // Any additional notes
-  
+  testDate DateTime @default(now())
+  testType String   @default("DCRM") // Type of test performed
+  operator String? // Who performed the test
+  notes    String? // Any additional notes
+
   // File information
-  fileName     String
-  fileUrl      String?  // If you want to store the original file
-  
+  fileName String
+  fileUrl  String? // If you want to store the original file
+
   // Reference data info
   referenceFileName String?
   referenceFileUrl  String?
-  
-  // Complete test data stored as JSON
-  testData     Json     // Stores the entire parsed data
-  
-  // Key metrics for quick querying (denormalized for performance)
-  travelT1Max  Float?
-  velocityT1Max Float?
-  resistanceCH1Avg Float?
-  
-  // Pass/Fail status
-  status       String   @default("COMPLETED") // COMPLETED, FAILED, etc.
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 
-  @@map("test_results")
+  // Complete test data stored as JSON
+  testData Json // Stores the entire parsed data
+
+  // Key metrics for quick querying (denormalized for performance)
+  travelT1Max      Float?
+  velocityT1Max    Float?
+  resistanceCH1Avg Float?
+
+  // --- NEW: Component-wise AI Health Assessment ---
+  // Structure: { arcContacts: {score, reasoning}, mainContacts: {score, reasoning}, operatingMechanism: {score, reasoning}, overallScore: number }
+  componentHealth Json?
+
+  // Pass/Fail status
+  status String @default("COMPLETED") // COMPLETED, FAILED, etc.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([breakerId, testDate])
+  @@map("test_results")
 }
 
 // Update the Breaker model to include the relation
 model Breaker {
-  id           String   @id @default(cuid())
-  name         String
-  type         String
-  manufacturer String
-  model        String?
-  voltage      Float?
-  current      Float?
-  status       String?
+  id               String    @id @default(cuid())
+  name             String
+  type             String
+  manufacturer     String
+  model            String?
+  voltage          Float?
+  current          Float?
+  status           String?
   installationDate DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  stationId    String
-  station      Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
-  components   BreakerComponent[]
-  
+  stationId  String
+  station    Station            @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  components BreakerComponent[]
+
   dataSourceId String?
   dataSource   DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: SetNull)
-  
+
   // NEW: Relation to test results
-  testResults  TestResult[]
+  testResults TestResult[]
 
   @@map("breakers")
 }
@@ -96,16 +100,16 @@ model Breaker {
 model BreakerComponent {
   id          String   @id @default(cuid())
   name        String
-  type        String   // e.g., "Contact", "Coil", "Trip Unit", etc.
+  type        String // e.g., "Contact", "Coil", "Trip Unit", etc.
   description String?
   partNumber  String?
-  status      String?  // e.g., "Good", "Worn", "Needs Replacement"
+  status      String? // e.g., "Good", "Worn", "Needs Replacement"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
-  breakerId   String
-  breaker     Breaker  @relation(fields: [breakerId], references: [id], onDelete: Cascade)
+  breakerId String
+  breaker   Breaker @relation(fields: [breakerId], references: [id], onDelete: Cascade)
 
   @@map("breaker_components")
 }
@@ -113,9 +117,9 @@ model BreakerComponent {
 // --- UPDATED MODEL ---
 model DataSource {
   id          String   @id @default(cuid())
-  fileName    String   // Original name of the file, e.g., "station_data_v1.csv"
+  fileName    String // Original name of the file, e.g., "station_data_v1.csv"
   fileUrl     String   @unique // The URL or path to the CSV file
-  description String?  // Optional description of the data source
+  description String? // Optional description of the data source
   status      String   @default("PENDING") // e.g., PENDING, PROCESSING, COMPLETED, FAILED
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

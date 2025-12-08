@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "data": {
+    "testInfo": {},
+    "testResults": {},
+    "dataPoints": [],
+    "referenceData": {
+      "dataPoints": [],
+      "testResults": {}
+    },
+    "comparison": {
+      "notes": "Difference calculated: New - Ideal",
+      "metrics": {
+        "travelT1MaxDiff": null,
+        "velocityT1MaxDiff": null,
+        "resistanceCH1AvgDiff": null
+      }
+    }
+  }
+}

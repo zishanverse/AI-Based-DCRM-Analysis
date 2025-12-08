@@ -35,6 +35,9 @@ export default function DCRMAnalysis() {
     handleSubmit,
     visibleLines,
     setVisibleLines,
+    aiAnalysis,
+    analyzing,
+    handleAiAnalysis,
   } = useDcrmAnalysis();
 
   return (
@@ -59,6 +62,7 @@ export default function DCRMAnalysis() {
         }}
         onBreakerChange={setSelectedBreaker}
         onSubmit={handleSubmit}
+        onReferenceFileUpdated={() => {}}
       />
 
       {testInfo && (
@@ -68,6 +72,9 @@ export default function DCRMAnalysis() {
             testResults={testResults}
             comparison={comparison}
             assessment={assessment}
+            aiAnalysis={aiAnalysis}
+            analyzing={analyzing}
+            onRunAi={handleAiAnalysis}
           />
 
           <DcrmCharts

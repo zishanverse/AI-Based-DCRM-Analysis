@@ -6,12 +6,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TestInfo, TestResult } from "../types";
+import { DcrmAIAnalysis } from "./DcrmAIAnalysis";
 
 interface DcrmAssessmentReportProps {
   testInfo: TestInfo;
   testResults: TestResult | null;
   comparison: any | null;
   assessment: "HEALTHY" | "NEEDS MAINTENANCE" | "CRITICAL";
+  aiAnalysis?: any;
+  analyzing?: boolean;
+  onRunAi?: () => void;
 }
 
 export function DcrmAssessmentReport({
@@ -19,11 +23,31 @@ export function DcrmAssessmentReport({
   testResults,
   comparison,
   assessment,
+  aiAnalysis,
+  analyzing,
+  onRunAi,
 }: DcrmAssessmentReportProps) {
   if (!testInfo) return null;
 
   return (
     <>
+      <div className="print:block hidden mb-8 text-center border-b pb-4">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Circuit Breaker Diagnostic Report
+        </h1>
+        <p className="text-gray-500">
+          Generated on {new Date().toLocaleDateString()}
+        </p>
+      </div>
+
+      {onRunAi && (
+        <DcrmAIAnalysis
+          analysis={aiAnalysis}
+          loading={!!analyzing}
+          onAnalyze={onRunAi}
+        />
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <Card>
           <CardHeader>
@@ -35,7 +59,9 @@ export function DcrmAssessmentReport({
                 .slice(0, 9)
                 .map(([key, value]) => (
                   <div key={key} className="flex justify-between">
-                    <span className="font-medium">{key}:</span>
+                    <span className="font-medium capitalize">
+                      {key.replace(/([A-Z])/g, " $1").trim()}:
+                    </span>
                     <span>{value}</span>
                   </div>
                 ))}
@@ -43,6 +69,11 @@ export function DcrmAssessmentReport({
           </CardContent>
         </Card>
 
+        {/* ... (Existing Cards remain essentially the same, just copied full content for safety or assumed context if replacing whole file.
+         The user previously wrote this file entirely. I will just replace the `return` logic or the whole file to be safe.) 
+         Actually, I should use `replace_file_content` or just `write_to_file` if I have the whole content. 
+         I already have the previous content in context step 152. I will reuse it and just prepend the AI part.
+         */}
         <Card>
           <CardHeader>
             <CardTitle>Travel Results</CardTitle>
@@ -89,7 +120,7 @@ export function DcrmAssessmentReport({
                 <span className="font-medium">Travel T6 Max (mm):</span>
                 <span>{testResults?.travelT6Max?.toFixed(2)}</span>
               </div>
-              <div className="mt-4 p-3 bg-gray-100 rounded-md">
+              <div className="mt-4 p-3 bg-gray-100 rounded-md print:hidden">
                 <p className="text-sm font-medium">Assessment Notes:</p>
                 <p className="text-sm mt-1">
                   {assessment === "CRITICAL" &&
@@ -156,7 +187,7 @@ export function DcrmAssessmentReport({
       </div>
 
       {comparison && (
-        <Card className="mb-6 border-2 border-purple-200 shadow-lg bg-linear-to-br from-white to-purple-50">
+        <Card className="mb-6 border-2 border-purple-200 shadow-lg bg-linear-to-br from-white to-purple-50 break-inside-avoid">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <span className="text-2xl">🧬</span>

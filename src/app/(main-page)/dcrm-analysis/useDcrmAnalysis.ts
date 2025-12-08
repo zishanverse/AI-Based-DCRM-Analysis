@@ -109,6 +109,7 @@ export function useDcrmAnalysis() {
     diff_coilCurrentC6: false,
   });
 
+  // Load Stations
   useEffect(() => {
     async function loadStations() {
       const res = await getStations();
@@ -119,6 +120,7 @@ export function useDcrmAnalysis() {
     loadStations();
   }, []);
 
+  // Load Breakers
   useEffect(() => {
     async function loadBreakers() {
       if (!selectedStation) {
@@ -133,6 +135,7 @@ export function useDcrmAnalysis() {
     loadBreakers();
   }, [selectedStation]);
 
+  // Load Breaker Details
   useEffect(() => {
     if (selectedBreaker) {
       const breaker = breakers.find((b) => b.id === selectedBreaker);
@@ -224,6 +227,44 @@ export function useDcrmAnalysis() {
     }
   };
 
+  // AI Analysis Logic
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+
+  const handleAiAnalysis = async () => {
+    if (!testResults || !testInfo) return;
+
+    setAnalyzing(true);
+    try {
+      const payload = {
+        testResultId: testResults.id || null,
+        metrics: testResults,
+        referenceMetrics: selectedBreakerDetails?.dataSource
+          ? {
+              comparisonMatrix: comparison,
+            }
+          : null,
+      };
+
+      const res = await fetch("/api/analyze-health", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setAiAnalysis(json.data);
+      } else {
+        console.error(json.error);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   return {
     data,
     testResults,
@@ -252,5 +293,8 @@ export function useDcrmAnalysis() {
     handleSubmit,
     visibleLines,
     setVisibleLines,
+    aiAnalysis,
+    analyzing,
+    handleAiAnalysis,
   };
 }

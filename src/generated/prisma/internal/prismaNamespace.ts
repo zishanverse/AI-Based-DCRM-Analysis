@@ -844,6 +844,7 @@ export const TestResultScalarFieldEnum = {
   travelT1Max: 'travelT1Max',
   velocityT1Max: 'velocityT1Max',
   resistanceCH1Avg: 'resistanceCH1Avg',
+  componentHealth: 'componentHealth',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -912,6 +913,14 @@ export const JsonNullValueInput = {
 } as const
 
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
