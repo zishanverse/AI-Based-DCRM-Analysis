@@ -137,15 +137,15 @@ export default function PowergridLandingPage() {
       {/* Primary Hero Section - High Density */}
       <section
         ref={heroRef}
-        className="relative pt-20 pb-12 bg-white overflow-hidden"
+        className="relative pt-16 pb-8 bg-white overflow-hidden"
       >
         {/* Background Decorative Elements */}
         <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-slate-100 to-transparent skew-x-12 opacity-50 pointer-events-none" />
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-12 gap-8 items-start">
+          <div className="grid lg:grid-cols-12 gap-6 items-start">
             {/* Left Content: Information Dense */}
-            <div className="lg:col-span-7 space-y-6 pt-4">
+            <div className="lg:col-span-7 space-y-4 pt-2">
               {/* Badge Area */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -172,12 +172,12 @@ export default function PowergridLandingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <h1 className="text-4xl lg:text-5xl font-extrabold text-[#003366] leading-tight tracking-tight mb-3">
+                <h1 className="text-3xl lg:text-4xl font-extrabold text-[#003366] leading-tight tracking-tight mb-2">
                   National <span className="text-orange-600">Smart Grid</span>{" "}
                   <br />
                   Diagnostics System
                 </h1>
-                <p className="text-lg text-slate-600 max-w-xl leading-relaxed">
+                <p className="text-sm text-slate-600 max-w-xl leading-relaxed">
                   Next-generation{" "}
                   <span className="font-semibold text-slate-900">
                     DCRM Analysis
@@ -193,12 +193,12 @@ export default function PowergridLandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="grid grid-cols-2 gap-3 max-w-xl mt-4"
+                className="grid grid-cols-2 gap-2 max-w-xl mt-3"
               >
                 {features.map((f, i) => (
                   <div
                     key={i}
-                    className="flex items-start gap-3 p-3 rounded-lg border border-slate-100 bg-slate-50 hover:bg-white hover:border-blue-200 hover:shadow-sm transition-all"
+                    className="flex items-start gap-2 p-2 rounded-lg border border-slate-100 bg-slate-50 hover:bg-white hover:border-blue-200 hover:shadow-xs transition-all"
                   >
                     <div className={cn("p-2 rounded-md shrink-0", f.color)}>
                       {f.icon}
@@ -248,7 +248,7 @@ export default function PowergridLandingPage() {
                 className="relative z-10"
               >
                 {/* Visual Container styled as a control panel */}
-                <div className="bg-slate-900 p-2 rounded-xl shadow-2xl ring-1 ring-slate-900/50">
+                <div className="bg-slate-900 p-1.5 rounded-lg shadow-xl ring-1 ring-slate-900/50">
                   <Carousel
                     className="w-full"
                     opts={{ loop: true }}
@@ -310,14 +310,13 @@ export default function PowergridLandingPage() {
                 </div>
 
                 {/* Floating Stat Card */}
-                
               </motion.div>
             </div>
           </div>
         </div>
 
         {/* Bottom Ticker/Stats Strip */}
-        <div className="border-y border-slate-200 bg-slate-50 mt-16">
+        <div className="border-y border-slate-200 bg-slate-50 mt-8 py-2">
           <div className="container mx-auto px-4 py-4">
             <div className="flex flex-wrap justify-between items-center gap-6">
               {stats.map((s, i) => (
