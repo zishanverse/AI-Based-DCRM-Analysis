@@ -26,11 +26,13 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ReferenceArea,
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ZoomIn, RotateCcw } from "lucide-react";
 
 // Define types for our data
 interface DCRMDataPoint {
@@ -109,6 +111,12 @@ export default function DCRMAnalysis() {
   >("HEALTHY");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Zoom State
+  const [left, setLeft] = useState<string | number>("dataMin");
+  const [right, setRight] = useState<string | number>("dataMax");
+  const [refAreaLeft, setRefAreaLeft] = useState<string | number>("");
+  const [refAreaRight, setRefAreaRight] = useState<string | number>("");
 
   // Selector State
   const [stations, setStations] = useState<any[]>([]);
@@ -244,6 +252,33 @@ export default function DCRMAnalysis() {
       setFile(e.target.files[0]);
       setError(null);
     }
+  };
+
+  // Zoom Logic
+  const zoom = () => {
+    let l = refAreaLeft;
+    let r = refAreaRight;
+
+    if (l === r || r === "") {
+      setRefAreaLeft("");
+      setRefAreaRight("");
+      return;
+    }
+
+    // Ensure left is smaller than right for domain
+    if (l > r) [l, r] = [r, l];
+
+    setRefAreaLeft("");
+    setRefAreaRight("");
+    setLeft(l);
+    setRight(r);
+  };
+
+  const zoomOut = () => {
+    setLeft("dataMin");
+    setRight("dataMax");
+    setRefAreaLeft("");
+    setRefAreaRight("");
   };
 
   // Function to determine assessment based on test results
@@ -700,12 +735,184 @@ export default function DCRMAnalysis() {
             </Card>
           </div>
 
+          {comparison && (
+            <Card className="mb-6 border-2 border-purple-200 shadow-lg bg-linear-to-br from-white to-purple-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">🧬</span>
+                  <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-600 to-blue-600 font-extrabold">
+                    Difference Matrix
+                  </span>
+                </CardTitle>
+                <CardDescription>
+                  Detailed phase-wise deviation analysis (New - Ideal)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Travel Diff Card */}
+                  <div className="p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <span className="text-4xl">📏</span>
+                    </div>
+                    <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      Travel Delta
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-end">
+                        <span className="text-xs font-medium text-gray-400">
+                          T1 Max Diff
+                        </span>
+                        <span
+                          className={`text-xl font-mono font-bold ${
+                            Math.abs(comparison.metrics.travelT1MaxDiff) > 5
+                              ? "text-red-500"
+                              : "text-emerald-500"
+                          }`}
+                        >
+                          {comparison.metrics.travelT1MaxDiff > 0 ? "+" : ""}
+                          {comparison.metrics.travelT1MaxDiff.toFixed(2)}{" "}
+                          <span className="text-xs font-normal text-gray-400">
+                            mm
+                          </span>
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            Math.abs(comparison.metrics.travelT1MaxDiff) > 5
+                              ? "bg-red-500"
+                              : "bg-emerald-500"
+                          }`}
+                          style={{
+                            width: `${Math.min(
+                              Math.abs(comparison.metrics.travelT1MaxDiff) * 5,
+                              100
+                            )}%`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Velocity Diff Card */}
+                  <div className="p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <span className="text-4xl">⚡</span>
+                    </div>
+                    <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      Velocity Delta
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-end">
+                        <span className="text-xs font-medium text-gray-400">
+                          T1 Max Diff
+                        </span>
+                        <span
+                          className={`text-xl font-mono font-bold ${
+                            Math.abs(comparison.metrics.velocityT1MaxDiff) > 0.5
+                              ? "text-amber-500"
+                              : "text-emerald-500"
+                          }`}
+                        >
+                          {comparison.metrics.velocityT1MaxDiff > 0 ? "+" : ""}
+                          {comparison.metrics.velocityT1MaxDiff.toFixed(2)}{" "}
+                          <span className="text-xs font-normal text-gray-400">
+                            m/s
+                          </span>
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            Math.abs(comparison.metrics.velocityT1MaxDiff) > 0.5
+                              ? "bg-amber-500"
+                              : "bg-emerald-500"
+                          }`}
+                          style={{
+                            width: `${Math.min(
+                              Math.abs(comparison.metrics.velocityT1MaxDiff) *
+                                20,
+                              100
+                            )}%`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Resistance Diff Card */}
+                  <div className="p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <span className="text-4xl">Ω</span>
+                    </div>
+                    <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      Resistance Delta
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-end">
+                        <span className="text-xs font-medium text-gray-400">
+                          CH1 Avg Diff
+                        </span>
+                        <span
+                          className={`text-xl font-mono font-bold ${
+                            Math.abs(comparison.metrics.resistanceCH1AvgDiff) >
+                            10
+                              ? "text-red-500"
+                              : "text-emerald-500"
+                          }`}
+                        >
+                          {comparison.metrics.resistanceCH1AvgDiff > 0
+                            ? "+"
+                            : ""}
+                          {comparison.metrics.resistanceCH1AvgDiff.toFixed(2)}{" "}
+                          <span className="text-xs font-normal text-gray-400">
+                            µΩ
+                          </span>
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            Math.abs(comparison.metrics.resistanceCH1AvgDiff) >
+                            10
+                              ? "bg-red-500"
+                              : "bg-emerald-500"
+                          }`}
+                          style={{
+                            width: `${Math.min(
+                              Math.abs(
+                                comparison.metrics.resistanceCH1AvgDiff
+                              ) * 2,
+                              100
+                            )}%`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
-            <CardHeader>
-              <CardTitle>DCRM Test Data Visualization</CardTitle>
-              <CardDescription>
-                Toggle the checkboxes below to show/hide different measurements
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>DCRM Test Data Visualization</CardTitle>
+                <CardDescription>
+                  Toggle checkboxes below to filter. drag cursor on graph to
+                  Zoom.
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={zoomOut}
+                className="gap-2"
+              >
+                <RotateCcw className="h-4 w-4" /> Reset Zoom
+              </Button>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Checkbox Controls */}
@@ -972,6 +1179,15 @@ export default function DCRMAnalysis() {
                       data={data}
                       margin={{ top: 5, right: 30, left: 10, bottom: 0 }}
                       syncId="dcrmSync"
+                      onMouseDown={(e) =>
+                        e?.activeLabel && setRefAreaLeft(e.activeLabel)
+                      }
+                      onMouseMove={(e) =>
+                        refAreaLeft &&
+                        e?.activeLabel &&
+                        setRefAreaRight(e.activeLabel)
+                      }
+                      onMouseUp={zoom}
                     >
                       <CartesianGrid
                         strokeDasharray="3 3"
@@ -981,7 +1197,8 @@ export default function DCRMAnalysis() {
                       <XAxis
                         dataKey="time"
                         type="number"
-                        domain={[0, 600]}
+                        domain={[left, right]}
+                        allowDataOverflow
                         hide
                       />
                       <YAxis hide domain={["auto", "auto"]} />
@@ -991,6 +1208,13 @@ export default function DCRMAnalysis() {
                         iconType="line"
                         iconSize={12}
                       />
+                      {refAreaLeft && refAreaRight ? (
+                        <ReferenceArea
+                          x1={refAreaLeft}
+                          x2={refAreaRight}
+                          strokeOpacity={0.3}
+                        />
+                      ) : null}
                       {visibleLines.resistanceCH1 && (
                         <Line
                           type="monotone"
@@ -1213,6 +1437,15 @@ export default function DCRMAnalysis() {
                       data={data}
                       margin={{ top: 5, right: 30, left: 10, bottom: 0 }}
                       syncId="dcrmSync"
+                      onMouseDown={(e) =>
+                        e?.activeLabel && setRefAreaLeft(e.activeLabel)
+                      }
+                      onMouseMove={(e) =>
+                        refAreaLeft &&
+                        e?.activeLabel &&
+                        setRefAreaRight(e.activeLabel)
+                      }
+                      onMouseUp={zoom}
                     >
                       <CartesianGrid
                         strokeDasharray="3 3"
@@ -1222,7 +1455,8 @@ export default function DCRMAnalysis() {
                       <XAxis
                         dataKey="time"
                         type="number"
-                        domain={[0, 600]}
+                        domain={[left, right]}
+                        allowDataOverflow
                         hide
                       />
                       <YAxis hide domain={["auto", "auto"]} />
@@ -1232,6 +1466,13 @@ export default function DCRMAnalysis() {
                         iconType="line"
                         iconSize={12}
                       />
+                      {refAreaLeft && refAreaRight ? (
+                        <ReferenceArea
+                          x1={refAreaLeft}
+                          x2={refAreaRight}
+                          strokeOpacity={0.3}
+                        />
+                      ) : null}
                       {visibleLines.currentCH1 && (
                         <Line
                           type="monotone"
@@ -1454,6 +1695,15 @@ export default function DCRMAnalysis() {
                       data={data}
                       margin={{ top: 5, right: 30, left: 10, bottom: 0 }}
                       syncId="dcrmSync"
+                      onMouseDown={(e) =>
+                        e?.activeLabel && setRefAreaLeft(e.activeLabel)
+                      }
+                      onMouseMove={(e) =>
+                        refAreaLeft &&
+                        e?.activeLabel &&
+                        setRefAreaRight(e.activeLabel)
+                      }
+                      onMouseUp={zoom}
                     >
                       <CartesianGrid
                         strokeDasharray="3 3"
@@ -1463,7 +1713,8 @@ export default function DCRMAnalysis() {
                       <XAxis
                         dataKey="time"
                         type="number"
-                        domain={[0, 600]}
+                        domain={[left, right]}
+                        allowDataOverflow
                         hide
                       />
                       <YAxis hide domain={["auto", "auto"]} />
@@ -1473,6 +1724,13 @@ export default function DCRMAnalysis() {
                         iconType="line"
                         iconSize={12}
                       />
+                      {refAreaLeft && refAreaRight ? (
+                        <ReferenceArea
+                          x1={refAreaLeft}
+                          x2={refAreaRight}
+                          strokeOpacity={0.3}
+                        />
+                      ) : null}
                       {visibleLines.travelT1 && (
                         <Line
                           type="monotone"
@@ -1695,6 +1953,15 @@ export default function DCRMAnalysis() {
                       data={data}
                       margin={{ top: 5, right: 30, left: 10, bottom: 35 }}
                       syncId="dcrmSync"
+                      onMouseDown={(e) =>
+                        e?.activeLabel && setRefAreaLeft(e.activeLabel)
+                      }
+                      onMouseMove={(e) =>
+                        refAreaLeft &&
+                        e?.activeLabel &&
+                        setRefAreaRight(e.activeLabel)
+                      }
+                      onMouseUp={zoom}
                     >
                       <CartesianGrid
                         strokeDasharray="3 3"
@@ -1704,7 +1971,8 @@ export default function DCRMAnalysis() {
                       <XAxis
                         dataKey="time"
                         type="number"
-                        domain={[0, 600]}
+                        domain={[left, right]}
+                        allowDataOverflow
                         label={{
                           value: "Time (ms)",
                           position: "insideBottom",
@@ -1721,6 +1989,13 @@ export default function DCRMAnalysis() {
                         iconType="line"
                         iconSize={12}
                       />
+                      {refAreaLeft && refAreaRight ? (
+                        <ReferenceArea
+                          x1={refAreaLeft}
+                          x2={refAreaRight}
+                          strokeOpacity={0.3}
+                        />
+                      ) : null}
                       {visibleLines.coilCurrentC1 && (
                         <Line
                           type="monotone"

@@ -47,17 +47,17 @@ export default function PowergridLandingPage() {
 
   const carouselImages = [
     {
-      src: "/powergrid-1.jpg",
+      src: "https://cpimg.tistatic.com/08718005/b/4/Loco-Vaccum-Circuit-Breaker-Test-System.jpg",
       title: "National Grid Monitor",
       description: "Real-time telemetry from EHV substations across India",
     },
     {
-      src: "/powergrid-2.jpg",
+      src: "https://img.etimg.com/thumb/width-1600,height-900,imgsize-108722,resizemode-75,msid-117899457/markets/stocks/news/power-grid-shares-in-focus-after-co-posts-4-yoy-drop-in-q3-profit-declares-rs-3-25/sh-dividend.jpg",
       title: "Circuit Breaker Analytics",
       description: "DCRM signature analysis for predictive maintenance",
     },
     {
-      src: "/powergrid-3.jpg",
+      src: "https://th.bing.com/th/id/OIP.haLjZCPRyUyLZsNQ__8tZwHaEK?w=316&h=180&c=7&r=0&o=7&dpr=2&pid=1.7&rm=3",
       title: "Command Center",
       description: "Centralized AI-driven fault detection dashboard",
     },
