@@ -46,7 +46,7 @@ const data = {
     },
     {
       title: "Upload Document",
-      url: "#",
+      url: "/dcrm-analysis",
       icon: IconFileDescription,
     },
     {

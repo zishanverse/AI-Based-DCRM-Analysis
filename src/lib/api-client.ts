@@ -50,6 +50,7 @@ export async function login(stationId: string, password: string): Promise<LoginR
   });
 
   persistAuth(data);
+  console.log(data);
   return data;
 }
 

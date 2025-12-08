@@ -1,169 +1,409 @@
-import Link from "next/link"
-import {  Zap, Shield, BarChart3, Activity, ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import HeroSection from "@/components/hero-section"
+"use client";
 
-export default function Home() {
+import { useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import BentoGrid from "@/components/bento-grid";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
+  Brain,
+  TrendingUp,
+  ArrowRight,
+  Play,
+  BarChart3,
+  Cpu,
+  Radio,
+  Users,
+  Award,
+  CheckCircle,
+  Sparkles,
+  ChevronDown,
+  Activity,
+  Gauge,
+  Zap,
+  Server,
+  ShieldCheck,
+  Globe,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+function cn(...classes: string[]) {
+  return classes.filter(Boolean).join(" ");
+}
+
+export default function PowergridLandingPage() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const bentoRef = useRef<HTMLDivElement>(null);
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  const carouselImages = [
+    {
+      src: "/powergrid-1.jpg",
+      title: "National Grid Monitor",
+      description: "Real-time telemetry from EHV substations across India",
+    },
+    {
+      src: "/powergrid-2.jpg",
+      title: "Circuit Breaker Analytics",
+      description: "DCRM signature analysis for predictive maintenance",
+    },
+    {
+      src: "/powergrid-3.jpg",
+      title: "Command Center",
+      description: "Centralized AI-driven fault detection dashboard",
+    },
+  ];
+
+  const features = [
+    {
+      icon: <Brain className="w-5 h-5" />,
+      title: "AI Analysis",
+      description: "Auto-fault detection",
+      color: "text-blue-600 bg-blue-50",
+    },
+    {
+      icon: <Activity className="w-5 h-5" />,
+      title: "Live DCRM",
+      description: "Real-time breaker signatures",
+      color: "text-orange-600 bg-orange-50",
+    },
+    {
+      icon: <ShieldCheck className="w-5 h-5" />,
+      title: "Grid Security",
+      description: "ISO 27001 Certified",
+      color: "text-green-600 bg-green-50",
+    },
+    {
+      icon: <TrendingUp className="w-5 h-5" />,
+      title: "Predictive",
+      description: "Failure forecasting",
+      color: "text-purple-600 bg-purple-50",
+    },
+  ];
+
+  const stats = [
+    { value: "99.9%", label: "Uptime", icon: <Activity className="w-4 h-4" /> },
+    {
+      value: "500+",
+      label: "Substations",
+      icon: <Server className="w-4 h-4" />,
+    },
+    { value: "24/7", label: "Monitoring", icon: <Globe className="w-4 h-4" /> },
+    { value: "ISO", label: "Certified", icon: <Award className="w-4 h-4" /> },
+  ];
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    ref.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
-    <div className="flex min-h-screen  flex-col bg-background text-foreground">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-xl">
-            <Activity className="h-6 w-6 text-primary" />
-            <span>DCRM Monitor</span>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-200">
+      {/* Dense Top Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#003366] text-white shadow-md border-b border-blue-800">
+        <div className="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {/* Logo Placeholder */}
+            <div className="bg-white p-1 rounded-sm">
+              <Zap className="w-5 h-5 text-[#003366]" />
+            </div>
+            <span className="font-bold text-sm sm:text-base tracking-wide uppercase">
+              Powergrid DCRM Portal
+            </span>
           </div>
-          <nav className="hidden md:flex gap-6 text-sm font-medium">
-            <Link href="#features" className="hover:text-primary transition-colors">Features</Link>
-            <Link href="#how-it-works" className="hover:text-primary transition-colors">How it Works</Link>
-            <Link href="#pricing" className="hover:text-primary transition-colors">Pricing</Link>
-          </nav>
-          <div className="flex items-center gap-4">
-            <Link href="/sign-in">
-              <Button>Get Started</Button>
-            </Link>
+          <div className="flex items-center gap-4 text-xs font-medium text-blue-100">
+            <span className="hidden sm:inline-block">Ministry of Power</span>
+            <span className="h-4 w-px bg-blue-400/30 hidden sm:block"></span>
+            <span className="hidden sm:inline-block">Government of India</span>
+            <Button
+              variant="ghost"
+              className="text-white hover:bg-blue-800 hover:text-white h-8 px-3 text-xs uppercase tracking-wider"
+              onClick={() => router.push("/sign-in")}
+            >
+              Login
+            </Button>
           </div>
         </div>
-      </header>
+      </nav>
 
-      <main className="flex-1">
-        {/* Hero Section */}
-        {/* <section className="relative overflow-hidden py-20 md:py-32 lg:py-40">
-          <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
-          <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]"></div>
-          
-          <div className="container mx-auto flex flex-col items-center text-center gap-8">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
-              New: AI-Powered Analysis
-            </div>
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl max-w-4xl">
-              Advanced DCRM Waveform <br className="hidden sm:inline" />
-              <span className="text-primary">Monitoring & Analysis</span>
-            </h1>
-            <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl">
-              Ensure the health of your circuit breakers with real-time dynamic contact resistance measurement analysis. Detect faults before they happen.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 mt-4">
-              <Link href="/sign-in">
-                <Button size="lg" className="h-12 px-8 text-base gap-2">
-                  Go to Dashboard <ArrowRight className="h-4 w-4" />
+      {/* Primary Hero Section - High Density */}
+      <section
+        ref={heroRef}
+        className="relative pt-20 pb-12 bg-white overflow-hidden"
+      >
+        {/* Background Decorative Elements */}
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-slate-100 to-transparent skew-x-12 opacity-50 pointer-events-none" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            {/* Left Content: Information Dense */}
+            <div className="lg:col-span-7 space-y-6 pt-4">
+              {/* Badge Area */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-wrap gap-2"
+              >
+                <Badge
+                  variant="outline"
+                  className="bg-orange-50 text-orange-700 border-orange-200 px-2 py-0.5 text-xs uppercase tracking-wider font-semibold"
+                >
+                  <Activity className="w-3 h-3 mr-1" /> Live Monitor
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="bg-blue-50 text-blue-700 border-blue-200 px-2 py-0.5 text-xs uppercase tracking-wider font-semibold"
+                >
+                  v2.4 Stable
+                </Badge>
+              </motion.div>
+
+              {/* Main Headlines */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <h1 className="text-4xl lg:text-5xl font-extrabold text-[#003366] leading-tight tracking-tight mb-3">
+                  National <span className="text-orange-600">Smart Grid</span>{" "}
+                  <br />
+                  Diagnostics System
+                </h1>
+                <p className="text-lg text-slate-600 max-w-xl leading-relaxed">
+                  Next-generation{" "}
+                  <span className="font-semibold text-slate-900">
+                    DCRM Analysis
+                  </span>{" "}
+                  for EHV Circuit Breakers. Minimizing downtime through
+                  AI-driven predictive maintenance and real-time fault
+                  isolation.
+                </p>
+              </motion.div>
+
+              {/* Feature Grid - Integrated in Hero for Density */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="grid grid-cols-2 gap-3 max-w-xl mt-4"
+              >
+                {features.map((f, i) => (
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 p-3 rounded-lg border border-slate-100 bg-slate-50 hover:bg-white hover:border-blue-200 hover:shadow-sm transition-all"
+                  >
+                    <div className={cn("p-2 rounded-md shrink-0", f.color)}>
+                      {f.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-800 text-sm">
+                        {f.title}
+                      </h4>
+                      <p className="text-xs text-slate-500 leading-tight mt-0.5">
+                        {f.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+
+              {/* Action Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex flex-wrap gap-3 pt-4"
+              >
+                <Button
+                  size="lg"
+                  className="bg-[#003366] hover:bg-blue-900 text-white rounded-md px-6 shadow-lg shadow-blue-900/20"
+                >
+                  <Play className="w-4 h-4 mr-2 fill-current" />
+                  Access Dashboard
                 </Button>
-              </Link>
-              <Button size="lg" variant="outline" className="h-12 px-8 text-base">
-                View Demo
-              </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-md px-6"
+                >
+                  View Documentation
+                </Button>
+              </motion.div>
             </div>
-            
-            <div className="mt-16 relative rounded-xl border bg-background/50 shadow-2xl backdrop-blur-sm overflow-hidden">
-               <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-transparent opacity-50"></div>
-               <img 
-                 src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2670&auto=format&fit=crop" 
-                 alt="Dashboard Preview" 
-                 className="w-full max-w-5xl h-auto rounded-xl opacity-90"
-               />
-            </div>
-          </div>
-        </section> */}
-        <HeroSection/>
 
-        {/* Features Section */}
-        <section id="features" className="py-20 bg-muted/30">
-          <div className="container mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">Powerful Features for Engineers</h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Everything you need to analyze, track, and report on circuit breaker health.
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-background p-8 rounded-2xl border shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
-                  <BarChart3 className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">Real-time Visualization</h3>
-                <p className="text-muted-foreground">
-                  Visualize DCRM waveforms instantly with high-resolution charts. Zoom, pan, and analyze specific data points.
-                </p>
-              </div>
-              
-              <div className="bg-background p-8 rounded-2xl border shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
-                  <Zap className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">AI Fault Detection</h3>
-                <p className="text-muted-foreground">
-                  Our advanced AI algorithms automatically detect anomalies and potential faults in your resistance patterns.
-                </p>
-              </div>
-              
-              <div className="bg-background p-8 rounded-2xl border shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
-                  <Shield className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">Secure Data Storage</h3>
-                <p className="text-muted-foreground">
-                  All your test data is encrypted and stored securely. Access historical records anytime for trend analysis.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+            {/* Right Content: Compact Visuals */}
+            <div className="lg:col-span-5 relative">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+                className="relative z-10"
+              >
+                {/* Visual Container styled as a control panel */}
+                <div className="bg-slate-900 p-2 rounded-xl shadow-2xl ring-1 ring-slate-900/50">
+                  <Carousel
+                    className="w-full"
+                    opts={{ loop: true }}
+                    setApi={(api) => {
+                      if (api)
+                        api.on("select", () =>
+                          setActiveIndex(api.selectedScrollSnap())
+                        );
+                    }}
+                  >
+                    <CarouselContent>
+                      {carouselImages.map((img, idx) => (
+                        <CarouselItem key={idx}>
+                          <div className="relative aspect-video rounded-lg overflow-hidden border border-slate-700 group">
+                            <img
+                              src={img.src}
+                              alt={img.title}
+                              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                            />
+                            <div className="absolute inset-0 bg-linear-to-t from-[#003366]/90 via-transparent to-transparent"></div>
+                            <div className="absolute bottom-0 left-0 right-0 p-4">
+                              <div className="inline-flex items-center gap-2 mb-1">
+                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                <span className="text-[10px] font-mono text-green-400 uppercase tracking-widest">
+                                  System Active
+                                </span>
+                              </div>
+                              <h3 className="text-white font-bold text-lg leading-none">
+                                {img.title}
+                              </h3>
+                              <p className="text-slate-300 text-xs mt-1">
+                                {img.description}
+                              </p>
+                            </div>
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                  </Carousel>
 
-        {/* CTA Section */}
-        <section className="py-20">
-          <div className="container mx-auto">
-            <div className="bg-primary rounded-3xl p-8 md:p-16 text-center text-primary-foreground relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_25%,rgba(255,255,255,0.1)_50%,transparent_50%,transparent_75%,rgba(255,255,255,0.1)_75%,rgba(255,255,255,0.1)_100%)] bg-size-[20px_20px] opacity-20"></div>
-              
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6 relative z-10">Ready to upgrade your monitoring?</h2>
-              <p className="text-primary-foreground/80 text-lg max-w-2xl mx-auto mb-8 relative z-10">
-                Join leading power stations using our platform to ensure grid reliability and safety.
-              </p>
-              <div className="relative z-10">
-                <Link href="/sign-in">
-                  <Button size="lg" variant="secondary" className="h-12 px-8 text-base font-semibold">
-                    Get Started Now
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
+                  {/* Control Strip */}
+                  <div className="bg-slate-800 mt-2 rounded-md p-3 flex justify-between items-center">
+                    <div className="flex space-x-1">
+                      {carouselImages.map((_, i) => (
+                        <div
+                          key={i}
+                          className={cn(
+                            "h-1.5 w-8 rounded-full transition-colors",
+                            i === activeIndex ? "bg-orange-500" : "bg-slate-600"
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex gap-4 text-xs font-mono text-slate-400">
+                      <span>LAT: 28.61° N</span>
+                      <span>LNG: 77.20° E</span>
+                    </div>
+                  </div>
+                </div>
 
-      <footer className="border-t py-12 bg-muted/20">
-        <div className="container mx-auto grid md:grid-cols-4 gap-8">
-          <div className="col-span-2">
-            <div className="flex items-center gap-2 font-bold text-xl mb-4">
-              <Activity className="h-6 w-6 text-primary" />
-              <span>DCRM Monitor</span>
+                {/* Floating Stat Card */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.8 }}
+                  className="absolute -bottom-6 -left-6 bg-white p-4 rounded-lg shadow-xl border border-slate-100 hidden lg:block"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-green-100 p-2 rounded-full text-green-700">
+                      <Gauge className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="text-xs text-slate-500 font-medium uppercase">
+                        System Efficiency
+                      </div>
+                      <div className="text-2xl font-bold text-slate-900">
+                        98.2%
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
             </div>
-            <p className="text-muted-foreground max-w-sm">
-              The next generation of circuit breaker analysis tools. Simple, powerful, and intelligent.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Product</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="#" className="hover:text-foreground">Features</Link></li>
-              <li><Link href="#" className="hover:text-foreground">Pricing</Link></li>
-              <li><Link href="#" className="hover:text-foreground">Case Studies</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Company</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="#" className="hover:text-foreground">About</Link></li>
-              <li><Link href="#" className="hover:text-foreground">Contact</Link></li>
-              <li><Link href="#" className="hover:text-foreground">Privacy Policy</Link></li>
-            </ul>
           </div>
         </div>
-        <div className="container mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          © 2024 DCRM Monitor. All rights reserved.
+
+        {/* Bottom Ticker/Stats Strip */}
+        <div className="border-y border-slate-200 bg-slate-50 mt-16">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex flex-wrap justify-between items-center gap-6">
+              {stats.map((s, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="text-blue-600 bg-blue-100 p-1.5 rounded-full">
+                    {s.icon}
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-slate-900 leading-none">
+                      {s.value}
+                    </div>
+                    <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                      {s.label}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div className="h-8 w-px bg-slate-200 hidden lg:block"></div>
+              <div className="text-xs text-slate-400 max-w-[200px] hidden lg:block leading-tight">
+                Last updated: {new Date().toLocaleDateString()} <br />
+                System Status:{" "}
+                <span className="text-green-600 font-bold">Optimal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Apple-style Bento Grid Section */}
+      <section ref={bentoRef} className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-[#003366] mb-2">
+              Technical Operations Center
+            </h2>
+            <p className="text-slate-500 max-w-2xl mx-auto">
+              Centralized control plane for managing circuit breaker health and
+              operational metrics.
+            </p>
+          </div>
+          <BentoGrid />
+        </div>
+      </section>
+
+      {/* Footer Strip */}
+      <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-sm">
+          <div className="flex items-center gap-2 mb-4 md:mb-0">
+            <Zap className="w-4 h-4 text-orange-500" />
+            <span className="font-semibold text-slate-200">POWERGRID DCRM</span>
+          </div>
+          <div className="flex gap-6">
+            <a href="#" className="hover:text-white transition-colors">
+              Privacy Policy
+            </a>
+            <a href="#" className="hover:text-white transition-colors">
+              Terms of Service
+            </a>
+            <a href="#" className="hover:text-white transition-colors">
+              Contact
+            </a>
+          </div>
+          <div className="mt-4 md:mt-0 text-slate-600">
+            © 2025 Powergrid Corporation of India. All rights reserved.
+          </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }

@@ -271,4 +271,4 @@ if __name__ == '__main__':
     if not os.path.exists(os.path.join(ARTIFACTS_FOLDER, 'xgboost_model.pkl')):
         print("⚠️ WARNING: Model files not found. Run train_model.py first!")
     
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=8000)

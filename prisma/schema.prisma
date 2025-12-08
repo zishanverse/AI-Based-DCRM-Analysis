@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+ 
+datasource db {
+  provider = "postgresql"
+}
+
+model Station {
+  id          String   @id @default(cuid())
+  name        String
+  location    String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  breakers Breaker[]
+
+  @@map("stations")
+}
+
+model Breaker {
+  id           String   @id @default(cuid())
+  name         String
+  type         String   // e.g., "Oil Circuit Breaker", "Air Blast Circuit Breaker", etc.
+  manufacturer String
+  model        String?
+  voltage      Float?   // in kV
+  current      Float?   // in A
+  status       String?  // e.g., "Active", "Maintenance", "Decommissioned"
+  installationDate DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  stationId    String
+  station      Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  components   BreakerComponent[]
+  
+  // --- NEW RELATION ---
+  dataSourceId String? // Foreign key to the DataSource model. It's optional.
+  dataSource   DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: SetNull) // Defines the relation
+
+  @@map("breakers")
+}
+
+model BreakerComponent {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // e.g., "Contact", "Coil", "Trip Unit", etc.
+  description String?
+  partNumber  String?
+  status      String?  // e.g., "Good", "Worn", "Needs Replacement"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  breakerId   String
+  breaker     Breaker  @relation(fields: [breakerId], references: [id], onDelete: Cascade)
+
+  @@map("breaker_components")
+}
+
+// --- UPDATED MODEL ---
+model DataSource {
+  id          String   @id @default(cuid())
+  fileName    String   // Original name of the file, e.g., "station_data_v1.csv"
+  fileUrl     String   @unique // The URL or path to the CSV file
+  description String?  // Optional description of the data source
+  status      String   @default("PENDING") // e.g., PENDING, PROCESSING, COMPLETED, FAILED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // --- NEW RELATION ---
+  // One DataSource can have many Breakers
+  breakers Breaker[]
+
+  @@map("data_sources")
+}
