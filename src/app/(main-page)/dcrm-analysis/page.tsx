@@ -155,29 +155,87 @@ export default function DCRMAnalysis() {
   // State for controlling visible lines on the chart
   const [visibleLines, setVisibleLines] = useState<Record<string, boolean>>({
     resistanceCH1: true,
-    resistanceCH2: true,
-    resistanceCH3: true,
+    resistanceCH2: false,
+    resistanceCH3: false,
     resistanceCH4: false,
     resistanceCH5: false,
     resistanceCH6: false,
-    currentCH1: false,
+    currentCH1: true,
     currentCH2: false,
     currentCH3: false,
     currentCH4: false,
     currentCH5: false,
     currentCH6: false,
-    travelT1: false,
+    travelT1: true,
     travelT2: false,
     travelT3: false,
     travelT4: false,
     travelT5: false,
     travelT6: false,
-    coilCurrentC1: false,
+    coilCurrentC1: true,
     coilCurrentC2: false,
     coilCurrentC3: false,
     coilCurrentC4: false,
     coilCurrentC5: false,
     coilCurrentC6: false,
+
+    // Reference Lines (Initialized to True for Channel 1/Phase T1/Coil C1 by default)
+    ref_resistanceCH1: true,
+    ref_resistanceCH2: false,
+    ref_resistanceCH3: false,
+    ref_resistanceCH4: false,
+    ref_resistanceCH5: false,
+    ref_resistanceCH6: false,
+
+    ref_travelT1: true,
+    ref_travelT2: false,
+    ref_travelT3: false,
+    ref_travelT4: false,
+    ref_travelT5: false,
+    ref_travelT6: false,
+
+    ref_currentCH1: true,
+    ref_currentCH2: false,
+    ref_currentCH3: false,
+    ref_currentCH4: false,
+    ref_currentCH5: false,
+    ref_currentCH6: false,
+
+    ref_coilCurrentC1: true,
+    ref_coilCurrentC2: false,
+    ref_coilCurrentC3: false,
+    ref_coilCurrentC4: false,
+    ref_coilCurrentC5: false,
+    ref_coilCurrentC6: false,
+
+    // Difference Lines (Initialized to True for Channel 1/Phase T1/Coil C1 by default)
+    diff_resistanceCH1: true,
+    diff_resistanceCH2: false,
+    diff_resistanceCH3: false,
+    diff_resistanceCH4: false,
+    diff_resistanceCH5: false,
+    diff_resistanceCH6: false,
+
+    diff_travelT1: true,
+    diff_travelT2: false,
+    diff_travelT3: false,
+    diff_travelT4: false,
+    diff_travelT5: false,
+    diff_travelT6: false,
+
+    diff_currentCH1: true,
+    diff_currentCH2: false,
+    diff_currentCH3: false,
+    diff_currentCH4: false,
+    diff_currentCH5: false,
+    diff_currentCH6: false,
+
+    diff_coilCurrentC1: true,
+    diff_coilCurrentC2: false,
+    diff_coilCurrentC3: false,
+    diff_coilCurrentC4: false,
+    diff_coilCurrentC5: false,
+    diff_coilCurrentC6: false,
   });
 
   // Handle file upload
@@ -651,94 +709,254 @@ export default function DCRMAnalysis() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Checkbox Controls */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Resistance (µOhm)</h4>
-                  {[1, 2, 3, 4, 5, 6].map((ch) => (
-                    <label
-                      key={`res-${ch}`}
-                      className="flex items-center space-x-2 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={visibleLines[`resistanceCH${ch}`]}
-                        onChange={(e) =>
-                          setVisibleLines({
-                            ...visibleLines,
-                            [`resistanceCH${ch}`]: e.target.checked,
-                          })
-                        }
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">Channel {ch}</span>
-                    </label>
-                  ))}
+              {/* Checkbox Controls - Granular Selection */}
+              <div className="space-y-6 bg-gray-50 p-4 rounded-lg">
+                {/* Resistance Controls */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-2 text-red-700">
+                    Resistance Channels (µOhm)
+                  </h4>
+                  <div className="grid grid-cols-7 gap-2 text-sm font-medium text-center bg-gray-200 p-2 rounded-t-md">
+                    <div className="text-left pl-2">Channel</div>
+                    <div className="col-span-2">Test Data</div>
+                    <div className="col-span-2">Ideal (Ref)</div>
+                    <div className="col-span-2">Difference</div>
+                  </div>
+                  <div className="bg-white border rounded-b-md divide-y">
+                    {[1, 2, 3, 4, 5, 6].map((ch) => (
+                      <div
+                        key={`res-row-${ch}`}
+                        className="grid grid-cols-7 gap-2 p-2 items-center hover:bg-gray-50"
+                      >
+                        <div className="font-medium pl-2">CH{ch}</div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`resistanceCH${ch}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`resistanceCH${ch}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-red-600"
+                          />
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`ref_resistanceCH${ch}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`ref_resistanceCH${ch}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-blue-400"
+                          />
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`diff_resistanceCH${ch}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`diff_resistanceCH${ch}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-purple-600"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">DCRM Current (A)</h4>
-                  {[1, 2, 3, 4, 5, 6].map((ch) => (
-                    <label
-                      key={`cur-${ch}`}
-                      className="flex items-center space-x-2 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={visibleLines[`currentCH${ch}`]}
-                        onChange={(e) =>
-                          setVisibleLines({
-                            ...visibleLines,
-                            [`currentCH${ch}`]: e.target.checked,
-                          })
-                        }
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">Channel {ch}</span>
-                    </label>
-                  ))}
+
+                {/* Current Controls */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-2 text-blue-700">
+                    DCRM Current Channels (A)
+                  </h4>
+                  <div className="grid grid-cols-7 gap-2 text-sm font-medium text-center bg-gray-200 p-2 rounded-t-md">
+                    <div className="text-left pl-2">Channel</div>
+                    <div className="col-span-2">Test Data</div>
+                    <div className="col-span-2">Ideal (Ref)</div>
+                    <div className="col-span-2">Difference</div>
+                  </div>
+                  <div className="bg-white border rounded-b-md divide-y">
+                    {[1, 2, 3, 4, 5, 6].map((ch) => (
+                      <div
+                        key={`cur-row-${ch}`}
+                        className="grid grid-cols-7 gap-2 p-2 items-center hover:bg-gray-50"
+                      >
+                        <div className="font-medium pl-2">CH{ch}</div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`currentCH${ch}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`currentCH${ch}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-blue-600"
+                          />
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`ref_currentCH${ch}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`ref_currentCH${ch}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-cyan-400"
+                          />
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`diff_currentCH${ch}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`diff_currentCH${ch}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-purple-600"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Travel (mm)</h4>
-                  {[1, 2, 3, 4, 5, 6].map((t) => (
-                    <label
-                      key={`travel-${t}`}
-                      className="flex items-center space-x-2 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={visibleLines[`travelT${t}`]}
-                        onChange={(e) =>
-                          setVisibleLines({
-                            ...visibleLines,
-                            [`travelT${t}`]: e.target.checked,
-                          })
-                        }
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">Phase T{t}</span>
-                    </label>
-                  ))}
+
+                {/* Travel Controls */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-2 text-green-700">
+                    Travel Phases (mm)
+                  </h4>
+                  <div className="grid grid-cols-7 gap-2 text-sm font-medium text-center bg-gray-200 p-2 rounded-t-md">
+                    <div className="text-left pl-2">Phase</div>
+                    <div className="col-span-2">Test Data</div>
+                    <div className="col-span-2">Ideal (Ref)</div>
+                    <div className="col-span-2">Difference</div>
+                  </div>
+                  <div className="bg-white border rounded-b-md divide-y">
+                    {[1, 2, 3, 4, 5, 6].map((t) => (
+                      <div
+                        key={`travel-row-${t}`}
+                        className="grid grid-cols-7 gap-2 p-2 items-center hover:bg-gray-50"
+                      >
+                        <div className="font-medium pl-2">T{t}</div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`travelT${t}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`travelT${t}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-green-600"
+                          />
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`ref_travelT${t}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`ref_travelT${t}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-green-400"
+                          />
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`diff_travelT${t}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`diff_travelT${t}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-purple-600"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Coil Current (A)</h4>
-                  {[1, 2, 3, 4, 5, 6].map((c) => (
-                    <label
-                      key={`coil-${c}`}
-                      className="flex items-center space-x-2 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={visibleLines[`coilCurrentC${c}`]}
-                        onChange={(e) =>
-                          setVisibleLines({
-                            ...visibleLines,
-                            [`coilCurrentC${c}`]: e.target.checked,
-                          })
-                        }
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">Coil C{c}</span>
-                    </label>
-                  ))}
+
+                {/* Coil Current Controls */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-2 text-purple-700">
+                    Coil Current (A)
+                  </h4>
+                  <div className="grid grid-cols-7 gap-2 text-sm font-medium text-center bg-gray-200 p-2 rounded-t-md">
+                    <div className="text-left pl-2">Coil</div>
+                    <div className="col-span-2">Test Data</div>
+                    <div className="col-span-2">Ideal (Ref)</div>
+                    <div className="col-span-2">Difference</div>
+                  </div>
+                  <div className="bg-white border rounded-b-md divide-y">
+                    {[1, 2, 3, 4, 5, 6].map((c) => (
+                      <div
+                        key={`coil-row-${c}`}
+                        className="grid grid-cols-7 gap-2 p-2 items-center hover:bg-gray-50"
+                      >
+                        <div className="font-medium pl-2">C{c}</div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`coilCurrentC${c}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`coilCurrentC${c}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-purple-600"
+                          />
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`ref_coilCurrentC${c}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`ref_coilCurrentC${c}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-fuchsia-400"
+                          />
+                        </div>
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={visibleLines[`diff_coilCurrentC${c}`]}
+                            onChange={(e) =>
+                              setVisibleLines({
+                                ...visibleLines,
+                                [`diff_coilCurrentC${c}`]: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 accent-purple-600"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -840,77 +1058,145 @@ export default function DCRMAnalysis() {
                         />
                       )}
 
-                      {/* Reference Lines (Dashed) */}
-                      {visibleLines.resistanceCH1 && (
+                      {/* Reference Lines (Solid, Distinct Color) */}
+                      {visibleLines.ref_resistanceCH1 && (
                         <Line
                           type="monotone"
                           dataKey="ref_resistanceCH1"
-                          stroke="#FF0000"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#87CEEB"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH1"
                         />
                       )}
-                      {visibleLines.resistanceCH2 && (
+                      {visibleLines.ref_resistanceCH2 && (
                         <Line
                           type="monotone"
                           dataKey="ref_resistanceCH2"
-                          stroke="#DC143C"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#ADD8E6"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH2"
                         />
                       )}
-                      {visibleLines.resistanceCH3 && (
+                      {visibleLines.ref_resistanceCH3 && (
                         <Line
                           type="monotone"
                           dataKey="ref_resistanceCH3"
-                          stroke="#FF6347"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#B0C4DE"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH3"
                         />
                       )}
-                      {visibleLines.resistanceCH4 && (
+                      {visibleLines.ref_resistanceCH4 && (
                         <Line
                           type="monotone"
                           dataKey="ref_resistanceCH4"
-                          stroke="#FF4500"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#4682B4"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH4"
                         />
                       )}
-                      {visibleLines.resistanceCH5 && (
+                      {visibleLines.ref_resistanceCH5 && (
                         <Line
                           type="monotone"
                           dataKey="ref_resistanceCH5"
-                          stroke="#CD5C5C"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#5F9EA0"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH5"
                         />
                       )}
-                      {visibleLines.resistanceCH6 && (
+                      {visibleLines.ref_resistanceCH6 && (
                         <Line
                           type="monotone"
                           dataKey="ref_resistanceCH6"
-                          stroke="#8B0000"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#6495ED"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH6"
+                        />
+                      )}
+
+                      {/* Difference Lines (Step, Dashed) */}
+                      {visibleLines.diff_resistanceCH1 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_resistanceCH1"
+                          stroke="#800080"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH1"
+                        />
+                      )}
+                      {visibleLines.diff_resistanceCH2 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_resistanceCH2"
+                          stroke="#8B008B"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH2"
+                        />
+                      )}
+                      {visibleLines.diff_resistanceCH3 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_resistanceCH3"
+                          stroke="#9932CC"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH3"
+                        />
+                      )}
+                      {visibleLines.diff_resistanceCH4 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_resistanceCH4"
+                          stroke="#9400D3"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH4"
+                        />
+                      )}
+                      {visibleLines.diff_resistanceCH5 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_resistanceCH5"
+                          stroke="#BA55D3"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH5"
+                        />
+                      )}
+                      {visibleLines.diff_resistanceCH6 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_resistanceCH6"
+                          stroke="#DDA0DD"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH6"
                         />
                       )}
                     </LineChart>
@@ -1013,77 +1299,145 @@ export default function DCRMAnalysis() {
                         />
                       )}
 
-                      {/* Reference Lines (Dashed) */}
-                      {visibleLines.currentCH1 && (
+                      {/* Reference Lines (Solid Blue Group) */}
+                      {visibleLines.ref_currentCH1 && (
                         <Line
                           type="monotone"
                           dataKey="ref_currentCH1"
-                          stroke="#0000FF"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#00FFFF"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH1"
                         />
                       )}
-                      {visibleLines.currentCH2 && (
+                      {visibleLines.ref_currentCH2 && (
                         <Line
                           type="monotone"
                           dataKey="ref_currentCH2"
-                          stroke="#4169E1"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#AFEEEE"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH2"
                         />
                       )}
-                      {visibleLines.currentCH3 && (
+                      {visibleLines.ref_currentCH3 && (
                         <Line
                           type="monotone"
                           dataKey="ref_currentCH3"
-                          stroke="#1E90FF"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#7FFFD4"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH3"
                         />
                       )}
-                      {visibleLines.currentCH4 && (
+                      {visibleLines.ref_currentCH4 && (
                         <Line
                           type="monotone"
                           dataKey="ref_currentCH4"
-                          stroke="#00BFFF"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#40E0D0"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH4"
                         />
                       )}
-                      {visibleLines.currentCH5 && (
+                      {visibleLines.ref_currentCH5 && (
                         <Line
                           type="monotone"
                           dataKey="ref_currentCH5"
-                          stroke="#5F9EA0"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#48D1CC"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH5"
                         />
                       )}
-                      {visibleLines.currentCH6 && (
+                      {visibleLines.ref_currentCH6 && (
                         <Line
                           type="monotone"
                           dataKey="ref_currentCH6"
-                          stroke="#000080"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#00CED1"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal CH6"
+                        />
+                      )}
+
+                      {/* Diff Lines */}
+                      {visibleLines.diff_currentCH1 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_currentCH1"
+                          stroke="#800080"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH1"
+                        />
+                      )}
+                      {visibleLines.diff_currentCH2 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_currentCH2"
+                          stroke="#8B008B"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH2"
+                        />
+                      )}
+                      {visibleLines.diff_currentCH3 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_currentCH3"
+                          stroke="#9932CC"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH3"
+                        />
+                      )}
+                      {visibleLines.diff_currentCH4 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_currentCH4"
+                          stroke="#9400D3"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH4"
+                        />
+                      )}
+                      {visibleLines.diff_currentCH5 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_currentCH5"
+                          stroke="#BA55D3"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH5"
+                        />
+                      )}
+                      {visibleLines.diff_currentCH6 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_currentCH6"
+                          stroke="#DDA0DD"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff CH6"
                         />
                       )}
                     </LineChart>
@@ -1186,77 +1540,145 @@ export default function DCRMAnalysis() {
                         />
                       )}
 
-                      {/* Reference Lines (Dashed) */}
-                      {visibleLines.travelT1 && (
+                      {/* Reference Lines (Solid Green Group) */}
+                      {visibleLines.ref_travelT1 && (
                         <Line
                           type="monotone"
                           dataKey="ref_travelT1"
-                          stroke="#00FF00"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#90EE90"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal T1"
                         />
                       )}
-                      {visibleLines.travelT2 && (
+                      {visibleLines.ref_travelT2 && (
                         <Line
                           type="monotone"
                           dataKey="ref_travelT2"
-                          stroke="#32CD32"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#98FB98"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal T2"
                         />
                       )}
-                      {visibleLines.travelT3 && (
+                      {visibleLines.ref_travelT3 && (
                         <Line
                           type="monotone"
                           dataKey="ref_travelT3"
-                          stroke="#00FA9A"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#8FBC8F"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal T3"
                         />
                       )}
-                      {visibleLines.travelT4 && (
+                      {visibleLines.ref_travelT4 && (
                         <Line
                           type="monotone"
                           dataKey="ref_travelT4"
-                          stroke="#90EE90"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#3CB371"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal T4"
                         />
                       )}
-                      {visibleLines.travelT5 && (
+                      {visibleLines.ref_travelT5 && (
                         <Line
                           type="monotone"
                           dataKey="ref_travelT5"
-                          stroke="#3CB371"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          stroke="#2E8B57"
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal T5"
                         />
                       )}
-                      {visibleLines.travelT6 && (
+                      {visibleLines.ref_travelT6 && (
                         <Line
                           type="monotone"
                           dataKey="ref_travelT6"
                           stroke="#006400"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal T6"
+                        />
+                      )}
+
+                      {/* Diff Lines */}
+                      {visibleLines.diff_travelT1 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_travelT1"
+                          stroke="#800080"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff T1"
+                        />
+                      )}
+                      {visibleLines.diff_travelT2 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_travelT2"
+                          stroke="#8B008B"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff T2"
+                        />
+                      )}
+                      {visibleLines.diff_travelT3 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_travelT3"
+                          stroke="#9932CC"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff T3"
+                        />
+                      )}
+                      {visibleLines.diff_travelT4 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_travelT4"
+                          stroke="#9400D3"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff T4"
+                        />
+                      )}
+                      {visibleLines.diff_travelT5 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_travelT5"
+                          stroke="#BA55D3"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff T5"
+                        />
+                      )}
+                      {visibleLines.diff_travelT6 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_travelT6"
+                          stroke="#DDA0DD"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff T6"
                         />
                       )}
                     </LineChart>
@@ -1366,77 +1788,145 @@ export default function DCRMAnalysis() {
                         />
                       )}
 
-                      {/* Reference Lines (Dashed) */}
-                      {visibleLines.coilCurrentC1 && (
+                      {/* Reference Lines (Solid Purple Group) */}
+                      {visibleLines.ref_coilCurrentC1 && (
                         <Line
                           type="monotone"
                           dataKey="ref_coilCurrentC1"
                           stroke="#FF00FF"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal C1"
                         />
                       )}
-                      {visibleLines.coilCurrentC2 && (
+                      {visibleLines.ref_coilCurrentC2 && (
                         <Line
                           type="monotone"
                           dataKey="ref_coilCurrentC2"
                           stroke="#DA70D6"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal C2"
                         />
                       )}
-                      {visibleLines.coilCurrentC3 && (
+                      {visibleLines.ref_coilCurrentC3 && (
                         <Line
                           type="monotone"
                           dataKey="ref_coilCurrentC3"
                           stroke="#BA55D3"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal C3"
                         />
                       )}
-                      {visibleLines.coilCurrentC4 && (
+                      {visibleLines.ref_coilCurrentC4 && (
                         <Line
                           type="monotone"
                           dataKey="ref_coilCurrentC4"
                           stroke="#9370DB"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal C4"
                         />
                       )}
-                      {visibleLines.coilCurrentC5 && (
+                      {visibleLines.ref_coilCurrentC5 && (
                         <Line
                           type="monotone"
                           dataKey="ref_coilCurrentC5"
                           stroke="#8B008B"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal C5"
                         />
                       )}
-                      {visibleLines.coilCurrentC6 && (
+                      {visibleLines.ref_coilCurrentC6 && (
                         <Line
                           type="monotone"
                           dataKey="ref_coilCurrentC6"
                           stroke="#4B0082"
-                          strokeDasharray="5 5"
-                          strokeWidth={1}
+                          strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
                           name="Ideal C6"
+                        />
+                      )}
+
+                      {/* Diff Lines */}
+                      {visibleLines.diff_coilCurrentC1 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_coilCurrentC1"
+                          stroke="#800080"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff C1"
+                        />
+                      )}
+                      {visibleLines.diff_coilCurrentC2 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_coilCurrentC2"
+                          stroke="#8B008B"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff C2"
+                        />
+                      )}
+                      {visibleLines.diff_coilCurrentC3 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_coilCurrentC3"
+                          stroke="#9932CC"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff C3"
+                        />
+                      )}
+                      {visibleLines.diff_coilCurrentC4 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_coilCurrentC4"
+                          stroke="#9400D3"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff C4"
+                        />
+                      )}
+                      {visibleLines.diff_coilCurrentC5 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_coilCurrentC5"
+                          stroke="#BA55D3"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff C5"
+                        />
+                      )}
+                      {visibleLines.diff_coilCurrentC6 && (
+                        <Line
+                          type="step"
+                          dataKey="diff_coilCurrentC6"
+                          stroke="#DDA0DD"
+                          strokeDasharray="3 3"
+                          strokeWidth={1}
+                          dot={false}
+                          isAnimationActive={false}
+                          name="Diff C6"
                         />
                       )}
                     </LineChart>
