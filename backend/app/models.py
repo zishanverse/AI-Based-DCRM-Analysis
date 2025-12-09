@@ -97,6 +97,28 @@ class UploadResponse(BaseModel):
     diagnosticsTotalRows: int | None = Field(default=None, ge=0)
     advancedDiagnostics: list[AdvancedDiagnosticResult] | None = None
     waveformPreview: WaveformPreview | None = None
+    shap: ShapResponse | None = None
+
+
+class ShapValues(BaseModel):
+    resistance: list[float]
+    travel: list[float]
+    current: list[float]
+
+
+class ShapModelResult(BaseModel):
+    xgboost: ShapValues
+    adaboost: ShapValues
+
+
+class ShapTimeWindow(BaseModel):
+    start_ms: float
+    end_ms: float
+
+
+class ShapResponse(BaseModel):
+    time_windows: list[ShapTimeWindow]
+    shap: ShapModelResult
 
 
 class HeatmapPoint(BaseModel):

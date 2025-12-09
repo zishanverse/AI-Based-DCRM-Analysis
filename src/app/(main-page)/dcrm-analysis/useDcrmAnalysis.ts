@@ -29,6 +29,14 @@ export function useDcrmAnalysis() {
   const [selectedBreakerDetails, setSelectedBreakerDetails] =
     useState<any>(null);
 
+  // SHAP Analysis State
+  const [showShap, setShowShap] = useState(false);
+  const [shapData, setShapData] = useState<any>(null);
+
+  // AI Analysis Logic State
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+
   // Chart Visibility State
   const [visibleLines, setVisibleLines] = useState<Record<string, boolean>>({
     resistanceCH1: true,
@@ -196,7 +204,8 @@ export function useDcrmAnalysis() {
         );
       }
 
-      const response = await fetch("/api/dcrm-data", {
+      // Pass SHAP toggle state
+      const response = await fetch(`/api/dcrm-data?include_shap=${showShap}`, {
         method: "POST",
         body: formData,
       });
@@ -207,12 +216,19 @@ export function useDcrmAnalysis() {
         throw new Error(result.error || "Failed to parse CSV file");
       }
 
-      const { testInfo, testResults, dataPoints, comparison } = result.data;
+      const { testInfo, testResults, dataPoints, comparison, shap } = result.data;
 
       setTestInfo(testInfo);
       setTestResults(testResults);
       setData(dataPoints);
       setComparison(comparison);
+
+      if (shap) {
+        console.log("SHAP Data Received:", shap); // DEBUG
+        setShapData(shap);
+      } else {
+        console.log("No SHAP Data in response"); // DEBUG
+      }
 
       // Determine assessment based on the data
       if (testResults) {
@@ -227,10 +243,6 @@ export function useDcrmAnalysis() {
     }
   };
 
-  // AI Analysis Logic
-  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
-  const [analyzing, setAnalyzing] = useState(false);
-
   const handleAiAnalysis = async () => {
     if (!testResults || !testInfo) return;
 
@@ -239,11 +251,7 @@ export function useDcrmAnalysis() {
       const payload = {
         testResultId: testResults.id || null,
         metrics: testResults,
-        referenceMetrics: selectedBreakerDetails?.dataSource
-          ? {
-              comparisonMatrix: comparison,
-            }
-          : null,
+        comparison: comparison, // Data from both CSVs (diffs & text report)
       };
 
       const res = await fetch("/api/analyze-health", {
@@ -255,8 +263,53 @@ export function useDcrmAnalysis() {
       const json = await res.json();
       if (json.success) {
         setAiAnalysis(json.data);
+
+        // Map AI abnormal ranges to SHAP format for visualization
+        if (json.data.abnormal_ranges && json.data.abnormal_ranges.length > 0) {
+          console.log("AI Detected Abnormal Ranges:", json.data.abnormal_ranges);
+
+          // Create empty scores arrays matching current data length or default 500ms
+          const maxTime = Math.max(...json.data.abnormal_ranges.map((r: any) => r.end_ms), 500);
+          const windows = [];
+
+          // Create temporal windows every 10ms
+          for (let t = 0; t <= maxTime; t += 10) {
+            windows.push({ start_ms: t, end_ms: t + 10 });
+          }
+
+          const shapStructure = {
+            xgboost: {
+              resistance: new Array(windows.length).fill(0),
+              current: new Array(windows.length).fill(0),
+              travel: new Array(windows.length).fill(0)
+            }
+          };
+
+          // Fill scores based on ranges
+          json.data.abnormal_ranges.forEach((range: any) => {
+            const startIndex = Math.floor(range.start_ms / 10);
+            const endIndex = Math.floor(range.end_ms / 10);
+            const type = range.type.toLowerCase();
+
+            for (let i = startIndex; i <= endIndex && i < windows.length; i++) {
+              if (type.includes("resistance")) shapStructure.xgboost.resistance[i] = range.severity;
+              if (type.includes("current")) shapStructure.xgboost.current[i] = range.severity;
+              if (type.includes("travel")) shapStructure.xgboost.travel[i] = range.severity;
+            }
+          });
+
+          const syntheticShap = {
+            time_windows: windows,
+            shap: shapStructure
+          };
+
+          console.log("Synthesized SHAP from AI:", syntheticShap);
+          setShapData(syntheticShap);
+          setShowShap(true); // Auto-enable overlay
+        }
+
       } else {
-        console.error(json.error);
+        console.error("AI Analysis Failed:", json.error, json.details);
       }
     } catch (e) {
       console.error(e);
@@ -296,5 +349,8 @@ export function useDcrmAnalysis() {
     aiAnalysis,
     analyzing,
     handleAiAnalysis,
+    showShap,
+    setShowShap,
+    shapData,
   };
 }

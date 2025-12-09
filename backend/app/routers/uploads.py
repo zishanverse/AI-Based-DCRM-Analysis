@@ -13,7 +13,7 @@ from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
 from ..config import settings
 from ..models import UploadResponse, WaveformPoint, WaveformPreview
-from ..services import advanced_models_service, diagnostics_service
+from ..services import advanced_models_service, diagnostics_service, shap_service
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +163,10 @@ else:
 
 
 @router.post("/", response_model=UploadResponse)
-async def upload_csv(file: UploadFile = File(...)) -> UploadResponse:
+async def upload_csv(
+    file: UploadFile = File(...),
+    include_shap: bool = False  # Changed to simple query param (FastAPI default)
+) -> UploadResponse:
     if not settings.cloudinary_configured:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Cloudinary is not configured")
 
@@ -199,6 +202,15 @@ async def upload_csv(file: UploadFile = File(...)) -> UploadResponse:
     advanced_results: list[dict[str, object]] = []
     limited_dataframe = dataframe.head(MAX_DIAGNOSTIC_ROWS)
     waveform_preview = _extract_waveform_preview(dataframe)
+    
+    # Calculate SHAP if requested
+    shap_result = None
+    if include_shap:
+        try:
+            shap_result = shap_service.calculate_shap_for_waveform(dataframe)
+        except Exception as e:
+            logger.error(f"SHAP calculation error: {e}")
+
     for idx, row in limited_dataframe.iterrows():
         try:
             prediction = diagnostics_service.predict_single(row.to_dict())
@@ -242,4 +254,5 @@ async def upload_csv(file: UploadFile = File(...)) -> UploadResponse:
         diagnosticsTotalRows=len(dataframe),
         advancedDiagnostics=advanced_results or None,
         waveformPreview=waveform_preview,
+        shap=shap_result,
     )

@@ -46,21 +46,28 @@ def _load_models() -> None:
         logger.warning("Model directory %s does not exist", MODEL_DIR)
         return
 
+    # Update path to use the consolidated 'shap_models' subdirectory
+    consolidated_dir = MODEL_DIR / "shap_models"
+    
     try:
-        _xgb_model = joblib.load(MODEL_DIR / "xgb_dcrm_model.pkl")
-        _ada_model = joblib.load(MODEL_DIR / "adaboost_dcrm_model.pkl")
-        _feature_names = joblib.load(MODEL_DIR / "feature_names.pkl")
+        # Load models from the consolidated directory using new filenames
+        # Note: We use the same models trained for SHAP as they are the most recent/valid ones
+        _xgb_model = joblib.load(consolidated_dir / "xgboost_model.pkl")
+        _ada_model = joblib.load(consolidated_dir / "adaboost_model.pkl")
+        
+        # Feature names are now standard
+        _feature_names = joblib.load(consolidated_dir / "feature_names.pkl")
 
-        with open(MODEL_DIR / "label_map.json", "r", encoding="utf-8") as f:
-            raw_map = json.load(f)
-            cleaned: Dict[int, str] = {}
-            for k, v in raw_map.items():
-                normalized = _normalize_label_value(v)
-                if normalized:
-                    cleaned[int(k)] = normalized
-            _label_map = cleaned
+        # Label encoder instead of label_map
+        label_encoder = joblib.load(consolidated_dir / "label_encoder.pkl")
+        
+        # Reconstruct label map from encoder
+        cleaned: Dict[int, str] = {}
+        for idx, label in enumerate(label_encoder.classes_):
+             cleaned[idx] = str(label)
+        _label_map = cleaned
 
-        logger.info("Diagnostics models loaded successfully from %s", MODEL_DIR)
+        logger.info("Diagnostics models loaded successfully from %s", consolidated_dir)
     except Exception as exc:  # pragma: no cover - runtime artifacts
         logger.exception("Failed to load diagnostics models: %s", exc)
         _xgb_model = None
@@ -89,6 +96,11 @@ def ensure_models_ready() -> None:
 def get_feature_names() -> list[str]:
     ensure_models_ready()
     return list(_feature_names)
+
+
+def get_models() -> tuple[Any, Any, list[str]]:
+    ensure_models_ready()
+    return _xgb_model, _ada_model, list(_feature_names)
 
 
 def _build_dataframe_row(features: Mapping[str, Any]) -> pd.DataFrame:

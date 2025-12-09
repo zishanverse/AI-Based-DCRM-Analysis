@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Brain, Sparkles, Activity, Settings, Zap } from "lucide-react";
+import { Brain, Sparkles, Activity, Settings, Zap, AlertTriangle, Calendar, ClipboardCheck } from "lucide-react";
 
 interface ComponentHealth {
   score: number;
@@ -7,12 +7,29 @@ interface ComponentHealth {
   reasoning: string;
 }
 
+interface TechnicalParam {
+  value: number;
+  unit: string;
+  status: "Healthy" | "Warning" | "Critical";
+}
+
 interface AIAnalysisData {
   arcContacts: ComponentHealth;
   mainContacts: ComponentHealth;
   operatingMechanism: ComponentHealth;
+  technicalParameters?: {
+    mainContactResistance: TechnicalParam;
+    arcingContactResistance: TechnicalParam;
+    travelOverlap: TechnicalParam;
+    integratedWear: TechnicalParam;
+  };
   overallScore: number;
   maintenanceRecommendation: string;
+  maintenanceSchedule?: string;
+  maintenancePriority?: "Critical" | "High" | "Medium" | "Low";
+  criticalAlert?: string;
+  differenceAnalysis?: string;
+  abnormal_ranges?: any[];
 }
 
 interface DcrmAIAnalysisProps {
@@ -78,6 +95,19 @@ function HealthGauge({
   );
 }
 
+function StatusBadge({ status }: { status: string }) {
+  const colors = {
+    Healthy: "bg-green-100 text-green-700",
+    Warning: "bg-amber-100 text-amber-700",
+    Critical: "bg-red-100 text-red-700",
+  };
+  return (
+    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${colors[status as keyof typeof colors] || "bg-gray-100"}`}>
+      {status}
+    </span>
+  );
+}
+
 export function DcrmAIAnalysis({
   analysis,
   loading,
@@ -134,12 +164,14 @@ export function DcrmAIAnalysis({
 
   if (!analysis) return null;
 
+  const isCritical = analysis.maintenancePriority === "Critical" || analysis.overallScore < 50;
+
   return (
-    <Card className="mb-6 border-2 border-indigo-100 shadow-md overflow-hidden print:shadow-none print:border">
-      <CardHeader className="bg-linear-to-r from-indigo-50 to-white border-b border-indigo-50 flex flex-row items-center justify-between">
+    <Card className={`mb-6 border-2 shadow-md overflow-hidden print:shadow-none print:border ${isCritical ? 'border-red-200' : 'border-indigo-100'}`}>
+      <CardHeader className={`${isCritical ? 'bg-red-50 border-red-100' : 'bg-linear-to-r from-indigo-50 to-white border-indigo-50'} border-b flex flex-row items-center justify-between`}>
         <div>
-          <CardTitle className="flex items-center gap-2 text-indigo-900">
-            <Brain className="w-5 h-5 text-indigo-600" />
+          <CardTitle className={`flex items-center gap-2 ${isCritical ? 'text-red-900' : 'text-indigo-900'}`}>
+            <Brain className={`w-5 h-5 ${isCritical ? 'text-red-600' : 'text-indigo-600'}`} />
             AI Health Assessment
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
@@ -151,19 +183,44 @@ export function DcrmAIAnalysis({
             Overall Health Score:
           </span>
           <span
-            className={`text-lg font-bold ${
-              analysis.overallScore >= 80
-                ? "text-emerald-600"
-                : analysis.overallScore >= 50
+            className={`text-lg font-bold ${analysis.overallScore >= 80
+              ? "text-emerald-600"
+              : analysis.overallScore >= 50
                 ? "text-amber-600"
                 : "text-red-600"
-            }`}
+              }`}
           >
             {analysis.overallScore}/100
           </span>
         </div>
       </CardHeader>
       <CardContent className="p-0">
+
+        {/* Critical Alert Banner */}
+        {(isCritical || analysis.criticalAlert) && (
+          <div className="bg-red-100 p-3 flex items-start gap-3 border-b border-red-200">
+            <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-bold text-red-800">Use Caution: Abnormality Detected</h4>
+              <p className="text-xs text-red-700 mt-1">
+                {analysis.criticalAlert || "Critical deviations detected. maintenance required immediately."}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Comparison / Difference Analysis Summary */}
+        {analysis.differenceAnalysis && (
+          <div className="p-4 bg-slate-50 border-b border-slate-100">
+            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Activity className="w-3 h-3" /> Deviation Analysis
+            </h4>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              {analysis.differenceAnalysis}
+            </p>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
           {/* Arc Contacts */}
           <div className="p-4 flex flex-col items-center text-center hover:bg-gray-50 transition-colors group">
@@ -174,13 +231,12 @@ export function DcrmAIAnalysis({
             />
             <div className="mt-3">
               <span
-                className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mb-2 ${
-                  analysis.arcContacts.status === "Healthy"
-                    ? "bg-green-100 text-green-700"
-                    : analysis.arcContacts.status === "Critical"
+                className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mb-2 ${analysis.arcContacts.status === "Healthy"
+                  ? "bg-green-100 text-green-700"
+                  : analysis.arcContacts.status === "Critical"
                     ? "bg-red-100 text-red-700"
                     : "bg-amber-100 text-amber-700"
-                }`}
+                  }`}
               >
                 {analysis.arcContacts.status}
               </span>
@@ -199,13 +255,12 @@ export function DcrmAIAnalysis({
             />
             <div className="mt-3">
               <span
-                className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mb-2 ${
-                  analysis.mainContacts.status === "Healthy"
-                    ? "bg-green-100 text-green-700"
-                    : analysis.mainContacts.status === "Critical"
+                className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mb-2 ${analysis.mainContacts.status === "Healthy"
+                  ? "bg-green-100 text-green-700"
+                  : analysis.mainContacts.status === "Critical"
                     ? "bg-red-100 text-red-700"
                     : "bg-amber-100 text-amber-700"
-                }`}
+                  }`}
               >
                 {analysis.mainContacts.status}
               </span>
@@ -224,13 +279,12 @@ export function DcrmAIAnalysis({
             />
             <div className="mt-3">
               <span
-                className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mb-2 ${
-                  analysis.operatingMechanism.status === "Healthy"
-                    ? "bg-green-100 text-green-700"
-                    : analysis.operatingMechanism.status === "Critical"
+                className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mb-2 ${analysis.operatingMechanism.status === "Healthy"
+                  ? "bg-green-100 text-green-700"
+                  : analysis.operatingMechanism.status === "Critical"
                     ? "bg-red-100 text-red-700"
                     : "bg-amber-100 text-amber-700"
-                }`}
+                  }`}
               >
                 {analysis.operatingMechanism.status}
               </span>
@@ -241,14 +295,84 @@ export function DcrmAIAnalysis({
           </div>
         </div>
 
+        {/* Technical Parameters Grid */}
+        {analysis.technicalParameters && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border-t border-gray-100 bg-gray-50/50">
+            <div className="p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
+              <p className="text-xs text-gray-500 mb-1">Main Contact (Rp)</p>
+              <div className="flex items-end gap-2 mb-1">
+                <span className="text-lg font-bold text-gray-800">{analysis.technicalParameters.mainContactResistance?.value ?? "--"}</span>
+                <span className="text-xs text-gray-500 mb-1">{analysis.technicalParameters.mainContactResistance?.unit}</span>
+              </div>
+              <StatusBadge status={analysis.technicalParameters.mainContactResistance?.status ?? "Healthy"} />
+            </div>
+            <div className="p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
+              <p className="text-xs text-gray-500 mb-1">Arcing Contact (Ra)</p>
+              <div className="flex items-end gap-2 mb-1">
+                <span className="text-lg font-bold text-gray-800">{analysis.technicalParameters.arcingContactResistance?.value ?? "--"}</span>
+                <span className="text-xs text-gray-500 mb-1">{analysis.technicalParameters.arcingContactResistance?.unit}</span>
+              </div>
+              <StatusBadge status={analysis.technicalParameters.arcingContactResistance?.status ?? "Healthy"} />
+            </div>
+            <div className="p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
+              <p className="text-xs text-gray-500 mb-1">Travel Overlap</p>
+              <div className="flex items-end gap-2 mb-1">
+                <span className="text-lg font-bold text-gray-800">{analysis.technicalParameters.travelOverlap?.value ?? "--"}</span>
+                <span className="text-xs text-gray-500 mb-1">{analysis.technicalParameters.travelOverlap?.unit}</span>
+              </div>
+              <StatusBadge status={analysis.technicalParameters.travelOverlap?.status ?? "Healthy"} />
+            </div>
+            <div className="p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
+              <p className="text-xs text-gray-500 mb-1">Integrated Wear</p>
+              <div className="flex items-end gap-2 mb-1">
+                <span className="text-lg font-bold text-gray-800">{analysis.technicalParameters.integratedWear?.value ?? "--"}</span>
+                <span className="text-xs text-gray-500 mb-1">{analysis.technicalParameters.integratedWear?.unit}</span>
+              </div>
+              <StatusBadge status={analysis.technicalParameters.integratedWear?.status ?? "Healthy"} />
+            </div>
+          </div>
+        )}
+
         {/* Recommendation Footer */}
         <div className="bg-indigo-50/50 p-4 border-t border-indigo-100">
-          <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1 flex items-center gap-2">
-            <Sparkles className="w-3 h-3" /> AI Recommendation
-          </h4>
-          <p className="text-sm text-indigo-800 italic">
-            "{analysis.maintenanceRecommendation}"
-          </p>
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="flex-1">
+              <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <ClipboardCheck className="w-3 h-3" /> AI Recommendation
+              </h4>
+              <p className="text-sm text-indigo-800 italic bg-white/50 p-3 rounded-md border border-indigo-100">
+                "{analysis.maintenanceRecommendation}"
+              </p>
+            </div>
+
+            {/* Maintenance Schedule Block */}
+            <div className="shrink-0 flex flex-col gap-2 min-w-[200px]">
+              <div className="bg-white p-3 rounded-lg border border-indigo-100 shadow-sm">
+                <h5 className="text-xs text-indigo-500 font-bold uppercase mb-1 flex items-center gap-1">
+                  <Calendar className="w-3 h-3" /> Schedule
+                </h5>
+                <p className="text-sm font-bold text-indigo-900">
+                  {analysis.maintenanceSchedule || "Condition Based"}
+                </p>
+              </div>
+
+              <div className="bg-white p-3 rounded-lg border border-indigo-100 shadow-sm">
+                <h5 className="text-xs text-indigo-500 font-bold uppercase mb-1 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> Priority
+                </h5>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${analysis.maintenancePriority === 'Critical' ? 'bg-red-500' :
+                      analysis.maintenancePriority === 'High' ? 'bg-orange-500' :
+                        analysis.maintenancePriority === 'Medium' ? 'bg-yellow-500' :
+                          'bg-blue-500'
+                    }`}></span>
+                  <p className="text-sm font-bold text-indigo-900">
+                    {analysis.maintenancePriority || "Standard"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

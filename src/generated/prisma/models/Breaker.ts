@@ -284,9 +284,9 @@ export type BreakerWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Breaker"> | Date | string
   stationId?: Prisma.StringFilter<"Breaker"> | string
   dataSourceId?: Prisma.StringNullableFilter<"Breaker"> | string | null
-  station?: Prisma.XOR<Prisma.StationScalarRelationFilter, Prisma.StationWhereInput>
   components?: Prisma.BreakerComponentListRelationFilter
   dataSource?: Prisma.XOR<Prisma.DataSourceNullableScalarRelationFilter, Prisma.DataSourceWhereInput> | null
+  station?: Prisma.XOR<Prisma.StationScalarRelationFilter, Prisma.StationWhereInput>
   testResults?: Prisma.TestResultListRelationFilter
 }
 
@@ -304,9 +304,9 @@ export type BreakerOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
   dataSourceId?: Prisma.SortOrderInput | Prisma.SortOrder
-  station?: Prisma.StationOrderByWithRelationInput
   components?: Prisma.BreakerComponentOrderByRelationAggregateInput
   dataSource?: Prisma.DataSourceOrderByWithRelationInput
+  station?: Prisma.StationOrderByWithRelationInput
   testResults?: Prisma.TestResultOrderByRelationAggregateInput
 }
 
@@ -327,9 +327,9 @@ export type BreakerWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Breaker"> | Date | string
   stationId?: Prisma.StringFilter<"Breaker"> | string
   dataSourceId?: Prisma.StringNullableFilter<"Breaker"> | string | null
-  station?: Prisma.XOR<Prisma.StationScalarRelationFilter, Prisma.StationWhereInput>
   components?: Prisma.BreakerComponentListRelationFilter
   dataSource?: Prisma.XOR<Prisma.DataSourceNullableScalarRelationFilter, Prisma.DataSourceWhereInput> | null
+  station?: Prisma.XOR<Prisma.StationScalarRelationFilter, Prisma.StationWhereInput>
   testResults?: Prisma.TestResultListRelationFilter
 }, "id">
 
@@ -385,9 +385,9 @@ export type BreakerCreateInput = {
   installationDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  station: Prisma.StationCreateNestedOneWithoutBreakersInput
   components?: Prisma.BreakerComponentCreateNestedManyWithoutBreakerInput
   dataSource?: Prisma.DataSourceCreateNestedOneWithoutBreakersInput
+  station: Prisma.StationCreateNestedOneWithoutBreakersInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutBreakerInput
 }
 
@@ -421,9 +421,9 @@ export type BreakerUpdateInput = {
   installationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
   components?: Prisma.BreakerComponentUpdateManyWithoutBreakerNestedInput
   dataSource?: Prisma.DataSourceUpdateOneWithoutBreakersNestedInput
+  station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutBreakerNestedInput
 }
 
@@ -771,9 +771,9 @@ export type BreakerCreateWithoutTestResultsInput = {
   installationDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  station: Prisma.StationCreateNestedOneWithoutBreakersInput
   components?: Prisma.BreakerComponentCreateNestedManyWithoutBreakerInput
   dataSource?: Prisma.DataSourceCreateNestedOneWithoutBreakersInput
+  station: Prisma.StationCreateNestedOneWithoutBreakersInput
 }
 
 export type BreakerUncheckedCreateWithoutTestResultsInput = {
@@ -821,9 +821,9 @@ export type BreakerUpdateWithoutTestResultsInput = {
   installationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
   components?: Prisma.BreakerComponentUpdateManyWithoutBreakerNestedInput
   dataSource?: Prisma.DataSourceUpdateOneWithoutBreakersNestedInput
+  station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
 }
 
 export type BreakerUncheckedUpdateWithoutTestResultsInput = {
@@ -855,8 +855,8 @@ export type BreakerCreateWithoutComponentsInput = {
   installationDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  station: Prisma.StationCreateNestedOneWithoutBreakersInput
   dataSource?: Prisma.DataSourceCreateNestedOneWithoutBreakersInput
+  station: Prisma.StationCreateNestedOneWithoutBreakersInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutBreakerInput
 }
 
@@ -905,8 +905,8 @@ export type BreakerUpdateWithoutComponentsInput = {
   installationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
   dataSource?: Prisma.DataSourceUpdateOneWithoutBreakersNestedInput
+  station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutBreakerNestedInput
 }
 
@@ -939,8 +939,8 @@ export type BreakerCreateWithoutDataSourceInput = {
   installationDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  station: Prisma.StationCreateNestedOneWithoutBreakersInput
   components?: Prisma.BreakerComponentCreateNestedManyWithoutBreakerInput
+  station: Prisma.StationCreateNestedOneWithoutBreakersInput
   testResults?: Prisma.TestResultCreateNestedManyWithoutBreakerInput
 }
 
@@ -1078,8 +1078,8 @@ export type BreakerUpdateWithoutDataSourceInput = {
   installationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
   components?: Prisma.BreakerComponentUpdateManyWithoutBreakerNestedInput
+  station?: Prisma.StationUpdateOneRequiredWithoutBreakersNestedInput
   testResults?: Prisma.TestResultUpdateManyWithoutBreakerNestedInput
 }
 
@@ -1169,9 +1169,9 @@ export type BreakerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   updatedAt?: boolean
   stationId?: boolean
   dataSourceId?: boolean
-  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
   components?: boolean | Prisma.Breaker$componentsArgs<ExtArgs>
   dataSource?: boolean | Prisma.Breaker$dataSourceArgs<ExtArgs>
+  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
   testResults?: boolean | Prisma.Breaker$testResultsArgs<ExtArgs>
   _count?: boolean | Prisma.BreakerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["breaker"]>
@@ -1190,8 +1190,8 @@ export type BreakerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   updatedAt?: boolean
   stationId?: boolean
   dataSourceId?: boolean
-  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
   dataSource?: boolean | Prisma.Breaker$dataSourceArgs<ExtArgs>
+  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["breaker"]>
 
 export type BreakerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1208,8 +1208,8 @@ export type BreakerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   updatedAt?: boolean
   stationId?: boolean
   dataSourceId?: boolean
-  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
   dataSource?: boolean | Prisma.Breaker$dataSourceArgs<ExtArgs>
+  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["breaker"]>
 
 export type BreakerSelectScalar = {
@@ -1230,27 +1230,27 @@ export type BreakerSelectScalar = {
 
 export type BreakerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "type" | "manufacturer" | "model" | "voltage" | "current" | "status" | "installationDate" | "createdAt" | "updatedAt" | "stationId" | "dataSourceId", ExtArgs["result"]["breaker"]>
 export type BreakerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
   components?: boolean | Prisma.Breaker$componentsArgs<ExtArgs>
   dataSource?: boolean | Prisma.Breaker$dataSourceArgs<ExtArgs>
+  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
   testResults?: boolean | Prisma.Breaker$testResultsArgs<ExtArgs>
   _count?: boolean | Prisma.BreakerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type BreakerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
   dataSource?: boolean | Prisma.Breaker$dataSourceArgs<ExtArgs>
+  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
 }
 export type BreakerIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
   dataSource?: boolean | Prisma.Breaker$dataSourceArgs<ExtArgs>
+  station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
 }
 
 export type $BreakerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Breaker"
   objects: {
-    station: Prisma.$StationPayload<ExtArgs>
     components: Prisma.$BreakerComponentPayload<ExtArgs>[]
     dataSource: Prisma.$DataSourcePayload<ExtArgs> | null
+    station: Prisma.$StationPayload<ExtArgs>
     testResults: Prisma.$TestResultPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1661,9 +1661,9 @@ readonly fields: BreakerFieldRefs;
  */
 export interface Prisma__BreakerClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  station<T extends Prisma.StationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StationDefaultArgs<ExtArgs>>): Prisma.Prisma__StationClient<runtime.Types.Result.GetResult<Prisma.$StationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   components<T extends Prisma.Breaker$componentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Breaker$componentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BreakerComponentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dataSource<T extends Prisma.Breaker$dataSourceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Breaker$dataSourceArgs<ExtArgs>>): Prisma.Prisma__DataSourceClient<runtime.Types.Result.GetResult<Prisma.$DataSourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  station<T extends Prisma.StationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StationDefaultArgs<ExtArgs>>): Prisma.Prisma__StationClient<runtime.Types.Result.GetResult<Prisma.$StationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   testResults<T extends Prisma.Breaker$testResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Breaker$testResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.

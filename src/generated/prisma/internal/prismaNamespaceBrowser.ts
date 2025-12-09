@@ -101,10 +101,10 @@ export const TestResultScalarFieldEnum = {
   travelT1Max: 'travelT1Max',
   velocityT1Max: 'velocityT1Max',
   resistanceCH1Avg: 'resistanceCH1Avg',
-  componentHealth: 'componentHealth',
   status: 'status',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  componentHealth: 'componentHealth'
 } as const
 
 export type TestResultScalarFieldEnum = (typeof TestResultScalarFieldEnum)[keyof typeof TestResultScalarFieldEnum]

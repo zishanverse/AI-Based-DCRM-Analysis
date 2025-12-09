@@ -27,6 +27,7 @@ export interface DCRMDataPoint {
 }
 
 export interface TestResult {
+  id?: string;
   resistanceCH1Avg: number;
   resistanceCH2Avg: number;
   resistanceCH3Avg: number;

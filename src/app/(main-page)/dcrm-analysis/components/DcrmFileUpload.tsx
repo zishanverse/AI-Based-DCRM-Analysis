@@ -17,11 +17,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useState } from "react";
-import { 
-  Upload, 
-  FileCheck, 
-  FileX, 
-  Trash2, 
+import {
+  Upload,
+  FileCheck,
+  FileX,
+  Trash2,
   Download,
   RefreshCw,
   AlertCircle,
@@ -43,6 +43,8 @@ interface DcrmFileUploadProps {
   onBreakerChange: (val: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onReferenceFileUpdated?: () => void; // Callback to refresh breaker details
+  showShap: boolean;
+  onShapChange: (val: boolean) => void;
 }
 
 export function DcrmFileUpload({
@@ -60,6 +62,8 @@ export function DcrmFileUpload({
   onBreakerChange,
   onSubmit,
   onReferenceFileUpdated,
+  showShap,
+  onShapChange,
 }: DcrmFileUploadProps) {
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
   const [uploadingReference, setUploadingReference] = useState(false);
@@ -111,11 +115,11 @@ export function DcrmFileUpload({
         setReferenceSuccess(result.message);
         setReferenceFile(null);
         setShowReferenceUpload(false);
-        
+
         // Reset file input
         const fileInput = document.getElementById('reference-file') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
-        
+
         // Callback to refresh breaker details
         if (onReferenceFileUpdated) {
           onReferenceFileUpdated();
@@ -133,7 +137,7 @@ export function DcrmFileUpload({
 
   const handleDeleteReference = async () => {
     if (!selectedBreaker) return;
-    
+
     if (!confirm("Are you sure you want to remove the reference file? This will affect future test comparisons.")) {
       return;
     }
@@ -263,7 +267,7 @@ export function DcrmFileUpload({
                       Ideal/Reference File
                     </h4>
                   </div>
-                  
+
                   {hasReferenceFile && (
                     <div className="flex gap-2">
                       <Button
@@ -287,7 +291,7 @@ export function DcrmFileUpload({
                       </Button>
                     </div>
                   )}
-                  
+
                   {!hasReferenceFile && (
                     <Button
                       type="button"
@@ -426,6 +430,23 @@ export function DcrmFileUpload({
             )}
           </div>
 
+          {/* Feature Toggles */}
+          <div className="flex items-center space-x-2 border p-3 rounded-md bg-gray-50">
+            <input
+              id="shap-toggle"
+              type="checkbox"
+              checked={showShap}
+              onChange={(e) => onShapChange(e.target.checked)}
+              className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+            />
+            <label htmlFor="shap-toggle" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+              Enable AI Fault Explanation (SHAP)
+              <span className="block text-xs text-gray-500 font-normal">
+                Highlights potential faulty regions on the waveform
+              </span>
+            </label>
+          </div>
+
           {error && (
             <Alert variant="destructive">
               <AlertTitle>Error</AlertTitle>
@@ -433,8 +454,8 @@ export function DcrmFileUpload({
             </Alert>
           )}
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={loading || !file || !selectedBreaker}
             className="w-full"
           >

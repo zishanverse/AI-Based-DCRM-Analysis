@@ -12,3 +12,4 @@ python-dotenv
 supabase
 passlib[bcrypt]
 tensorflow
+shap>=0.44.0

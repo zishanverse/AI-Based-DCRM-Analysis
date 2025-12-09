@@ -33,18 +33,6 @@ export function DcrmHeader({ assessment, showAssessment }: DcrmHeaderProps) {
             >
               <Printer className="h-4 w-4" /> Export Report
             </Button>
-
-            <Badge
-              className={`text-sm px-4 py-1.5 ${
-                assessment === "HEALTHY"
-                  ? "bg-emerald-500 hover:bg-emerald-600"
-                  : assessment === "NEEDS MAINTENANCE"
-                  ? "bg-amber-500 hover:bg-amber-600"
-                  : "bg-red-600 hover:bg-red-700"
-              }`}
-            >
-              {assessment}
-            </Badge>
           </>
         )}
       </div>
@@ -53,13 +41,12 @@ export function DcrmHeader({ assessment, showAssessment }: DcrmHeaderProps) {
       <div className="hidden print:block text-right">
         <h2 className="text-lg font-bold">Assessment Result</h2>
         <div
-          className={`text-xl font-bold uppercase ${
-            assessment === "HEALTHY"
+          className={`text-xl font-bold uppercase ${assessment === "HEALTHY"
               ? "text-green-600"
               : assessment === "CRITICAL"
-              ? "text-red-600"
-              : "text-amber-600"
-          }`}
+                ? "text-red-600"
+                : "text-amber-600"
+            }`}
         >
           {assessment}
         </div>

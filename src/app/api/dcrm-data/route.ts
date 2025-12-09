@@ -61,20 +61,69 @@ export async function POST(request: NextRequest) {
       const refRes = referenceData.testResults;
       const newRes = data.testResults;
 
+      // Calculate diffs for all available metrics
+      const calculateDiff = (key: string) => {
+        const newVal = newRes[key];
+        const refVal = refRes[key];
+        if (typeof newVal === 'number' && typeof refVal === 'number') {
+          return newVal - refVal;
+        }
+        return 0;
+      };
+
+      const metricsDiff: Record<string, number> = {};
+      Object.keys(newRes).forEach(key => {
+        metricsDiff[`${key}Diff`] = calculateDiff(key);
+      });
+
+      // Detect Spikes / Abnormalities in Resistance
+      // We'll scan the datapoints and look for significant deviations vs reference
+      const abnormalities: string[] = [];
+      let maxResistanceDev = 0;
+
+      const RESISTANCE_THRESHOLD = 500; // uOhm deviation to consider "Abnormal Spike" - tunable
+
+      // We need to iterate the data points to find specific spikes
+      // Assuming data.dataPoints and referenceData.dataPoints are aligned by index
+      const limit = Math.min(data.dataPoints.length, referenceData.dataPoints.length);
+
+      for (let i = 0; i < limit; i++) {
+        const pt = data.dataPoints[i];
+        const ref = referenceData.dataPoints[i];
+
+        // Check CH1-CH6 Resistance
+        [1, 2, 3, 4, 5, 6].forEach(ch => {
+          const key = `resistanceCH${ch}` as keyof DataPoint; // Cast to known key
+          const val = pt[key] as number;
+          const refVal = ref[key] as number;
+
+          if (val !== undefined && refVal !== undefined && val < 8000 && refVal < 8000) {
+            const diff = val - refVal;
+            if (Math.abs(diff) > maxResistanceDev) maxResistanceDev = Math.abs(diff);
+
+            if (Math.abs(diff) > RESISTANCE_THRESHOLD) {
+              // Initial simple spike detection
+              // We limit the log size to avoid context overflow
+              if (abnormalities.length < 20) {
+                abnormalities.push(`Time ${pt.time.toFixed(1)}ms: CH${ch} Deviation ${diff > 0 ? '+' : ''}${diff.toFixed(0)}μΩ (Test: ${val}, Ref: ${refVal})`);
+              }
+            }
+          }
+        });
+      }
+
       comparison = {
-        notes: "Difference calculated: New - Ideal",
-        metrics: {
-          travelT1MaxDiff: newRes.travelT1Max - refRes.travelT1Max,
-          velocityT1MaxDiff: newRes.velocityT1Max - refRes.velocityT1Max,
-          resistanceCH1AvgDiff:
-            newRes.resistanceCH1Avg - refRes.resistanceCH1Avg,
-        },
+        notes: "Difference calculated: New - Ideal. Includes Spike Analysis.",
+        metrics: metricsDiff,
+        abnormalityReport: abnormalities.length > 0 ? abnormalities.join("\n") : "No significant resistance spikes detected (>500μΩ).",
+        maxResistanceDeviation: maxResistanceDev
       };
 
       // Workflow Log
       console.log("--- DCRM COMPARISON WORKFLOW EXECUTED ---");
       console.log("Breaker Reference Data Found. Comparing...");
-      console.log("Comparison Results:", JSON.stringify(comparison, null, 2));
+      console.log(`Max Resistance Deviation: ${maxResistanceDev} μΩ`);
+      console.log("Abnormalities Sample:", abnormalities.slice(0, 3));
       console.log("-----------------------------------------");
 
       // Merge reference data into dataPoints for easy charting
@@ -168,17 +217,45 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // SHAP Analysis Integration
+    let shapResult = null;
+    const includeShap = request.nextUrl.searchParams.get("include_shap") === "true";
+
+    if (includeShap) {
+      try {
+        const backendFormData = new FormData();
+        backendFormData.append("file", new Blob([text], { type: "text/csv" }), file.name);
+
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        // Ensure trailing slash to avoid 307 redirects which can drop POST body
+        const response = await fetch(`${backendUrl}/api/v1/uploads/?include_shap=true`, {
+          method: "POST",
+          body: backendFormData,
+        });
+
+        if (response.ok) {
+          const shapJson = await response.json();
+          shapResult = shapJson.shap;
+        } else {
+          console.error("SHAP Backend Error:", response.statusText);
+        }
+      } catch (err) {
+        console.error("SHAP Proxy Error:", err);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: {
         ...data,
         referenceData: referenceData
           ? {
-              dataPoints: referenceData.dataPoints,
-              testResults: referenceData.testResults,
-            }
+            dataPoints: referenceData.dataPoints,
+            testResults: referenceData.testResults,
+          }
           : null,
         comparison: comparison,
+        shap: shapResult, // Include SHAP in response
       },
     });
   } catch (error) {

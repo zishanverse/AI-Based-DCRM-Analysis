@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -14,65 +8,44 @@ datasource db {
 }
 
 model Station {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
   location    String?
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  breakers Breaker[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  breakers    Breaker[]
 
   @@map("stations")
 }
 
-// Add this new model to your schema
-
 model TestResult {
-  id        String  @id @default(cuid())
-  breakerId String
-  breaker   Breaker @relation(fields: [breakerId], references: [id], onDelete: Cascade)
-
-  // Test metadata
-  testDate DateTime @default(now())
-  testType String   @default("DCRM") // Type of test performed
-  operator String? // Who performed the test
-  notes    String? // Any additional notes
-
-  // File information
-  fileName String
-  fileUrl  String? // If you want to store the original file
-
-  // Reference data info
+  id                String   @id @default(cuid())
+  breakerId         String
+  testDate          DateTime @default(now())
+  testType          String   @default("DCRM")
+  operator          String?
+  notes             String?
+  fileName          String
+  fileUrl           String?
   referenceFileName String?
   referenceFileUrl  String?
-
-  // Complete test data stored as JSON
-  testData Json // Stores the entire parsed data
-
-  // Key metrics for quick querying (denormalized for performance)
-  travelT1Max      Float?
-  velocityT1Max    Float?
-  resistanceCH1Avg Float?
-
-  // --- NEW: Component-wise AI Health Assessment ---
-  // Structure: { arcContacts: {score, reasoning}, mainContacts: {score, reasoning}, operatingMechanism: {score, reasoning}, overallScore: number }
-  componentHealth Json?
-
-  // Pass/Fail status
-  status String @default("COMPLETED") // COMPLETED, FAILED, etc.
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  testData          Json
+  travelT1Max       Float?
+  velocityT1Max     Float?
+  resistanceCH1Avg  Float?
+  status            String   @default("COMPLETED")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  componentHealth   Json?
+  breaker           Breaker  @relation(fields: [breakerId], references: [id], onDelete: Cascade)
 
   @@index([breakerId, testDate])
   @@map("test_results")
 }
 
-// Update the Breaker model to include the relation
 model Breaker {
-  id               String    @id @default(cuid())
+  id               String             @id @default(cuid())
   name             String
   type             String
   manufacturer     String
@@ -81,18 +54,14 @@ model Breaker {
   current          Float?
   status           String?
   installationDate DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  stationId  String
-  station    Station            @relation(fields: [stationId], references: [id], onDelete: Cascade)
-  components BreakerComponent[]
-
-  dataSourceId String?
-  dataSource   DataSource? @relation(fields: [dataSourceId], references: [id], onDelete: SetNull)
-
-  // NEW: Relation to test results
-  testResults TestResult[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  stationId        String
+  dataSourceId     String?
+  components       BreakerComponent[]
+  dataSource       DataSource?        @relation(fields: [dataSourceId], references: [id])
+  station          Station            @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  testResults      TestResult[]
 
   @@map("breakers")
 }
@@ -100,33 +69,27 @@ model Breaker {
 model BreakerComponent {
   id          String   @id @default(cuid())
   name        String
-  type        String // e.g., "Contact", "Coil", "Trip Unit", etc.
+  type        String
   description String?
   partNumber  String?
-  status      String? // e.g., "Good", "Worn", "Needs Replacement"
+  status      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  // Relations
-  breakerId String
-  breaker   Breaker @relation(fields: [breakerId], references: [id], onDelete: Cascade)
+  breakerId   String
+  breaker     Breaker  @relation(fields: [breakerId], references: [id], onDelete: Cascade)
 
   @@map("breaker_components")
 }
 
-// --- UPDATED MODEL ---
 model DataSource {
-  id          String   @id @default(cuid())
-  fileName    String // Original name of the file, e.g., "station_data_v1.csv"
-  fileUrl     String   @unique // The URL or path to the CSV file
-  description String? // Optional description of the data source
-  status      String   @default("PENDING") // e.g., PENDING, PROCESSING, COMPLETED, FAILED
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // --- NEW RELATION ---
-  // One DataSource can have many Breakers
-  breakers Breaker[]
+  id          String    @id @default(cuid())
+  fileName    String
+  fileUrl     String    @unique
+  description String?
+  status      String    @default("PENDING")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  breakers    Breaker[]
 
   @@map("data_sources")
 }

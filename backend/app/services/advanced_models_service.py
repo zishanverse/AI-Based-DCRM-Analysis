@@ -15,7 +15,7 @@ from tensorflow import keras
 
 logger = logging.getLogger(__name__)
 
-ADVANCED_MODEL_DIR = Path(os.getenv("ADVANCED_MODEL_DIR", "new models"))
+ADVANCED_MODEL_DIR = Path(__file__).resolve().parent.parent.parent / "dcrm_models" / "shap_models"
 _DROP_COLUMNS = {
     "breaker_id",
     "bay_id",
@@ -237,7 +237,7 @@ def _format_probabilities(probabilities: Iterable[float]) -> Dict[str, float]:
     result: Dict[str, float] = {}
     for idx, prob in enumerate(probabilities):
         label = _label_encoder.inverse_transform([idx])[0]
-        result[label] = float(prob * 100)
+        result[str(label)] = float(prob * 100)
     return result
 
 
@@ -250,12 +250,12 @@ def predict_row(row: Mapping[str, Any]) -> Dict[str, Any]:
     try:
         xgb_pred_idx = int(_xgb_model.predict(processed)[0])
         xgb_proba = _xgb_model.predict_proba(processed)[0]
-        xgb_label = _label_encoder.inverse_transform([xgb_pred_idx])[0]
+        xgb_label = str(_label_encoder.inverse_transform([xgb_pred_idx])[0])
         xgb_conf = float(xgb_proba[xgb_pred_idx] * 100)
 
         ada_pred_idx = int(_ada_model.predict(processed)[0])
         ada_proba = _ada_model.predict_proba(processed)[0]
-        ada_label = _label_encoder.inverse_transform([ada_pred_idx])[0]
+        ada_label = str(_label_encoder.inverse_transform([ada_pred_idx])[0])
         ada_conf = float(ada_proba[ada_pred_idx] * 100)
 
         reconstruction = _autoencoder.predict(processed, verbose=0)

@@ -37,6 +37,15 @@ A comprehensive Digital Contact Resistance Monitoring (DCRM) platform built for 
 - **Ministry of Power Theming**: Professional color scheme (Deep Blue, Saffron, Green).
 - **Interactive Widgets**: Real-time comparison metrics (Max Travel, Max Velocity, Avg Resistance).
 
+### 🤖 Generative AI Diagnostics
+
+- **Automated Health Assessment**: Uses LangChain & LLMs to analyze DCRM metrics.
+- **Component-Level Insights**:
+  - **Arc Contacts**: Evaluates wear based on dynamic resistance.
+  - **Main Contacts**: Checks for looseness/oxidation via static resistance.
+  - **Operating Mechanism**: Diagnoses mechanical friction/dumping from travel curves.
+- **Actionable Recommendations**: Generates specific maintenance advice based on the analysis.
+
 ### 🛠️ Admin & Management
 
 - **Breaker Management**: Link CSV files to specific breakers as "Ideal Data" for future comparisons.
@@ -52,6 +61,7 @@ A comprehensive Digital Contact Resistance Monitoring (DCRM) platform built for 
 | **Database** | PostgreSQL, Prisma ORM                         |
 | **Storage**  | ImageKit (File Storage)                        |
 | **ML/Data**  | NumPy, Pandas, Scikit-learn (XGBoost/AdaBoost) |
+| **GenAI**    | LangChain, OpenAI (GPT-4/GLM-4)                |
 
 ## Getting Started
 
@@ -60,6 +70,7 @@ A comprehensive Digital Contact Resistance Monitoring (DCRM) platform built for 
 - Node.js (v18+)
 - Python (v3.10+)
 - PostgreSQL Database URL
+- **(New) AI Configuration**: ZAI_API_KEY, ZAI_BASE_URL (for Generative AI Analysis)
 
 ### 1. Frontend Setup
 
@@ -114,7 +125,10 @@ npx prisma studio
     - **Red Column**: Shows the newly uploaded test waveforms.
     - **Purple Column**: Superimposes both for direct visual comparison.
     - **Metrics**: Compare Max Travel, Velocity, and Resistance side-by-side.
-5.  **Set Ideal Data**: If a breaker has no data, you can upload a file via "Update Ideal Data (DB)" to save it as the new baseline.
+5.  **AI Health Assessment**:
+    - Click "Analyze Health" to trigger the GenAI diagnostic engine.
+    - Review the generated report for Arc Contacts, Main Contacts, and Mechanism health.
+6.  **Set Ideal Data**: If a breaker has no data, you can upload a file via "Update Ideal Data (DB)" to save it as the new baseline.
 
 ## Project Structure
 

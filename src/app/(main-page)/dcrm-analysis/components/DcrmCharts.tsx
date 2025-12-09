@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Activity } from "lucide-react";
 
 interface DcrmChartsProps {
   data: any[];
@@ -31,17 +31,30 @@ interface DcrmChartsProps {
   setRefAreaRight: (val: string | number) => void;
   zoom: () => void;
   zoomOut: () => void;
+  shapData?: any; // { time_windows, shap: { xgboost: { resistance: [], ... } } }
+  showShap?: boolean;
+  onToggleShap?: (val: boolean) => void;
 }
+
+import { ShapOverlay } from "@/components/ShapOverlay";
 
 // Custom tooltip for the charts
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
+    // Determine unit based on the dataKey
+    const getUnit = (dataKey: string) => {
+      if (dataKey.includes('resistance')) return 'µΩ';
+      if (dataKey.includes('current') || dataKey.includes('coilCurrent')) return 'A';
+      if (dataKey.includes('travel')) return 'mm';
+      return '';
+    };
+
     return (
       <div className="bg-white p-2 border border-gray-300 rounded shadow">
         <p className="font-semibold">{`Time: ${label} ms`}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} style={{ color: entry.color }}>
-            {`${entry.name}: ${entry.value}`}
+            {`${entry.name}: ${entry.value} ${getUnit(entry.dataKey)}`}
           </p>
         ))}
       </div>
@@ -62,6 +75,9 @@ export function DcrmCharts({
   setRefAreaRight,
   zoom,
   zoomOut,
+  shapData,
+  showShap,
+  onToggleShap,
 }: DcrmChartsProps) {
   return (
     <Card>
@@ -72,9 +88,22 @@ export function DcrmCharts({
             Toggle checkboxes below to filter. drag cursor on graph to Zoom.
           </CardDescription>
         </div>
-        <Button variant="outline" size="sm" onClick={zoomOut} className="gap-2">
-          <RotateCcw className="h-4 w-4" /> Reset Zoom
-        </Button>
+        <div className="flex items-center gap-2">
+          {onToggleShap && (
+            <Button
+              variant={showShap ? "destructive" : "outline"}
+              size="sm"
+              onClick={() => onToggleShap(!showShap)}
+              className={`gap-2 ${showShap ? "bg-red-100 text-red-700 hover:bg-red-200 border-red-200" : ""}`}
+            >
+              <Activity className="h-4 w-4" />
+              {showShap ? "Hide AI Overlays" : "Show AI Overlays"}
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={zoomOut} className="gap-2">
+            <RotateCcw className="h-4 w-4" /> Reset Zoom
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Checkbox Controls - Granular Selection */}
@@ -337,6 +366,7 @@ export function DcrmCharts({
             </h3>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart
+                key={showShap ? "shap-visible" : "shap-hidden"}
                 data={data}
                 margin={{ top: 5, right: 30, left: 10, bottom: 0 }}
                 syncId="dcrmSync"
@@ -376,6 +406,17 @@ export function DcrmCharts({
                     strokeOpacity={0.3}
                   />
                 ) : null}
+
+                {/* SHAP Overlay - Resistance */}
+                {showShap && shapData?.shap?.xgboost?.resistance && (
+                  <ShapOverlay
+                    windows={shapData.time_windows}
+                    scores={shapData.shap.xgboost.resistance}
+                    color="#ff0000" // Red for resistance issues
+                    visible={true}
+                  />
+                )}
+
                 {visibleLines.resistanceCH1 && (
                   <Line
                     type="monotone"
@@ -634,6 +675,17 @@ export function DcrmCharts({
                     strokeOpacity={0.3}
                   />
                 ) : null}
+
+                {/* SHAP Overlay - Current */}
+                {showShap && shapData?.shap?.xgboost?.current && (
+                  <ShapOverlay
+                    windows={shapData.time_windows}
+                    scores={shapData.shap.xgboost.current}
+                    color="#0000ff" // Blue for current issues
+                    visible={true}
+                  />
+                )}
+
                 {visibleLines.currentCH1 && (
                   <Line
                     type="monotone"
@@ -853,6 +905,7 @@ export function DcrmCharts({
             </h3>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart
+                key={showShap ? "shap-visible-travel" : "shap-hidden-travel"}
                 data={data}
                 margin={{ top: 5, right: 30, left: 10, bottom: 0 }}
                 syncId="dcrmSync"
@@ -892,6 +945,16 @@ export function DcrmCharts({
                     strokeOpacity={0.3}
                   />
                 ) : null}
+
+                {/* SHAP Overlay - Travel */}
+                {showShap && shapData?.shap?.xgboost?.travel && (
+                  <ShapOverlay
+                    windows={shapData.time_windows}
+                    scores={shapData.shap.xgboost.travel}
+                    color="#008000" // Green for travel issues
+                    visible={true}
+                  />
+                )}
                 {visibleLines.travelT1 && (
                   <Line
                     type="monotone"

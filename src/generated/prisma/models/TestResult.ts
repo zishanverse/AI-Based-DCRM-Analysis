@@ -91,10 +91,10 @@ export type TestResultCountAggregateOutputType = {
   travelT1Max: number
   velocityT1Max: number
   resistanceCH1Avg: number
-  componentHealth: number
   status: number
   createdAt: number
   updatedAt: number
+  componentHealth: number
   _all: number
 }
 
@@ -164,10 +164,10 @@ export type TestResultCountAggregateInputType = {
   travelT1Max?: true
   velocityT1Max?: true
   resistanceCH1Avg?: true
-  componentHealth?: true
   status?: true
   createdAt?: true
   updatedAt?: true
+  componentHealth?: true
   _all?: true
 }
 
@@ -272,10 +272,10 @@ export type TestResultGroupByOutputType = {
   travelT1Max: number | null
   velocityT1Max: number | null
   resistanceCH1Avg: number | null
-  componentHealth: runtime.JsonValue | null
   status: string
   createdAt: Date
   updatedAt: Date
+  componentHealth: runtime.JsonValue | null
   _count: TestResultCountAggregateOutputType | null
   _avg: TestResultAvgAggregateOutputType | null
   _sum: TestResultSumAggregateOutputType | null
@@ -316,10 +316,10 @@ export type TestResultWhereInput = {
   travelT1Max?: Prisma.FloatNullableFilter<"TestResult"> | number | null
   velocityT1Max?: Prisma.FloatNullableFilter<"TestResult"> | number | null
   resistanceCH1Avg?: Prisma.FloatNullableFilter<"TestResult"> | number | null
-  componentHealth?: Prisma.JsonNullableFilter<"TestResult">
   status?: Prisma.StringFilter<"TestResult"> | string
   createdAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
+  componentHealth?: Prisma.JsonNullableFilter<"TestResult">
   breaker?: Prisma.XOR<Prisma.BreakerScalarRelationFilter, Prisma.BreakerWhereInput>
 }
 
@@ -338,10 +338,10 @@ export type TestResultOrderByWithRelationInput = {
   travelT1Max?: Prisma.SortOrderInput | Prisma.SortOrder
   velocityT1Max?: Prisma.SortOrderInput | Prisma.SortOrder
   resistanceCH1Avg?: Prisma.SortOrderInput | Prisma.SortOrder
-  componentHealth?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  componentHealth?: Prisma.SortOrderInput | Prisma.SortOrder
   breaker?: Prisma.BreakerOrderByWithRelationInput
 }
 
@@ -363,10 +363,10 @@ export type TestResultWhereUniqueInput = Prisma.AtLeast<{
   travelT1Max?: Prisma.FloatNullableFilter<"TestResult"> | number | null
   velocityT1Max?: Prisma.FloatNullableFilter<"TestResult"> | number | null
   resistanceCH1Avg?: Prisma.FloatNullableFilter<"TestResult"> | number | null
-  componentHealth?: Prisma.JsonNullableFilter<"TestResult">
   status?: Prisma.StringFilter<"TestResult"> | string
   createdAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
+  componentHealth?: Prisma.JsonNullableFilter<"TestResult">
   breaker?: Prisma.XOR<Prisma.BreakerScalarRelationFilter, Prisma.BreakerWhereInput>
 }, "id">
 
@@ -385,10 +385,10 @@ export type TestResultOrderByWithAggregationInput = {
   travelT1Max?: Prisma.SortOrderInput | Prisma.SortOrder
   velocityT1Max?: Prisma.SortOrderInput | Prisma.SortOrder
   resistanceCH1Avg?: Prisma.SortOrderInput | Prisma.SortOrder
-  componentHealth?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  componentHealth?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TestResultCountOrderByAggregateInput
   _avg?: Prisma.TestResultAvgOrderByAggregateInput
   _max?: Prisma.TestResultMaxOrderByAggregateInput
@@ -414,10 +414,10 @@ export type TestResultScalarWhereWithAggregatesInput = {
   travelT1Max?: Prisma.FloatNullableWithAggregatesFilter<"TestResult"> | number | null
   velocityT1Max?: Prisma.FloatNullableWithAggregatesFilter<"TestResult"> | number | null
   resistanceCH1Avg?: Prisma.FloatNullableWithAggregatesFilter<"TestResult"> | number | null
-  componentHealth?: Prisma.JsonNullableWithAggregatesFilter<"TestResult">
   status?: Prisma.StringWithAggregatesFilter<"TestResult"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TestResult"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TestResult"> | Date | string
+  componentHealth?: Prisma.JsonNullableWithAggregatesFilter<"TestResult">
 }
 
 export type TestResultCreateInput = {
@@ -434,10 +434,10 @@ export type TestResultCreateInput = {
   travelT1Max?: number | null
   velocityT1Max?: number | null
   resistanceCH1Avg?: number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   breaker: Prisma.BreakerCreateNestedOneWithoutTestResultsInput
 }
 
@@ -456,10 +456,10 @@ export type TestResultUncheckedCreateInput = {
   travelT1Max?: number | null
   velocityT1Max?: number | null
   resistanceCH1Avg?: number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TestResultUpdateInput = {
@@ -476,10 +476,10 @@ export type TestResultUpdateInput = {
   travelT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   velocityT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   resistanceCH1Avg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   breaker?: Prisma.BreakerUpdateOneRequiredWithoutTestResultsNestedInput
 }
 
@@ -498,10 +498,10 @@ export type TestResultUncheckedUpdateInput = {
   travelT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   velocityT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   resistanceCH1Avg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TestResultCreateManyInput = {
@@ -519,10 +519,10 @@ export type TestResultCreateManyInput = {
   travelT1Max?: number | null
   velocityT1Max?: number | null
   resistanceCH1Avg?: number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TestResultUpdateManyMutationInput = {
@@ -539,10 +539,10 @@ export type TestResultUpdateManyMutationInput = {
   travelT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   velocityT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   resistanceCH1Avg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TestResultUncheckedUpdateManyInput = {
@@ -560,10 +560,10 @@ export type TestResultUncheckedUpdateManyInput = {
   travelT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   velocityT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   resistanceCH1Avg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TestResultCountOrderByAggregateInput = {
@@ -581,10 +581,10 @@ export type TestResultCountOrderByAggregateInput = {
   travelT1Max?: Prisma.SortOrder
   velocityT1Max?: Prisma.SortOrder
   resistanceCH1Avg?: Prisma.SortOrder
-  componentHealth?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  componentHealth?: Prisma.SortOrder
 }
 
 export type TestResultAvgOrderByAggregateInput = {
@@ -711,10 +711,10 @@ export type TestResultCreateWithoutBreakerInput = {
   travelT1Max?: number | null
   velocityT1Max?: number | null
   resistanceCH1Avg?: number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TestResultUncheckedCreateWithoutBreakerInput = {
@@ -731,10 +731,10 @@ export type TestResultUncheckedCreateWithoutBreakerInput = {
   travelT1Max?: number | null
   velocityT1Max?: number | null
   resistanceCH1Avg?: number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TestResultCreateOrConnectWithoutBreakerInput = {
@@ -781,10 +781,10 @@ export type TestResultScalarWhereInput = {
   travelT1Max?: Prisma.FloatNullableFilter<"TestResult"> | number | null
   velocityT1Max?: Prisma.FloatNullableFilter<"TestResult"> | number | null
   resistanceCH1Avg?: Prisma.FloatNullableFilter<"TestResult"> | number | null
-  componentHealth?: Prisma.JsonNullableFilter<"TestResult">
   status?: Prisma.StringFilter<"TestResult"> | string
   createdAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TestResult"> | Date | string
+  componentHealth?: Prisma.JsonNullableFilter<"TestResult">
 }
 
 export type TestResultCreateManyBreakerInput = {
@@ -801,10 +801,10 @@ export type TestResultCreateManyBreakerInput = {
   travelT1Max?: number | null
   velocityT1Max?: number | null
   resistanceCH1Avg?: number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TestResultUpdateWithoutBreakerInput = {
@@ -821,10 +821,10 @@ export type TestResultUpdateWithoutBreakerInput = {
   travelT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   velocityT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   resistanceCH1Avg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TestResultUncheckedUpdateWithoutBreakerInput = {
@@ -841,10 +841,10 @@ export type TestResultUncheckedUpdateWithoutBreakerInput = {
   travelT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   velocityT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   resistanceCH1Avg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TestResultUncheckedUpdateManyWithoutBreakerInput = {
@@ -861,10 +861,10 @@ export type TestResultUncheckedUpdateManyWithoutBreakerInput = {
   travelT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   velocityT1Max?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   resistanceCH1Avg?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  componentHealth?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -884,10 +884,10 @@ export type TestResultSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   travelT1Max?: boolean
   velocityT1Max?: boolean
   resistanceCH1Avg?: boolean
-  componentHealth?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  componentHealth?: boolean
   breaker?: boolean | Prisma.BreakerDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testResult"]>
 
@@ -906,10 +906,10 @@ export type TestResultSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   travelT1Max?: boolean
   velocityT1Max?: boolean
   resistanceCH1Avg?: boolean
-  componentHealth?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  componentHealth?: boolean
   breaker?: boolean | Prisma.BreakerDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testResult"]>
 
@@ -928,10 +928,10 @@ export type TestResultSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   travelT1Max?: boolean
   velocityT1Max?: boolean
   resistanceCH1Avg?: boolean
-  componentHealth?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  componentHealth?: boolean
   breaker?: boolean | Prisma.BreakerDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testResult"]>
 
@@ -950,13 +950,13 @@ export type TestResultSelectScalar = {
   travelT1Max?: boolean
   velocityT1Max?: boolean
   resistanceCH1Avg?: boolean
-  componentHealth?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  componentHealth?: boolean
 }
 
-export type TestResultOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "breakerId" | "testDate" | "testType" | "operator" | "notes" | "fileName" | "fileUrl" | "referenceFileName" | "referenceFileUrl" | "testData" | "travelT1Max" | "velocityT1Max" | "resistanceCH1Avg" | "componentHealth" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["testResult"]>
+export type TestResultOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "breakerId" | "testDate" | "testType" | "operator" | "notes" | "fileName" | "fileUrl" | "referenceFileName" | "referenceFileUrl" | "testData" | "travelT1Max" | "velocityT1Max" | "resistanceCH1Avg" | "status" | "createdAt" | "updatedAt" | "componentHealth", ExtArgs["result"]["testResult"]>
 export type TestResultInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   breaker?: boolean | Prisma.BreakerDefaultArgs<ExtArgs>
 }
@@ -987,10 +987,10 @@ export type $TestResultPayload<ExtArgs extends runtime.Types.Extensions.Internal
     travelT1Max: number | null
     velocityT1Max: number | null
     resistanceCH1Avg: number | null
-    componentHealth: runtime.JsonValue | null
     status: string
     createdAt: Date
     updatedAt: Date
+    componentHealth: runtime.JsonValue | null
   }, ExtArgs["result"]["testResult"]>
   composites: {}
 }
@@ -1429,10 +1429,10 @@ export interface TestResultFieldRefs {
   readonly travelT1Max: Prisma.FieldRef<"TestResult", 'Float'>
   readonly velocityT1Max: Prisma.FieldRef<"TestResult", 'Float'>
   readonly resistanceCH1Avg: Prisma.FieldRef<"TestResult", 'Float'>
-  readonly componentHealth: Prisma.FieldRef<"TestResult", 'Json'>
   readonly status: Prisma.FieldRef<"TestResult", 'String'>
   readonly createdAt: Prisma.FieldRef<"TestResult", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"TestResult", 'DateTime'>
+  readonly componentHealth: Prisma.FieldRef<"TestResult", 'Json'>
 }
     
 

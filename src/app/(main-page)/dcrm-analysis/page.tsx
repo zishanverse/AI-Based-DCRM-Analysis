@@ -38,6 +38,9 @@ export default function DCRMAnalysis() {
     aiAnalysis,
     analyzing,
     handleAiAnalysis,
+    showShap,
+    setShowShap,
+    shapData,
   } = useDcrmAnalysis();
 
   return (
@@ -62,7 +65,9 @@ export default function DCRMAnalysis() {
         }}
         onBreakerChange={setSelectedBreaker}
         onSubmit={handleSubmit}
-        onReferenceFileUpdated={() => {}}
+        onReferenceFileUpdated={() => { }}
+        showShap={showShap}
+        onShapChange={setShowShap}
       />
 
       {testInfo && (
@@ -89,6 +94,9 @@ export default function DCRMAnalysis() {
             setRefAreaRight={setRefAreaRight}
             zoom={zoom}
             zoomOut={zoomOut}
+            shapData={shapData}
+            showShap={showShap}
+            onToggleShap={setShowShap}
           />
         </>
       )}

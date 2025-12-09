@@ -9,7 +9,7 @@ The DCRM (Dynamic Contact Resistance Measurement) Analysis route is a critical f
 ## 2. Key Files
 
 - **Frontend**: `src/app/(main-page)/dcrm-analysis/page.tsx`
-- **Backend API**: `src/app/api/dcrm-data/route.ts`
+- **Backend API**: `src/app/api/dcrm-data/route.ts` & `src/app/api/analyze-health/route.ts`
 - **Database Schema**: `prisma/schema.prisma`
 
 ---
@@ -87,7 +87,9 @@ Client-side logic analyzes the parsed data arrays to determine health status:
     - Iterates through Test Data points.
     - Merges corresponding Reference Data point (`ref_` keys).
     - **Calculates Differences**: `diff_key = TestValue - RefValue`.
-    - Returns a unified `DCRMDataPoint` object containing Test, Ref, and Diff values for the frontend to render easily.
+    - **Abnormality Detection**: Scans merged data for significant resistance spikes (>500μΩ).
+    - Returns a unified `DCRMDataPoint` object containing Test, Ref, and Diff values.
+    - Generates and returns an `abnormalityReport` string listing detailed spike events.
 
 ---
 
@@ -116,3 +118,57 @@ model DataSource {
   breakers Breaker[]
 }
 ```
+
+---
+
+## 6. AI Diagnostics Overview (`analyze-health/route.ts`)
+
+### **A. Architecture**
+
+- **Engine**: LangChain + Z.ai (GLM-4 / GLM-4-Flash).
+- **Endpoint**: `POST /api/analyze-health`.
+- **Optimization**: Uses `glm-4-flash` by default for high-speed inference.
+- **Input Context**:
+    - **Test Metrics**: Aggregated stats (Max, Avg) for all channels.
+    - **Reference Comparison**: Differences vs ideal baseline.
+    - **Abnormality Report**: A generated text summary of specific resistance spikes (timestamps & magnitudes) derived from the full CSV waveforms. This allows the AI to analyze "waveform-level" events without processing the massive raw CSV payload.
+
+### **B. Flow & Prompt Engineering**
+
+1.  **Context Construction**:
+    - The system prompt defines the role: "Senior DCRM Diagnostics Assistant".
+    - The user prompt injects:
+        - `Reference Metrics`
+        - `Test Metrics`
+        - `Abnormality Report` (the text representation of the CSV diffs).
+2.  **Structured Output Enforcement**:
+    - System prompt strictly enforces a JSON-only response.
+    - The schema includes fields for component health, technical parameter status, and maintenance advice.
+
+### **C. Diagnostic Output Schema**
+
+The AI generates a comprehensive health report in JSON format:
+
+```json
+{
+  "arcContacts": { "score": 85, "status": "Healthy", "reasoning": "..." },
+  "mainContacts": { "score": 40, "status": "Critical", "reasoning": "..." },
+  "operatingMechanism": { "score": 90, "status": "Healthy", "reasoning": "..." },
+  "technicalParameters": {
+      "mainContactResistance": { "value": 45, "unit": "μΩ", "status": "Healthy" },
+      // ... other params
+  },
+  "overallScore": 72,
+  "maintenanceRecommendation": "Inspect main contacts immediately.",
+  "maintenanceSchedule": "Immediate",
+  "maintenancePriority": "High",
+  "criticalAlert": "Resistance spike detected at 12ms indicating wear.",
+  "differenceAnalysis": "Deviation of +600uOhm observed on Phase A vs Reference.",
+  "abnormal_ranges": [ ... ]
+}
+```
+
+### **D. Database Integration**
+
+- **Storage**: If a `testResultId` is provided, the full JSON analysis is stored in the `TestResult` table under `componentHealth`.
+- **Persistence**: Allows historical tracking of AI-generated health assessments over time.
