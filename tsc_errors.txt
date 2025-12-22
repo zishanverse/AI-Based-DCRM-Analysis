@@ -1,0 +1,40 @@
+﻿.next/dev/types/validator.ts(108,31): error TS2344: Type 'typeof import("F:/sih 2025/frontend/new code/SIH_ 25189_ asyncRifters_09/src/app/api/breakers/[id]/reference-file/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/breakers/[id]/reference-file">'.
+  Types of property 'DELETE' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ success: boolean; message: string; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(108,31): error TS2344: Type 'typeof import("F:/sih 2025/frontend/new code/SIH_ 25189_ asyncRifters_09/src/app/api/breakers/[id]/reference-file/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/breakers/[id]/reference-file">'.
+  Types of property 'DELETE' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ success: boolean; message: string; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+src/components/data-table.tsx(14,8): error TS2307: Cannot find module '@dnd-kit/core' or its corresponding type declarations.
+src/components/data-table.tsx(15,40): error TS2307: Cannot find module '@dnd-kit/modifiers' or its corresponding type declarations.
+src/components/data-table.tsx(21,8): error TS2307: Cannot find module '@dnd-kit/sortable' or its corresponding type declarations.
+src/components/data-table.tsx(22,21): error TS2307: Cannot find module '@dnd-kit/utilities' or its corresponding type declarations.
+src/components/data-table.tsx(51,8): error TS2307: Cannot find module '@tanstack/react-table' or its corresponding type declarations.
+src/components/data-table.tsx(143,14): error TS7031: Binding element 'row' implicitly has an 'any' type.
+src/components/data-table.tsx(147,16): error TS7031: Binding element 'table' implicitly has an 'any' type.
+src/components/data-table.tsx(159,14): error TS7031: Binding element 'row' implicitly has an 'any' type.
+src/components/data-table.tsx(174,14): error TS7031: Binding element 'row' implicitly has an 'any' type.
+src/components/data-table.tsx(182,14): error TS7031: Binding element 'row' implicitly has an 'any' type.
+src/components/data-table.tsx(193,14): error TS7031: Binding element 'row' implicitly has an 'any' type.
+src/components/data-table.tsx(207,14): error TS7031: Binding element 'row' implicitly has an 'any' type.
+src/components/data-table.tsx(232,14): error TS7031: Binding element 'row' implicitly has an 'any' type.
+src/components/data-table.tsx(257,14): error TS7031: Binding element 'row' implicitly has an 'any' type.
+src/components/data-table.tsx(330,35): error TS7006: Parameter 'cell' implicitly has an 'any' type.
+src/components/data-table.tsx(378,16): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/components/data-table.tsx(452,20): error TS7006: Parameter 'column' implicitly has an 'any' type.
+src/components/data-table.tsx(456,23): error TS7006: Parameter 'column' implicitly has an 'any' type.
+src/components/data-table.tsx(492,47): error TS7006: Parameter 'headerGroup' implicitly has an 'any' type.
+src/components/data-table.tsx(494,47): error TS7006: Parameter 'header' implicitly has an 'any' type.
+src/components/data-table.tsx(515,52): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/components/ui/animated-group.tsx(3,34): error TS2307: Cannot find module 'motion/react' or its corresponding type declarations.
+src/components/ui/animated-group.tsx(119,37): error TS2503: Cannot find namespace 'JSX'.
+src/components/ui/animated-group.tsx(123,42): error TS2503: Cannot find namespace 'JSX'.
+src/components/ui/text-effect.tsx(6,8): error TS2307: Cannot find module 'motion/react' or its corresponding type declarations.
+src/components/ui/text-effect.tsx(12,8): error TS2307: Cannot find module 'motion/react' or its corresponding type declarations.

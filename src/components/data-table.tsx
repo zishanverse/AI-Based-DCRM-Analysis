@@ -48,6 +48,7 @@ import {
   SortingState,
   useReactTable,
   VisibilityState,
+  type Table as TanstackTable,
 } from "@tanstack/react-table"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 import { toast } from "sonner"
@@ -116,6 +117,8 @@ export const schema = z.object({
   reviewer: z.string(),
 })
 
+export type Task = z.infer<typeof schema>
+
 // Create a separate component for the drag handle
 function DragHandle({ id }: { id: number }) {
   const { attributes, listeners } = useSortable({
@@ -136,15 +139,15 @@ function DragHandle({ id }: { id: number }) {
   )
 }
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
+const columns: ColumnDef<Task>[] = [
   {
     id: "drag",
     header: () => null,
-    cell: ({ row }) => <DragHandle id={row.original.id} />,
+    cell: ({ row }: { row: Row<Task> }) => <DragHandle id={row.original.id} />,
   },
   {
     id: "select",
-    header: ({ table }) => (
+    header: ({ table }: { table: TanstackTable<Task> }) => (
       <div className="flex items-center justify-center">
         <Checkbox
           checked={
@@ -156,7 +159,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
         />
       </div>
     ),
-    cell: ({ row }) => (
+    cell: ({ row }: { row: Row<Task> }) => (
       <div className="flex items-center justify-center">
         <Checkbox
           checked={row.getIsSelected()}
@@ -171,7 +174,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     accessorKey: "header",
     header: "Header",
-    cell: ({ row }) => {
+    cell: ({ row }: { row: Row<Task> }) => {
       return <TableCellViewer item={row.original} />
     },
     enableHiding: false,
@@ -179,7 +182,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     accessorKey: "type",
     header: "Section Type",
-    cell: ({ row }) => (
+    cell: ({ row }: { row: Row<Task> }) => (
       <div className="w-32">
         <Badge variant="outline" className="text-muted-foreground px-1.5">
           {row.original.type}
@@ -190,7 +193,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => (
+    cell: ({ row }: { row: Row<Task> }) => (
       <Badge variant="outline" className="text-muted-foreground px-1.5">
         {row.original.status === "Done" ? (
           <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
@@ -204,7 +207,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     accessorKey: "target",
     header: () => <div className="w-full text-right">Target</div>,
-    cell: ({ row }) => (
+    cell: ({ row }: { row: Row<Task> }) => (
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -229,7 +232,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     accessorKey: "limit",
     header: () => <div className="w-full text-right">Limit</div>,
-    cell: ({ row }) => (
+    cell: ({ row }: { row: Row<Task> }) => (
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -254,7 +257,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     accessorKey: "reviewer",
     header: "Reviewer",
-    cell: ({ row }) => {
+    cell: ({ row }: { row: Row<Task> }) => {
       const isAssigned = row.original.reviewer !== "Assign reviewer"
 
       if (isAssigned) {
@@ -311,7 +314,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   },
 ]
 
-function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
+function DraggableRow({ row }: { row: Row<Task> }) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: row.original.id,
   })
@@ -339,7 +342,7 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
 export function DataTable({
   data: initialData,
 }: {
-  data: z.infer<typeof schema>[]
+  data: Task[]
 }) {
   const [data, setData] = React.useState(() => initialData)
   const [rowSelection, setRowSelection] = React.useState({})
@@ -497,9 +500,9 @@ export function DataTable({
                           {header.isPlaceholder
                             ? null
                             : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                         </TableHead>
                       )
                     })}
@@ -647,7 +650,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
+function TableCellViewer({ item }: { item: Task }) {
   const isMobile = useIsMobile()
 
   return (

@@ -46,7 +46,7 @@ export async function POST(
 
     // Upsert DataSource
     let dataSource;
-    
+
     if (breaker.dataSourceId) {
       // Update existing DataSource
       dataSource = await db.dataSource.update({
@@ -85,8 +85,8 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: breaker.dataSourceId 
-        ? "Reference file updated successfully" 
+      message: breaker.dataSourceId
+        ? "Reference file updated successfully"
         : "Reference file uploaded successfully",
       data: {
         dataSourceId: dataSource.id,
@@ -165,10 +165,10 @@ export async function GET(
 // DELETE - Remove Reference File from a Breaker
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: breakerId } = params;
+    const { id: breakerId } = await params;
 
     const breaker = await db.breaker.findUnique({
       where: { id: breakerId },
