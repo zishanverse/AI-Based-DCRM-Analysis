@@ -39,12 +39,18 @@ A comprehensive Digital Contact Resistance Monitoring (DCRM) platform built for 
 
 ### 🤖 Generative AI Diagnostics
 
-- **Automated Health Assessment**: Uses LangChain & LLMs to analyze DCRM metrics.
+- **Automated Health Assessment**: Uses LangChain & **GLM-4-Flash** (Optimized) for high-speed diagnostics.
 - **Component-Level Insights**:
   - **Arc Contacts**: Evaluates wear based on dynamic resistance.
   - **Main Contacts**: Checks for looseness/oxidation via static resistance.
-  - **Operating Mechanism**: Diagnoses mechanical friction/dumping from travel curves.
-- **Actionable Recommendations**: Generates specific maintenance advice based on the analysis.
+  - **Operating Mechanism**: Diagnoses mechanical friction/damping from travel curves.
+- **Advanced Difference Analysis**:
+  - AI analyzes the **Abnormality Report** generated from row-by-row CSV comparison.
+  - Identifies specific resistance spikes (>500μΩ) and signal deviations.
+- **Actionable Outputs**:
+  - **Maintenance Schedule**: Suggests immediate or routine maintenance.
+  - **Critical Alerts**: Highlights urgent issues with a visual banner.
+  - **Recommendations**: Specific actionable advice (e.g., "Inspect nozzle contacts").
 
 ### 🛠️ Admin & Management
 
@@ -61,7 +67,7 @@ A comprehensive Digital Contact Resistance Monitoring (DCRM) platform built for 
 | **Database** | PostgreSQL, Prisma ORM                         |
 | **Storage**  | ImageKit (File Storage)                        |
 | **ML/Data**  | NumPy, Pandas, Scikit-learn (XGBoost/AdaBoost) |
-| **GenAI**    | LangChain, OpenAI (GPT-4/GLM-4)                |
+| **GenAI**    | LangChain, Z.ai (GLM-4-Flash / GLM-4)          |
 
 ## Getting Started
 
@@ -123,11 +129,12 @@ npx prisma studio
     - The system parses both files.
     - **Blue Column**: Shows Reference/Ideal waveforms.
     - **Red Column**: Shows the newly uploaded test waveforms.
-    - **Purple Column**: Superimposes both for direct visual comparison.
+    - **Purple Column**: Superimposes both with a dedicated **Difference Line** (Step Chart) to visualize exact deviations.
     - **Metrics**: Compare Max Travel, Velocity, and Resistance side-by-side.
 5.  **AI Health Assessment**:
     - Click "Analyze Health" to trigger the GenAI diagnostic engine.
-    - Review the generated report for Arc Contacts, Main Contacts, and Mechanism health.
+    - The system generates a text-based **Abnormality Report** in the background.
+    - Review the **Difference Analysis**, **Maintenance Schedule**, and Critical Alerts.
 6.  **Set Ideal Data**: If a breaker has no data, you can upload a file via "Update Ideal Data (DB)" to save it as the new baseline.
 
 ## Project Structure
