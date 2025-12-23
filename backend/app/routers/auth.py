@@ -20,9 +20,9 @@ REFRESH_COOKIE_MAX_AGE = int(timedelta(days=7).total_seconds())
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(payload: LoginRequest, response: Response) -> TokenResponse:
+async def login(payload: LoginRequest, response: Response) -> TokenResponse:
     station_id = payload.station_id
-    user_record = authenticate_station(station_id, payload.password)
+    user_record = await authenticate_station(station_id, payload.password)
 
     access_token = create_access_token(station_id)
     refresh_token = create_refresh_token(station_id)

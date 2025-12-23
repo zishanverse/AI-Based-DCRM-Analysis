@@ -20,64 +20,110 @@ export type StationModel = runtime.Types.Result.DefaultSelection<Prisma.$Station
 
 export type AggregateStation = {
   _count: StationCountAggregateOutputType | null
+  _avg: StationAvgAggregateOutputType | null
+  _sum: StationSumAggregateOutputType | null
   _min: StationMinAggregateOutputType | null
   _max: StationMaxAggregateOutputType | null
+}
+
+export type StationAvgAggregateOutputType = {
+  locationLat: number | null
+  locationLon: number | null
+}
+
+export type StationSumAggregateOutputType = {
+  locationLat: number | null
+  locationLon: number | null
 }
 
 export type StationMinAggregateOutputType = {
   id: string | null
   name: string | null
   location: string | null
+  locationLat: number | null
+  locationLon: number | null
   description: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  password: string | null
+  role: string | null
 }
 
 export type StationMaxAggregateOutputType = {
   id: string | null
   name: string | null
   location: string | null
+  locationLat: number | null
+  locationLon: number | null
   description: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  password: string | null
+  role: string | null
 }
 
 export type StationCountAggregateOutputType = {
   id: number
   name: number
   location: number
+  locationLat: number
+  locationLon: number
   description: number
   createdAt: number
   updatedAt: number
+  password: number
+  role: number
   _all: number
 }
 
+
+export type StationAvgAggregateInputType = {
+  locationLat?: true
+  locationLon?: true
+}
+
+export type StationSumAggregateInputType = {
+  locationLat?: true
+  locationLon?: true
+}
 
 export type StationMinAggregateInputType = {
   id?: true
   name?: true
   location?: true
+  locationLat?: true
+  locationLon?: true
   description?: true
   createdAt?: true
   updatedAt?: true
+  password?: true
+  role?: true
 }
 
 export type StationMaxAggregateInputType = {
   id?: true
   name?: true
   location?: true
+  locationLat?: true
+  locationLon?: true
   description?: true
   createdAt?: true
   updatedAt?: true
+  password?: true
+  role?: true
 }
 
 export type StationCountAggregateInputType = {
   id?: true
   name?: true
   location?: true
+  locationLat?: true
+  locationLon?: true
   description?: true
   createdAt?: true
   updatedAt?: true
+  password?: true
+  role?: true
   _all?: true
 }
 
@@ -119,6 +165,18 @@ export type StationAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: StationAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: StationSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: StationMinAggregateInputType
@@ -149,6 +207,8 @@ export type StationGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: StationCountAggregateInputType | true
+  _avg?: StationAvgAggregateInputType
+  _sum?: StationSumAggregateInputType
   _min?: StationMinAggregateInputType
   _max?: StationMaxAggregateInputType
 }
@@ -157,10 +217,16 @@ export type StationGroupByOutputType = {
   id: string
   name: string
   location: string | null
+  locationLat: number | null
+  locationLon: number | null
   description: string | null
   createdAt: Date
   updatedAt: Date
+  password: string | null
+  role: string
   _count: StationCountAggregateOutputType | null
+  _avg: StationAvgAggregateOutputType | null
+  _sum: StationSumAggregateOutputType | null
   _min: StationMinAggregateOutputType | null
   _max: StationMaxAggregateOutputType | null
 }
@@ -187,9 +253,13 @@ export type StationWhereInput = {
   id?: Prisma.StringFilter<"Station"> | string
   name?: Prisma.StringFilter<"Station"> | string
   location?: Prisma.StringNullableFilter<"Station"> | string | null
+  locationLat?: Prisma.FloatNullableFilter<"Station"> | number | null
+  locationLon?: Prisma.FloatNullableFilter<"Station"> | number | null
   description?: Prisma.StringNullableFilter<"Station"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Station"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Station"> | Date | string
+  password?: Prisma.StringNullableFilter<"Station"> | string | null
+  role?: Prisma.StringFilter<"Station"> | string
   breakers?: Prisma.BreakerListRelationFilter
 }
 
@@ -197,9 +267,13 @@ export type StationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
+  locationLat?: Prisma.SortOrderInput | Prisma.SortOrder
+  locationLon?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  password?: Prisma.SortOrderInput | Prisma.SortOrder
+  role?: Prisma.SortOrder
   breakers?: Prisma.BreakerOrderByRelationAggregateInput
 }
 
@@ -210,9 +284,13 @@ export type StationWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.StationWhereInput | Prisma.StationWhereInput[]
   name?: Prisma.StringFilter<"Station"> | string
   location?: Prisma.StringNullableFilter<"Station"> | string | null
+  locationLat?: Prisma.FloatNullableFilter<"Station"> | number | null
+  locationLon?: Prisma.FloatNullableFilter<"Station"> | number | null
   description?: Prisma.StringNullableFilter<"Station"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Station"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Station"> | Date | string
+  password?: Prisma.StringNullableFilter<"Station"> | string | null
+  role?: Prisma.StringFilter<"Station"> | string
   breakers?: Prisma.BreakerListRelationFilter
 }, "id">
 
@@ -220,12 +298,18 @@ export type StationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
+  locationLat?: Prisma.SortOrderInput | Prisma.SortOrder
+  locationLon?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  password?: Prisma.SortOrderInput | Prisma.SortOrder
+  role?: Prisma.SortOrder
   _count?: Prisma.StationCountOrderByAggregateInput
+  _avg?: Prisma.StationAvgOrderByAggregateInput
   _max?: Prisma.StationMaxOrderByAggregateInput
   _min?: Prisma.StationMinOrderByAggregateInput
+  _sum?: Prisma.StationSumOrderByAggregateInput
 }
 
 export type StationScalarWhereWithAggregatesInput = {
@@ -235,28 +319,40 @@ export type StationScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Station"> | string
   name?: Prisma.StringWithAggregatesFilter<"Station"> | string
   location?: Prisma.StringNullableWithAggregatesFilter<"Station"> | string | null
+  locationLat?: Prisma.FloatNullableWithAggregatesFilter<"Station"> | number | null
+  locationLon?: Prisma.FloatNullableWithAggregatesFilter<"Station"> | number | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Station"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Station"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Station"> | Date | string
+  password?: Prisma.StringNullableWithAggregatesFilter<"Station"> | string | null
+  role?: Prisma.StringWithAggregatesFilter<"Station"> | string
 }
 
 export type StationCreateInput = {
   id?: string
-  name: string
+  name?: string
   location?: string | null
+  locationLat?: number | null
+  locationLon?: number | null
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  password?: string | null
+  role?: string
   breakers?: Prisma.BreakerCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateInput = {
   id?: string
-  name: string
+  name?: string
   location?: string | null
+  locationLat?: number | null
+  locationLon?: number | null
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  password?: string | null
+  role?: string
   breakers?: Prisma.BreakerUncheckedCreateNestedManyWithoutStationInput
 }
 
@@ -264,9 +360,13 @@ export type StationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  locationLon?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   breakers?: Prisma.BreakerUpdateManyWithoutStationNestedInput
 }
 
@@ -274,64 +374,102 @@ export type StationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  locationLon?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   breakers?: Prisma.BreakerUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationCreateManyInput = {
   id?: string
-  name: string
+  name?: string
   location?: string | null
+  locationLat?: number | null
+  locationLon?: number | null
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  password?: string | null
+  role?: string
 }
 
 export type StationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  locationLon?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type StationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  locationLon?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type StationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   location?: Prisma.SortOrder
+  locationLat?: Prisma.SortOrder
+  locationLon?: Prisma.SortOrder
   description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  password?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+}
+
+export type StationAvgOrderByAggregateInput = {
+  locationLat?: Prisma.SortOrder
+  locationLon?: Prisma.SortOrder
 }
 
 export type StationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   location?: Prisma.SortOrder
+  locationLat?: Prisma.SortOrder
+  locationLon?: Prisma.SortOrder
   description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  password?: Prisma.SortOrder
+  role?: Prisma.SortOrder
 }
 
 export type StationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   location?: Prisma.SortOrder
+  locationLat?: Prisma.SortOrder
+  locationLon?: Prisma.SortOrder
   description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  password?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+}
+
+export type StationSumOrderByAggregateInput = {
+  locationLat?: Prisma.SortOrder
+  locationLon?: Prisma.SortOrder
 }
 
 export type StationScalarRelationFilter = {
@@ -345,6 +483,14 @@ export type StringFieldUpdateOperationsInput = {
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
+}
+
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -367,20 +513,28 @@ export type StationUpdateOneRequiredWithoutBreakersNestedInput = {
 
 export type StationCreateWithoutBreakersInput = {
   id?: string
-  name: string
+  name?: string
   location?: string | null
+  locationLat?: number | null
+  locationLon?: number | null
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  password?: string | null
+  role?: string
 }
 
 export type StationUncheckedCreateWithoutBreakersInput = {
   id?: string
-  name: string
+  name?: string
   location?: string | null
+  locationLat?: number | null
+  locationLon?: number | null
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  password?: string | null
+  role?: string
 }
 
 export type StationCreateOrConnectWithoutBreakersInput = {
@@ -403,18 +557,26 @@ export type StationUpdateWithoutBreakersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  locationLon?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type StationUncheckedUpdateWithoutBreakersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationLat?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  locationLon?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -452,9 +614,13 @@ export type StationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   id?: boolean
   name?: boolean
   location?: boolean
+  locationLat?: boolean
+  locationLon?: boolean
   description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  password?: boolean
+  role?: boolean
   breakers?: boolean | Prisma.Station$breakersArgs<ExtArgs>
   _count?: boolean | Prisma.StationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["station"]>
@@ -463,30 +629,42 @@ export type StationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   name?: boolean
   location?: boolean
+  locationLat?: boolean
+  locationLon?: boolean
   description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  password?: boolean
+  role?: boolean
 }, ExtArgs["result"]["station"]>
 
 export type StationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
   location?: boolean
+  locationLat?: boolean
+  locationLon?: boolean
   description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  password?: boolean
+  role?: boolean
 }, ExtArgs["result"]["station"]>
 
 export type StationSelectScalar = {
   id?: boolean
   name?: boolean
   location?: boolean
+  locationLat?: boolean
+  locationLon?: boolean
   description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  password?: boolean
+  role?: boolean
 }
 
-export type StationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "location" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["station"]>
+export type StationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "location" | "locationLat" | "locationLon" | "description" | "createdAt" | "updatedAt" | "password" | "role", ExtArgs["result"]["station"]>
 export type StationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   breakers?: boolean | Prisma.Station$breakersArgs<ExtArgs>
   _count?: boolean | Prisma.StationCountOutputTypeDefaultArgs<ExtArgs>
@@ -503,9 +681,13 @@ export type $StationPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     name: string
     location: string | null
+    locationLat: number | null
+    locationLon: number | null
     description: string | null
     createdAt: Date
     updatedAt: Date
+    password: string | null
+    role: string
   }, ExtArgs["result"]["station"]>
   composites: {}
 }
@@ -933,9 +1115,13 @@ export interface StationFieldRefs {
   readonly id: Prisma.FieldRef<"Station", 'String'>
   readonly name: Prisma.FieldRef<"Station", 'String'>
   readonly location: Prisma.FieldRef<"Station", 'String'>
+  readonly locationLat: Prisma.FieldRef<"Station", 'Float'>
+  readonly locationLon: Prisma.FieldRef<"Station", 'Float'>
   readonly description: Prisma.FieldRef<"Station", 'String'>
   readonly createdAt: Prisma.FieldRef<"Station", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Station", 'DateTime'>
+  readonly password: Prisma.FieldRef<"Station", 'String'>
+  readonly role: Prisma.FieldRef<"Station", 'String'>
 }
     
 

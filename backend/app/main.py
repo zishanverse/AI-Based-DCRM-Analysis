@@ -16,7 +16,19 @@ from .routers import (
     waveforms,
 )
 
+
+from .db import database
+
 app = FastAPI(title="DCRM Monitor API", version="0.1.0")
+
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
+
 
 ALLOWED_ORIGINS = [
     "http://localhost",

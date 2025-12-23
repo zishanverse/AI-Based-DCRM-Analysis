@@ -22,6 +22,11 @@ def _get_supabase_credentials() -> tuple[str, str]:
     url = os.getenv(SUPABASE_URL_ENV)
     key = os.getenv(SUPABASE_SERVICE_ROLE_KEY_ENV) or os.getenv(SUPABASE_ANON_KEY_ENV)
     if not url or not key:
+        # If credentials are missing, we might want to allow the app to start
+        # and fail only when a request tries to use the client.
+        # But stations.py catches errors, so raising here is fine IF it's called at runtime.
+        # Check if get_supabase_client is called at module level.
+        # usage: client = get_supabase_client() inside function.
         raise SupabaseSettingsError(
             "Supabase credentials are missing. Make sure SUPABASE_URL and either "
             "SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY are defined."

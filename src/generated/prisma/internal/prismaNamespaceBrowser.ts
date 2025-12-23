@@ -78,9 +78,13 @@ export const StationScalarFieldEnum = {
   id: 'id',
   name: 'name',
   location: 'location',
+  locationLat: 'locationLat',
+  locationLon: 'locationLon',
   description: 'description',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  password: 'password',
+  role: 'role'
 } as const
 
 export type StationScalarFieldEnum = (typeof StationScalarFieldEnum)[keyof typeof StationScalarFieldEnum]

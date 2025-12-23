@@ -647,14 +647,6 @@ export type TestResultOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type NullableFloatFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type TestResultCreateNestedManyWithoutBreakerInput = {
   create?: Prisma.XOR<Prisma.TestResultCreateWithoutBreakerInput, Prisma.TestResultUncheckedCreateWithoutBreakerInput> | Prisma.TestResultCreateWithoutBreakerInput[] | Prisma.TestResultUncheckedCreateWithoutBreakerInput[]
   connectOrCreate?: Prisma.TestResultCreateOrConnectWithoutBreakerInput | Prisma.TestResultCreateOrConnectWithoutBreakerInput[]

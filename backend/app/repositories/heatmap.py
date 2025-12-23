@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from ..supabase_client import get_supabase_client
+# from ..supabase_client import get_supabase_client
 
 HEATMAP_TABLE_ENV_VAR = "SUPABASE_HEATMAP_TABLE"
 DEFAULT_HEATMAP_TABLE = "heatmap_points"
@@ -44,16 +44,22 @@ def _derive_intensity(row: Dict[str, Any]) -> float:
     return round(200.0 + severity * 800.0, 2)
 
 
-def fetch_heatmap_points(limit: int = 512) -> List[Dict[str, Any]]:
-    client = get_supabase_client()
-    response = (
-        client.table(_table_name())
-        .select("device_id, lat, lon, timestamp, health_score, status, severity")
-        .order("timestamp", desc=True)
-        .limit(limit)
-        .execute()
-    )
-    return getattr(response, "data", []) or []
+from ..db import database
+
+async def fetch_heatmap_points(limit: int = 512) -> List[Dict[str, Any]]:
+    # Query matching the previous Supabase select
+    query = f"""
+        SELECT device_id, lat, lon, timestamp, health_score, status, severity 
+        FROM {_table_name()} 
+        ORDER BY timestamp DESC 
+        LIMIT :limit
+    """
+    try:
+        rows = await database.fetch_all(query=query, values={"limit": limit})
+        return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"Heatmap DB Error: {e}")
+        return []
 
 
 def transform_heatmap_points(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:

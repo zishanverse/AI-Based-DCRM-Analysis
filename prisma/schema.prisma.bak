@@ -8,16 +8,14 @@ datasource db {
 }
 
 model Station {
-  id          String    @id @default(cuid())
-  name        String    @default("Unknown Station")
+  id          String    @id @default(cuid()) @map("station_id")
+  name        String
   location    String?
-  locationLat Float?    @map("location_lat")
-  locationLon Float?    @map("location_lon")
   description String?
+  password    String?   @default("$2b$12$cq1...") @map("password_hash") // Default hash for 'password'
+  role        String    @default("engineer")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  password    String?   @default("$2b$12$cq1...") // Default hash
-  role        String    @default("engineer")
   breakers    Breaker[]
 
   @@map("stations")

@@ -4,9 +4,11 @@ import { db } from "@/lib/db";
 
 export async function getStations() {
   try {
+    console.log("Fetching stations...");
     const stations = await db.station.findMany({
       orderBy: { name: "asc" },
     });
+    console.log(`Fetched ${stations.length} stations`);
     return { success: true, data: stations };
   } catch (error) {
     console.error("Error fetching stations:", error);
