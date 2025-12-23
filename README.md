@@ -1,8 +1,12 @@
 <div align="center">
 
-# SIH 2025 - Powergrid DCRM Analysis & Monitoring Platform
+# AI-Based DCRM Analysis & Monitoring Platform
+### SIH 2025 | Problem Statement ID: 25189
+### Team: asyncRifters_09
 
-A comprehensive Digital Contact Resistance Monitoring (DCRM) platform built for the Smart India Hackathon 2025. This application empowers utilities to monitor breaker health, visualize waveforms, and perform advanced comparative analysis.
+**"Revolutionizing Circuit Breaker Diagnostics with Generative AI"**
+
+A comprehensive Digital Contact Resistance Monitoring (DCRM) platform built for the Smart India Hackathon 2025. This application empowers utilities to monitor breaker health, visualize waveforms, detect abnormalities using GLM-4-Flash, and perform advanced comparative analysis.
 
 </div>
 

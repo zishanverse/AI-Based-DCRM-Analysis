@@ -226,7 +226,7 @@ export async function POST(request: NextRequest) {
         const backendFormData = new FormData();
         backendFormData.append("file", new Blob([text], { type: "text/csv" }), file.name);
 
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
         // Ensure trailing slash to avoid 307 redirects which can drop POST body
         const response = await fetch(`${backendUrl}/api/v1/uploads/?include_shap=true`, {
           method: "POST",
