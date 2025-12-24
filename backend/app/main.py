@@ -30,11 +30,19 @@ async def shutdown():
     await database.disconnect()
 
 
+import os
+
 ALLOWED_ORIGINS = [
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:5173",
+    "https://ai-based-dcrm-analysis.vercel.app",
 ]
+
+# Add origins from environment variable (comma separated)
+env_origins = os.getenv("ALLOWED_ORIGINS")
+if env_origins:
+    ALLOWED_ORIGINS.extend([origin.strip() for origin in env_origins.split(",")])
 
 app.add_middleware(
     CORSMiddleware,
