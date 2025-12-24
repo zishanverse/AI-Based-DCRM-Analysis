@@ -6,7 +6,7 @@ pandas
 numpy
 joblib
 xgboost
-scikit-learn
+scikit-learn==1.5.2
 cloudinary
 python-dotenv
 supabase
