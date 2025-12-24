@@ -160,3 +160,9 @@ npx prisma studio
 ├── prisma/                     # Database schema & migrations
 └── public/                     # Static assets
 ```
+
+
+
+make the whole project at light theme and add the option to make it dark 
+
+make sure to make the waveform proper visible on dark mode also . 
