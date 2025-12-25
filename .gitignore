@@ -51,3 +51,11 @@ next-env.d.ts
 
 # Data
 backend/DCRM CSV files/DCRM/DCRM/
+
+# Sensitive & Temp
+*.sql
+*.pem
+*.yaml
+tsc_errors.log
+tsc_errors.txt
+seed_log.txt
