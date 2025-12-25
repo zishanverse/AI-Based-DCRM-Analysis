@@ -68,6 +68,10 @@ app.include_router(model_tests.router)
 async def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
+@app.get("/")
+async def root() -> dict[str, str]:
+    return {"message": "DCRM API is running", "status": "online"}
+
 
 @app.websocket("/ws/echo")
 async def websocket_echo(websocket: WebSocket) -> None:
