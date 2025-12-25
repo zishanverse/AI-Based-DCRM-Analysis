@@ -20,7 +20,7 @@ CREATE TABLE "stations" (
     "description" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "password" TEXT DEFAULT '$2b$12$cq1...', -- Default hash (update as needed)
+    "password" TEXT, -- Dynamic: No default, must be set on creation
     "role" TEXT NOT NULL DEFAULT 'engineer'
 );
 
@@ -78,7 +78,7 @@ CREATE TABLE "test_results" (
 
 -- Station
 INSERT INTO "stations" ("id", "name", "location", "role", "password", "createdAt", "updatedAt")
-VALUES ('demo-station', 'Demo Substation 400kV', 'New Delhi', 'engineer', '$2b$12$cq1...', NOW(), NOW());
+VALUES ('STD-1234', 'Demo Substation 400kV', 'New Delhi', 'engineer', '$2b$12$9s0xTd2M1vMOMNTxBTUhA00nFW.IfUP6', NOW(), NOW());
 
 -- Data Sources
 INSERT INTO "data_sources" ("id", "fileName", "fileUrl", "description", "status", "createdAt", "updatedAt")
@@ -86,7 +86,7 @@ VALUES ('ds-sample-01', 'sample_dcrm.csv', 'https://res.cloudinary.com/demo/imag
 
 -- Breakers
 INSERT INTO "breakers" ("id", "name", "type", "manufacturer", "voltage", "current", "status", "stationId", "dataSourceId", "createdAt", "updatedAt")
-VALUES ('brk-001', 'BRK-Main-01', 'SF6 Circuit Breaker', 'Siemens', 400.0, 2000.0, 'Healthy', 'demo-station', 'ds-sample-01', NOW(), NOW());
+VALUES ('brk-001', 'BRK-Main-01', 'SF6 Circuit Breaker', 'Siemens', 400.0, 2000.0, 'Healthy', 'STD-1234', 'ds-sample-01', NOW(), NOW());
 
 -- Test Results (Sample JSON content simplified for SQL readability)
 INSERT INTO "test_results" ("id", "breakerId", "testDate", "testType", "fileName", "testData", "componentHealth", "createdAt", "updatedAt")

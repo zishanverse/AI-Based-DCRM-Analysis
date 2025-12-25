@@ -217,31 +217,73 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // SHAP Analysis Integration
+    // SHAP Analysis & Persistence
     let shapResult = null;
     const includeShap = request.nextUrl.searchParams.get("include_shap") === "true";
 
-    if (includeShap) {
-      try {
-        const backendFormData = new FormData();
-        backendFormData.append("file", new Blob([text], { type: "text/csv" }), file.name);
+    try {
+      const backendFormData = new FormData();
+      backendFormData.append("file", new Blob([text], { type: "text/csv" }), file.name);
 
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
-        // Ensure trailing slash to avoid 307 redirects which can drop POST body
-        const response = await fetch(`${backendUrl}/api/v1/uploads/?include_shap=true`, {
-          method: "POST",
-          body: backendFormData,
-        });
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+      // Ensure trailing slash to avoid 307 redirects which can drop POST body
+      const response = await fetch(`${backendUrl}/api/v1/uploads/?include_shap=${includeShap}`, {
+        method: "POST",
+        body: backendFormData,
+      });
 
-        if (response.ok) {
-          const shapJson = await response.json();
-          shapResult = shapJson.shap;
-        } else {
-          console.error("SHAP Backend Error:", response.statusText);
+      if (response.ok) {
+        const uploadJson = await response.json();
+        const secureUrl = uploadJson.secureUrl;
+
+        if (includeShap && uploadJson.shap) {
+          shapResult = uploadJson.shap;
         }
-      } catch (err) {
-        console.error("SHAP Proxy Error:", err);
+
+        // Persistence Logic
+        if (secureUrl) {
+          try {
+            // 1. Data Source
+            await db.dataSource.upsert({
+              where: { fileUrl: secureUrl },
+              create: {
+                fileName: file.name,
+                fileUrl: secureUrl,
+                description: "Uploaded via DCRM Analysis",
+                status: "PROCESSED"
+              },
+              update: {}
+            });
+
+            // 2. Test Result
+            if (breakerId) {
+              await db.testResult.create({
+                data: {
+                  breakerId: breakerId,
+                  testType: "DCRM",
+                  fileName: file.name,
+                  fileUrl: secureUrl,
+                  referenceFileUrl: finalReferenceUrl,
+                  testData: data as any,
+                  componentHealth: shapResult ? (shapResult as any) : undefined,
+                  status: "COMPLETED",
+                  // Map calculated stats
+                  travelT1Max: data.testResults.travelT1Max,
+                  velocityT1Max: data.testResults.velocityT1Max,
+                  resistanceCH1Avg: data.testResults.resistanceCH1Avg,
+                  notes: comparison ? JSON.stringify(comparison) : null
+                }
+              });
+            }
+          } catch (dbErr) {
+            console.error("DB Persistence Error:", dbErr);
+          }
+        }
+      } else {
+        console.error("Backend Upload Error:", response.statusText);
       }
+    } catch (err) {
+      console.error("Backend Proxy Error:", err);
     }
 
     return NextResponse.json({
