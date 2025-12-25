@@ -20,4 +20,19 @@ if not DATABASE_URL:
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-database = Database(DATABASE_URL)
+
+
+# Force SSL mode if not present
+if "sslmode=" not in DATABASE_URL:
+    separator = "&" if "?" in DATABASE_URL else "?"
+    DATABASE_URL = f"{DATABASE_URL}{separator}sslmode=require"
+
+# Fix for Supabase Transaction Pooler (which doesn't support prepared statements)
+# and general stability on Render.
+database = Database(
+    DATABASE_URL, 
+    min_size=1, 
+    max_size=20,
+    statement_cache_size=0,  # Required for PgBouncer Transaction Mode
+    ssl="require" # Explicitly request SSL context
+)
