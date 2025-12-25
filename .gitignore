@@ -48,3 +48,6 @@ next-env.d.ts
 # tools
 .claude
 
+
+# Data
+backend/DCRM CSV files/DCRM/DCRM/
