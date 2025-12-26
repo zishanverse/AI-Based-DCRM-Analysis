@@ -27,6 +27,14 @@ if "sslmode=" not in DATABASE_URL:
     separator = "&" if "?" in DATABASE_URL else "?"
     DATABASE_URL = f"{DATABASE_URL}{separator}sslmode=require"
 
+
+import ssl
+
+# Create a proper SSL context
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
 # Fix for Supabase Transaction Pooler (which doesn't support prepared statements)
 # and general stability on Render.
 database = Database(
@@ -34,5 +42,5 @@ database = Database(
     min_size=1, 
     max_size=20,
     statement_cache_size=0,  # Required for PgBouncer Transaction Mode
-    ssl="require" # Explicitly request SSL context
+    ssl=ssl_context 
 )
