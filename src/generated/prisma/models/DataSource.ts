@@ -32,6 +32,7 @@ export type DataSourceMinAggregateOutputType = {
   status: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  fileType: string | null
 }
 
 export type DataSourceMaxAggregateOutputType = {
@@ -42,6 +43,7 @@ export type DataSourceMaxAggregateOutputType = {
   status: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  fileType: string | null
 }
 
 export type DataSourceCountAggregateOutputType = {
@@ -52,6 +54,7 @@ export type DataSourceCountAggregateOutputType = {
   status: number
   createdAt: number
   updatedAt: number
+  fileType: number
   _all: number
 }
 
@@ -64,6 +67,7 @@ export type DataSourceMinAggregateInputType = {
   status?: true
   createdAt?: true
   updatedAt?: true
+  fileType?: true
 }
 
 export type DataSourceMaxAggregateInputType = {
@@ -74,6 +78,7 @@ export type DataSourceMaxAggregateInputType = {
   status?: true
   createdAt?: true
   updatedAt?: true
+  fileType?: true
 }
 
 export type DataSourceCountAggregateInputType = {
@@ -84,6 +89,7 @@ export type DataSourceCountAggregateInputType = {
   status?: true
   createdAt?: true
   updatedAt?: true
+  fileType?: true
   _all?: true
 }
 
@@ -167,6 +173,7 @@ export type DataSourceGroupByOutputType = {
   status: string
   createdAt: Date
   updatedAt: Date
+  fileType: string
   _count: DataSourceCountAggregateOutputType | null
   _min: DataSourceMinAggregateOutputType | null
   _max: DataSourceMaxAggregateOutputType | null
@@ -198,6 +205,7 @@ export type DataSourceWhereInput = {
   status?: Prisma.StringFilter<"DataSource"> | string
   createdAt?: Prisma.DateTimeFilter<"DataSource"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"DataSource"> | Date | string
+  fileType?: Prisma.StringFilter<"DataSource"> | string
   breakers?: Prisma.BreakerListRelationFilter
 }
 
@@ -209,6 +217,7 @@ export type DataSourceOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  fileType?: Prisma.SortOrder
   breakers?: Prisma.BreakerOrderByRelationAggregateInput
 }
 
@@ -223,6 +232,7 @@ export type DataSourceWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"DataSource"> | string
   createdAt?: Prisma.DateTimeFilter<"DataSource"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"DataSource"> | Date | string
+  fileType?: Prisma.StringFilter<"DataSource"> | string
   breakers?: Prisma.BreakerListRelationFilter
 }, "id" | "fileUrl">
 
@@ -234,6 +244,7 @@ export type DataSourceOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  fileType?: Prisma.SortOrder
   _count?: Prisma.DataSourceCountOrderByAggregateInput
   _max?: Prisma.DataSourceMaxOrderByAggregateInput
   _min?: Prisma.DataSourceMinOrderByAggregateInput
@@ -250,6 +261,7 @@ export type DataSourceScalarWhereWithAggregatesInput = {
   status?: Prisma.StringWithAggregatesFilter<"DataSource"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"DataSource"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"DataSource"> | Date | string
+  fileType?: Prisma.StringWithAggregatesFilter<"DataSource"> | string
 }
 
 export type DataSourceCreateInput = {
@@ -260,6 +272,7 @@ export type DataSourceCreateInput = {
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  fileType?: string
   breakers?: Prisma.BreakerCreateNestedManyWithoutDataSourceInput
 }
 
@@ -271,6 +284,7 @@ export type DataSourceUncheckedCreateInput = {
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  fileType?: string
   breakers?: Prisma.BreakerUncheckedCreateNestedManyWithoutDataSourceInput
 }
 
@@ -282,6 +296,7 @@ export type DataSourceUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
   breakers?: Prisma.BreakerUpdateManyWithoutDataSourceNestedInput
 }
 
@@ -293,6 +308,7 @@ export type DataSourceUncheckedUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
   breakers?: Prisma.BreakerUncheckedUpdateManyWithoutDataSourceNestedInput
 }
 
@@ -304,6 +320,7 @@ export type DataSourceCreateManyInput = {
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  fileType?: string
 }
 
 export type DataSourceUpdateManyMutationInput = {
@@ -314,6 +331,7 @@ export type DataSourceUpdateManyMutationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type DataSourceUncheckedUpdateManyInput = {
@@ -324,6 +342,7 @@ export type DataSourceUncheckedUpdateManyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type DataSourceNullableScalarRelationFilter = {
@@ -339,6 +358,7 @@ export type DataSourceCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  fileType?: Prisma.SortOrder
 }
 
 export type DataSourceMaxOrderByAggregateInput = {
@@ -349,6 +369,7 @@ export type DataSourceMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  fileType?: Prisma.SortOrder
 }
 
 export type DataSourceMinOrderByAggregateInput = {
@@ -359,6 +380,7 @@ export type DataSourceMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  fileType?: Prisma.SortOrder
 }
 
 export type DataSourceCreateNestedOneWithoutBreakersInput = {
@@ -385,6 +407,7 @@ export type DataSourceCreateWithoutBreakersInput = {
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  fileType?: string
 }
 
 export type DataSourceUncheckedCreateWithoutBreakersInput = {
@@ -395,6 +418,7 @@ export type DataSourceUncheckedCreateWithoutBreakersInput = {
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  fileType?: string
 }
 
 export type DataSourceCreateOrConnectWithoutBreakersInput = {
@@ -421,6 +445,7 @@ export type DataSourceUpdateWithoutBreakersInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type DataSourceUncheckedUpdateWithoutBreakersInput = {
@@ -431,6 +456,7 @@ export type DataSourceUncheckedUpdateWithoutBreakersInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -472,6 +498,7 @@ export type DataSourceSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  fileType?: boolean
   breakers?: boolean | Prisma.DataSource$breakersArgs<ExtArgs>
   _count?: boolean | Prisma.DataSourceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["dataSource"]>
@@ -484,6 +511,7 @@ export type DataSourceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  fileType?: boolean
 }, ExtArgs["result"]["dataSource"]>
 
 export type DataSourceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -494,6 +522,7 @@ export type DataSourceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  fileType?: boolean
 }, ExtArgs["result"]["dataSource"]>
 
 export type DataSourceSelectScalar = {
@@ -504,9 +533,10 @@ export type DataSourceSelectScalar = {
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  fileType?: boolean
 }
 
-export type DataSourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fileName" | "fileUrl" | "description" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["dataSource"]>
+export type DataSourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fileName" | "fileUrl" | "description" | "status" | "createdAt" | "updatedAt" | "fileType", ExtArgs["result"]["dataSource"]>
 export type DataSourceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   breakers?: boolean | Prisma.DataSource$breakersArgs<ExtArgs>
   _count?: boolean | Prisma.DataSourceCountOutputTypeDefaultArgs<ExtArgs>
@@ -527,6 +557,7 @@ export type $DataSourcePayload<ExtArgs extends runtime.Types.Extensions.Internal
     status: string
     createdAt: Date
     updatedAt: Date
+    fileType: string
   }, ExtArgs["result"]["dataSource"]>
   composites: {}
 }
@@ -958,6 +989,7 @@ export interface DataSourceFieldRefs {
   readonly status: Prisma.FieldRef<"DataSource", 'String'>
   readonly createdAt: Prisma.FieldRef<"DataSource", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"DataSource", 'DateTime'>
+  readonly fileType: Prisma.FieldRef<"DataSource", 'String'>
 }
     
 

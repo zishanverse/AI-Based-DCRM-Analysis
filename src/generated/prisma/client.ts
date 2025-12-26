@@ -64,3 +64,53 @@ export type BreakerComponent = Prisma.BreakerComponentModel
  * 
  */
 export type DataSource = Prisma.DataSourceModel
+/**
+ * Model AssistantJob
+ * 
+ */
+export type AssistantJob = Prisma.AssistantJobModel
+/**
+ * Model CircuitCategory
+ * 
+ */
+export type CircuitCategory = Prisma.CircuitCategoryModel
+/**
+ * Model CsvUploadResponse
+ * 
+ */
+export type CsvUploadResponse = Prisma.CsvUploadResponseModel
+/**
+ * Model HeatmapPoint
+ * 
+ */
+export type HeatmapPoint = Prisma.HeatmapPointModel
+/**
+ * Model MlModelMetadata
+ * 
+ */
+export type MlModelMetadata = Prisma.MlModelMetadataModel
+/**
+ * Model MlPredictionOutput
+ * 
+ */
+export type MlPredictionOutput = Prisma.MlPredictionOutputModel
+/**
+ * Model MlPredictionProbability
+ * 
+ */
+export type MlPredictionProbability = Prisma.MlPredictionProbabilityModel
+/**
+ * Model ShapExplanation
+ * 
+ */
+export type ShapExplanation = Prisma.ShapExplanationModel
+/**
+ * Model StationCsvFile
+ * 
+ */
+export type StationCsvFile = Prisma.StationCsvFileModel
+/**
+ * Model UploadedCsvRow
+ * 
+ */
+export type UploadedCsvRow = Prisma.UploadedCsvRowModel

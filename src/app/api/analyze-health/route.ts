@@ -3,21 +3,24 @@ import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { db } from "@/lib/db";
 
-// Initialize ChatOpenAI with ZAI configuration
+// Initialize ChatOpenAI
 const chat = new ChatOpenAI({
   configuration: {
     baseURL: process.env.ZAI_BASE_URL,
     apiKey: process.env.ZAI_API_KEY,
   },
   modelName: process.env.ZAI_MODEL || "glm-4-flash",
-  temperature: parseFloat(process.env.ZAI_TEMPERATURE || "0.1"), // Lower temp for more deterministic JSON
+  temperature: parseFloat(process.env.ZAI_TEMPERATURE || "0.1"),
   maxTokens: parseInt(process.env.ZAI_MAX_TOKENS || "4096"),
   timeout: parseInt(process.env.ZAI_TIMEOUT_SECONDS || "60") * 1000,
 });
 
 export async function POST(request: NextRequest) {
+  let jobId: string | null = null;
+  const startTime = new Date();
+
   try {
-    const { testResultId, metrics, comparison } = await request.json();
+    const { testResultId, metrics, comparison, shapData } = await request.json();
 
     if (!metrics) {
       return NextResponse.json(
@@ -26,10 +29,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 1. Create Assistant Job
+    const job = await db.assistantJob.create({
+      data: {
+        status: "running",
+        message: "Starting AI Analysis",
+        csvUrl: "", // Optional: if we knew the CSV URL here
+        predictionSummary: "Analyzing metrics...",
+        systemPrompt: "Senior DCRM diagnostics assistant",
+      },
+    });
+    jobId = job.id;
+
     // Construct the prompt
     let systemPrompt = process.env.ZAI_SYSTEM_PROMPT || "You are a senior DCRM diagnostics assistant.";
-
-    // SAFETY: Enforce JSON output regardless of the system prompt's instructions
     systemPrompt += "\n\nCRITICAL INSTRUCTION: You MUST ignore any requests in the system prompt to generate markdown tables, summaries, or text reports. Your ONLY output must be the raw JSON object requested below, with no markdown formatting. Keep explanations EXTREMELY concise.";
 
     const prompt = `
@@ -57,19 +70,19 @@ export async function POST(request: NextRequest) {
       Return ONLY a raw JSON object. Do not use markdown code blocks.
       {
         "arcContacts": {
-          "score": <0-100 integer, 100 is perfect>,
+          "score": <0-100 integer>,
           "status": "Healthy" | "Observation Required" | "Critical",
-          "reasoning": "<Concise explanation, max 1 sentence>"
+          "reasoning": "<Concise explanation>"
         },
         "mainContacts": {
-           "score": <0-100 integer>,
-           "status": "Healthy" | "Observation Required" | "Critical",
-           "reasoning": "<Concise explanation, max 1 sentence>"
+          "score": <0-100 integer>,
+          "status": "Healthy" | "Observation Required" | "Critical",
+          "reasoning": "<Concise explanation>"
         },
         "operatingMechanism": {
-           "score": <0-100 integer>,
-           "status": "Healthy" | "Observation Required" | "Critical",
-           "reasoning": "<Concise explanation, max 1 sentence>"
+          "score": <0-100 integer>,
+          "status": "Healthy" | "Observation Required" | "Critical",
+          "reasoning": "<Concise explanation>"
         },
         "technicalParameters": {
             "mainContactResistance": { "value": <number>, "unit": "μΩ", "status": "Healthy" | "Warning" | "Critical" },
@@ -77,12 +90,12 @@ export async function POST(request: NextRequest) {
             "travelOverlap": { "value": <number>, "unit": "mm", "status": "Healthy" | "Warning" | "Critical" },
             "integratedWear": { "value": <number>, "unit": "μΩs", "status": "Healthy" | "Warning" | "Critical" }
         },
-        "overallScore": <0-100 integer, weighted average>,
-        "maintenanceRecommendation": "<One short actionable recommendation>",
+        "overallScore": <0-100 integer>,
+        "maintenanceRecommendation": "<Short recommendation>",
         "maintenanceSchedule": "Immediate" | "Next Outage" | "Routine" | "Condition Based",
         "maintenancePriority": "Critical" | "High" | "Medium" | "Low",
-        "criticalAlert": "<Optional specific alert message if status is Critical, otherwise null>",
-        "differenceAnalysis": "<Concise summary of key differences from reference and their implications>",
+        "criticalAlert": "<Optional message or null>",
+        "differenceAnalysis": "<Summary of differences>",
         "abnormal_ranges": [
             {
                 "start_ms": <integer>,
@@ -95,75 +108,113 @@ export async function POST(request: NextRequest) {
       }
     `;
 
-    // Call AI
+    // 2. Call AI
     const response = await chat.invoke([
       new SystemMessage(systemPrompt),
       new HumanMessage(prompt),
     ]);
 
-    // Parse JSON
     const content = response.content.toString();
-    console.log("DEBUG: Raw AI Response:", content);
-
-    // Clean markdown code blocks if present
     const jsonString = content.replace(/```json\n?|\n?```/g, "").trim();
-
     let analysisFull;
+
     try {
       analysisFull = JSON.parse(jsonString);
     } catch (parseError) {
-      console.warn("Initial JSON parse failed, attempting repair for truncation:", parseError);
-      // Attempt to repair truncated JSON (common pattern: missing closing braces)
+      console.warn("Initial JSON parse failed, attempting repair:", parseError);
+      // Simple repair attempt
       let repairedString = jsonString;
-
-      // If it ends with a quote but no brace, it might be inside a string value
-      // But likely it just ends abruptly. 
-      // Simple heuristic: Try closing arrays and objects if they look open
-      // This is brute-force and might not work for all cases, but helps for simple truncation
-      // First, check if we are inside a string
       if (repairedString.lastIndexOf('"') > repairedString.lastIndexOf('}')) {
-        // We are likely inside a string or key. 
-        // If we are deep in the structure, we might just cut off the last entry and close.
-        // But simpler: just try to close the main structure.
-        // If it ends with "description": "some text
         repairedString += '"}] }';
       } else {
-        // ends with }, missing ] }
         repairedString += '] }';
       }
-
       try {
         analysisFull = JSON.parse(repairedString);
-        console.log("JSON repaired successfully.");
       } catch (repairError) {
-        console.error("JSON repair failed:", repairError);
-        throw parseError; // Throw original error if repair fails
+        throw parseError;
       }
     }
 
-    console.log(analysisFull);
+    // 3. Save SHAP & Prediction Data
+    // Ensure Model Metadata exists (Placeholder)
+    const modelMeta = await db.mlModelMetadata.upsert({
+      where: { id: 1 },
+      update: {},
+      create: {
+        modelName: "DCRM-XGBoost-Ensemble",
+        modelType: "xgboost",
+        modelVersion: "1.0.0",
+        trainingDate: new Date(),
+        featureNames: ["resistance", "current", "travel"],
+        labelMap: {},
+      }
+    });
 
-    // Update DB if testResultId is provided
+    const prediction = await db.mlPredictionOutput.create({
+      data: {
+        modelMetadataId: modelMeta.id,
+        inputShape: [], // Placeholder
+        primaryClassIndex: 0,
+        primaryClassLabel: analysisFull.overallScore > 80 ? "Healthy" : "Faulty",
+        primaryConfidence: analysisFull.overallScore / 100, // Normalized score as confidence
+        secondaryClassLabel: "Unknown",
+        rawScores: analysisFull,
+      }
+    });
+
+    if (shapData) {
+      await db.shapExplanation.create({
+        data: {
+          predictionId: prediction.id,
+          baseValue: 0,
+          shapValues: [], // Storing complex structure in 'data' field instead
+          featureNames: Object.keys(shapData?.shap?.xgboost || {}),
+          data: shapData,
+        }
+      });
+    }
+
+    // 4. Update TestResult & AssistantJob
     if (testResultId) {
       await db.testResult.update({
         where: { id: testResultId },
-        data: {
-          componentHealth: analysisFull,
-        },
+        data: { componentHealth: analysisFull },
       });
     }
+
+    await db.assistantJob.update({
+      where: { id: jobId },
+      data: {
+        status: "completed",
+        reply: JSON.stringify(analysisFull),
+        predictionSummary: analysisFull.maintenanceRecommendation || "Analysis Completed",
+      }
+    });
 
     return NextResponse.json({
       success: true,
       data: analysisFull,
     });
+
   } catch (error) {
     console.error("AI Analysis Error Full:", error);
+
+    // Update Job Status on Error
+    if (jobId) {
+      await db.assistantJob.update({
+        where: { id: jobId },
+        data: {
+          status: "failed",
+          error: error instanceof Error ? error.message : "Unknown error",
+        }
+      });
+    }
+
     return NextResponse.json(
       {
         error: "Failed to generate AI analysis",
         details: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     );

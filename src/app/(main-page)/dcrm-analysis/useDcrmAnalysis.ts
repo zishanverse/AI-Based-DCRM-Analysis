@@ -13,6 +13,8 @@ export function useDcrmAnalysis() {
     "HEALTHY" | "NEEDS MAINTENANCE" | "CRITICAL"
   >("HEALTHY");
   const [file, setFile] = useState<File | null>(null);
+  const [idealFile, setIdealFile] = useState<File | null>(null); // New: Ideal File
+  const [fileType, setFileType] = useState<"TEST" | "IDEAL">("TEST"); // New: File Type
   const [error, setError] = useState<string | null>(null);
 
   // Zoom State
@@ -160,6 +162,12 @@ export function useDcrmAnalysis() {
     }
   };
 
+  const handleIdealFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setIdealFile(e.target.files[0]);
+    }
+  };
+
   const zoom = () => {
     let l = refAreaLeft;
     let r = refAreaRight;
@@ -203,6 +211,13 @@ export function useDcrmAnalysis() {
           selectedBreakerDetails.dataSource.fileUrl
         );
       }
+
+      // Append Ideal/Reference File if provided and we are in TEST mode
+      if (fileType === "TEST" && idealFile) {
+        formData.append("referenceFile", idealFile);
+      }
+
+      formData.append("fileType", fileType);
 
       // Pass SHAP toggle state
       const response = await fetch(`/api/dcrm-data?include_shap=${showShap}`, {
@@ -251,7 +266,8 @@ export function useDcrmAnalysis() {
       const payload = {
         testResultId: testResults.id || null,
         metrics: testResults,
-        comparison: comparison, // Data from both CSVs (diffs & text report)
+        comparison: comparison,
+        shapData: shapData, // Pass SHAP data to backend
       };
 
       const res = await fetch("/api/analyze-health", {
@@ -343,6 +359,10 @@ export function useDcrmAnalysis() {
     setSelectedStation,
     setSelectedBreaker,
     handleFileChange,
+    handleIdealFileChange,
+    idealFile,
+    fileType,
+    setFileType,
     handleSubmit,
     visibleLines,
     setVisibleLines,

@@ -57,6 +57,7 @@ export async function POST(
           description: `Reference CSV for ${breaker.name}`,
           status: "COMPLETED",
           updatedAt: new Date(),
+          fileType: "IDEAL", // Ensure fileType is set
         },
       });
 
@@ -69,6 +70,7 @@ export async function POST(
           fileUrl: fileUrl,
           description: `Reference CSV for ${breaker.name}`,
           status: "COMPLETED",
+          fileType: "IDEAL", // Ensure fileType is set
         },
       });
 

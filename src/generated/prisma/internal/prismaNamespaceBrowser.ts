@@ -55,7 +55,17 @@ export const ModelName = {
   TestResult: 'TestResult',
   Breaker: 'Breaker',
   BreakerComponent: 'BreakerComponent',
-  DataSource: 'DataSource'
+  DataSource: 'DataSource',
+  AssistantJob: 'AssistantJob',
+  CircuitCategory: 'CircuitCategory',
+  CsvUploadResponse: 'CsvUploadResponse',
+  HeatmapPoint: 'HeatmapPoint',
+  MlModelMetadata: 'MlModelMetadata',
+  MlPredictionOutput: 'MlPredictionOutput',
+  MlPredictionProbability: 'MlPredictionProbability',
+  ShapExplanation: 'ShapExplanation',
+  StationCsvFile: 'StationCsvFile',
+  UploadedCsvRow: 'UploadedCsvRow'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -155,10 +165,149 @@ export const DataSourceScalarFieldEnum = {
   description: 'description',
   status: 'status',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  fileType: 'fileType'
 } as const
 
 export type DataSourceScalarFieldEnum = (typeof DataSourceScalarFieldEnum)[keyof typeof DataSourceScalarFieldEnum]
+
+
+export const AssistantJobScalarFieldEnum = {
+  id: 'id',
+  jobId: 'jobId',
+  status: 'status',
+  message: 'message',
+  csvUrl: 'csvUrl',
+  predictionSummary: 'predictionSummary',
+  systemPrompt: 'systemPrompt',
+  reply: 'reply',
+  error: 'error',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AssistantJobScalarFieldEnum = (typeof AssistantJobScalarFieldEnum)[keyof typeof AssistantJobScalarFieldEnum]
+
+
+export const CircuitCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  type: 'type',
+  slug: 'slug',
+  description: 'description',
+  metadata: 'metadata'
+} as const
+
+export type CircuitCategoryScalarFieldEnum = (typeof CircuitCategoryScalarFieldEnum)[keyof typeof CircuitCategoryScalarFieldEnum]
+
+
+export const CsvUploadResponseScalarFieldEnum = {
+  csvFileId: 'csvFileId',
+  cloudinaryUrl: 'cloudinaryUrl',
+  fileId: 'fileId',
+  diagnostics: 'diagnostics',
+  processedRows: 'processedRows',
+  skippedRows: 'skippedRows',
+  createdAt: 'createdAt'
+} as const
+
+export type CsvUploadResponseScalarFieldEnum = (typeof CsvUploadResponseScalarFieldEnum)[keyof typeof CsvUploadResponseScalarFieldEnum]
+
+
+export const HeatmapPointScalarFieldEnum = {
+  id: 'id',
+  deviceId: 'deviceId',
+  lat: 'lat',
+  lon: 'lon',
+  timestamp: 'timestamp',
+  healthScore: 'healthScore',
+  status: 'status',
+  severity: 'severity',
+  metadata: 'metadata'
+} as const
+
+export type HeatmapPointScalarFieldEnum = (typeof HeatmapPointScalarFieldEnum)[keyof typeof HeatmapPointScalarFieldEnum]
+
+
+export const MlModelMetadataScalarFieldEnum = {
+  id: 'id',
+  modelName: 'modelName',
+  modelType: 'modelType',
+  modelVersion: 'modelVersion',
+  trainingDate: 'trainingDate',
+  featureNames: 'featureNames',
+  labelMap: 'labelMap',
+  metadata: 'metadata'
+} as const
+
+export type MlModelMetadataScalarFieldEnum = (typeof MlModelMetadataScalarFieldEnum)[keyof typeof MlModelMetadataScalarFieldEnum]
+
+
+export const MlPredictionOutputScalarFieldEnum = {
+  id: 'id',
+  modelMetadataId: 'modelMetadataId',
+  inputShape: 'inputShape',
+  primaryClassIndex: 'primaryClassIndex',
+  primaryClassLabel: 'primaryClassLabel',
+  primaryConfidence: 'primaryConfidence',
+  secondaryClassLabel: 'secondaryClassLabel',
+  rawScores: 'rawScores',
+  createdAt: 'createdAt'
+} as const
+
+export type MlPredictionOutputScalarFieldEnum = (typeof MlPredictionOutputScalarFieldEnum)[keyof typeof MlPredictionOutputScalarFieldEnum]
+
+
+export const MlPredictionProbabilityScalarFieldEnum = {
+  id: 'id',
+  predictionId: 'predictionId',
+  classIndex: 'classIndex',
+  classLabel: 'classLabel',
+  probability: 'probability'
+} as const
+
+export type MlPredictionProbabilityScalarFieldEnum = (typeof MlPredictionProbabilityScalarFieldEnum)[keyof typeof MlPredictionProbabilityScalarFieldEnum]
+
+
+export const ShapExplanationScalarFieldEnum = {
+  id: 'id',
+  predictionId: 'predictionId',
+  baseValue: 'baseValue',
+  shapValues: 'shapValues',
+  featureNames: 'featureNames',
+  data: 'data',
+  meta: 'meta',
+  createdAt: 'createdAt'
+} as const
+
+export type ShapExplanationScalarFieldEnum = (typeof ShapExplanationScalarFieldEnum)[keyof typeof ShapExplanationScalarFieldEnum]
+
+
+export const StationCsvFileScalarFieldEnum = {
+  id: 'id',
+  stationId: 'stationId',
+  url: 'url',
+  filename: 'filename',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type StationCsvFileScalarFieldEnum = (typeof StationCsvFileScalarFieldEnum)[keyof typeof StationCsvFileScalarFieldEnum]
+
+
+export const UploadedCsvRowScalarFieldEnum = {
+  id: 'id',
+  csvFileId: 'csvFileId',
+  deviceId: 'deviceId',
+  timestampIso: 'timestampIso',
+  sampleRateHz: 'sampleRateHz',
+  channel: 'channel',
+  tMs: 'tMs',
+  rOhm: 'rOhm',
+  rawRowIndex: 'rawRowIndex',
+  diagnostics: 'diagnostics'
+} as const
+
+export type UploadedCsvRowScalarFieldEnum = (typeof UploadedCsvRowScalarFieldEnum)[keyof typeof UploadedCsvRowScalarFieldEnum]
 
 
 export const SortOrder = {

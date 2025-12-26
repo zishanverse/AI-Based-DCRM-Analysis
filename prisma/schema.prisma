@@ -93,7 +93,146 @@ model DataSource {
   status      String    @default("PENDING")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  fileType    String    @default("TEST") // "TEST" or "IDEAL"
   breakers    Breaker[]
 
   @@map("data_sources")
+}
+
+model AssistantJob {
+  id                String   @id @default(uuid())
+  jobId             String   @unique @map("job_id") @default(uuid())
+  status            String
+  message           String
+  csvUrl            String   @map("csv_url")
+  predictionSummary String   @map("prediction_summary")
+  systemPrompt      String   @map("system_prompt")
+  reply             String?
+  error             String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("assistant_jobs")
+}
+
+model CircuitCategory {
+  id          Int    @id @default(autoincrement())
+  name        String
+  type        String
+  slug        String @unique
+  description String?
+  metadata    Json   @default("{}")
+
+  @@map("circuit_categories")
+}
+
+model CsvUploadResponse {
+  csvFileId     Int            @id @map("csv_file_id")
+  cloudinaryUrl String         @map("cloudinary_url")
+  fileId        String         @map("file_id")
+  diagnostics   Json
+  processedRows Int            @map("processed_rows")
+  skippedRows   Int            @map("skipped_rows")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  StationCsvFile StationCsvFile @relation(fields: [csvFileId], references: [id])
+
+  @@map("csv_upload_responses")
+}
+
+model HeatmapPoint {
+  id          String   @id @default(uuid())
+  deviceId    String   @map("device_id")
+  lat         Decimal
+  lon         Decimal
+  timestamp   DateTime
+  healthScore Decimal  @map("health_score")
+  status      String
+  severity    Decimal
+  metadata    Json     @default("{}")
+
+  @@map("heatmap_points")
+}
+
+model MlModelMetadata {
+  id           Int                  @id @default(autoincrement())
+  modelName    String               @map("model_name")
+  modelType    String               @map("model_type")
+  modelVersion String               @map("model_version")
+  trainingDate DateTime             @db.Date @map("training_date")
+  featureNames String[]             @map("feature_names")
+  labelMap     Json                 @map("label_map")
+  metadata     Json                 @default("{}")
+  predictions  MlPredictionOutput[]
+
+  @@map("ml_model_metadata")
+}
+
+model MlPredictionOutput {
+  id                 String                    @id @default(uuid())
+  modelMetadataId    Int                       @map("model_metadata_id")
+  inputShape         String[]                  @map("input_shape") // Changed to String[] as arrays of mixed types not fully supported in simple arrays
+  primaryClassIndex  Int                       @map("primary_class_index")
+  primaryClassLabel  String                    @map("primary_class_label")
+  primaryConfidence  Decimal                   @map("primary_confidence")
+  secondaryClassLabel String                   @map("secondary_class_label")
+  rawScores          Json?                     @map("raw_scores")
+  createdAt          DateTime                  @default(now()) @map("created_at")
+  modelMetadata      MlModelMetadata           @relation(fields: [modelMetadataId], references: [id])
+  probabilities      MlPredictionProbability[]
+  shapExplanations   ShapExplanation[]
+
+  @@map("ml_prediction_output")
+}
+
+model MlPredictionProbability {
+  id            Int                @id @default(autoincrement())
+  predictionId  String             @map("prediction_id")
+  classIndex    Int                @map("class_index")
+  classLabel    String             @map("class_label")
+  probability   Decimal
+  prediction    MlPredictionOutput @relation(fields: [predictionId], references: [id])
+
+  @@map("ml_prediction_probabilities")
+}
+
+model ShapExplanation {
+  id           String             @id @default(uuid())
+  predictionId String             @map("prediction_id")
+  baseValue    Float              @map("base_value")
+  shapValues   Float[]            @map("shap_values")
+  featureNames String[]           @map("feature_names")
+  data         Json
+  meta         Json               @default("{}")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  prediction   MlPredictionOutput @relation(fields: [predictionId], references: [id])
+
+  @@map("shap_explanations")
+}
+
+model StationCsvFile {
+  id         Int                 @id @default(autoincrement())
+  stationId  String              @map("station_id")
+  url        String
+  filename   String
+  uploadedAt DateTime            @default(now()) @map("uploaded_at")
+  response   CsvUploadResponse?
+  rows       UploadedCsvRow[]
+
+  @@map("station_csv_files")
+}
+
+model UploadedCsvRow {
+  id            BigInt         @id @default(autoincrement())
+  csvFileId     Int            @map("csv_file_id")
+  deviceId      String         @map("device_id")
+  timestampIso  DateTime       @map("timestamp_iso")
+  sampleRateHz  Decimal        @map("sample_rate_hz")
+  channel       String
+  tMs           Decimal        @map("t_ms")
+  rOhm          Decimal        @map("r_ohm")
+  rawRowIndex   Int            @map("raw_row_index")
+  diagnostics   Json?
+  csvFile       StationCsvFile @relation(fields: [csvFileId], references: [id])
+
+  @@map("uploaded_csv_rows")
 }

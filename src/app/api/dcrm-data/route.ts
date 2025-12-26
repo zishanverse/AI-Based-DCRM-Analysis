@@ -6,6 +6,8 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const referenceUrl = formData.get("referenceUrl") as string;
+    const referenceFile = formData.get("referenceFile") as File; // Check for uploaded reference file
+    const fileType = (formData.get("fileType") as string) || "TEST"; // "TEST" or "IDEAL"
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -38,7 +40,18 @@ export async function POST(request: NextRequest) {
     const data = parseCSV(text);
 
     let referenceData = null;
-    if (finalReferenceUrl) {
+
+    // Priority 1: Direct File Upload
+    if (referenceFile) {
+      try {
+        const refText = await referenceFile.text();
+        referenceData = parseCSV(refText);
+      } catch (refError) {
+        console.error("Error processing uploaded reference CSV:", refError);
+      }
+    }
+    // Priority 2: URL (DB or Provided)
+    else if (finalReferenceUrl) {
       try {
         const refResponse = await fetch(finalReferenceUrl);
         if (refResponse.ok) {
@@ -249,15 +262,19 @@ export async function POST(request: NextRequest) {
               create: {
                 fileName: file.name,
                 fileUrl: secureUrl,
-                description: "Uploaded via DCRM Analysis",
-                status: "PROCESSED"
+                description: `Uploaded via DCRM Analysis (${fileType})`,
+                status: "PROCESSED",
+                fileType: fileType, // Save file type
               },
-              update: {}
+              update: {
+                fileType: fileType,
+              }
             });
 
             // 2. Test Result
+            let createdResult;
             if (breakerId) {
-              await db.testResult.create({
+              createdResult = await db.testResult.create({
                 data: {
                   breakerId: breakerId,
                   testType: "DCRM",
@@ -274,6 +291,11 @@ export async function POST(request: NextRequest) {
                   notes: comparison ? JSON.stringify(comparison) : null
                 }
               });
+
+              // Helper to attach ID to response
+              if (createdResult) {
+                (data.testResults as any).id = createdResult.id;
+              }
             }
           } catch (dbErr) {
             console.error("DB Persistence Error:", dbErr);
