@@ -37,6 +37,7 @@ interface DcrmChartsProps {
 }
 
 import { ShapOverlay } from "@/components/ShapOverlay";
+import { useTheme } from "next-themes";
 
 // Custom tooltip for the charts
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -79,6 +80,15 @@ export function DcrmCharts({
   showShap,
   onToggleShap,
 }: DcrmChartsProps) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const axisColor = isDark ? "#888888" : "#333333";
+  const gridColor = isDark ? "#333333" : "#eeeeee";
+  const tooltipBg = isDark ? "#1f2937" : "#ffffff";
+  const tooltipBorder = isDark ? "#374151" : "#e5e7eb";
+  const tooltipText = isDark ? "#f3f4f6" : "#000000";
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -382,7 +392,7 @@ export function DcrmCharts({
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#fee"
+                  stroke={gridColor}
                   vertical={false}
                 />
                 <XAxis
@@ -391,6 +401,7 @@ export function DcrmCharts({
                   domain={[left, right]}
                   allowDataOverflow
                   hide
+                  stroke={axisColor}
                 />
                 <YAxis hide domain={["auto", "auto"]} />
                 <Tooltip content={<CustomTooltip />} />
@@ -651,7 +662,7 @@ export function DcrmCharts({
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#eef"
+                  stroke={gridColor}
                   vertical={false}
                 />
                 <XAxis
@@ -921,7 +932,7 @@ export function DcrmCharts({
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#efe"
+                  stroke={gridColor}
                   vertical={false}
                 />
                 <XAxis
@@ -930,6 +941,7 @@ export function DcrmCharts({
                   domain={[left, right]}
                   allowDataOverflow
                   hide
+                  stroke={axisColor}
                 />
                 <YAxis hide domain={["auto", "auto"]} />
                 <Tooltip content={<CustomTooltip />} />
@@ -1189,7 +1201,7 @@ export function DcrmCharts({
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#fef"
+                  stroke={gridColor}
                   vertical={false}
                 />
                 <XAxis
@@ -1201,7 +1213,9 @@ export function DcrmCharts({
                     value: "Time (ms)",
                     position: "bottom",
                     offset: 0,
+                    fill: axisColor, // Ensure label is visible
                   }}
+                  stroke={axisColor}
                 />
                 <YAxis hide domain={["auto", "auto"]} />
                 <Tooltip content={<CustomTooltip />} />

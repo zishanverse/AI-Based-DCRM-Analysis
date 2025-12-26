@@ -5,6 +5,7 @@ import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import React from 'react'
 import { cn } from '@/lib/utils'
+import { ModeToggle } from '@/components/mode-toggle'
 
 const menuItems = [
     { name: 'Features', href: '#link' },
@@ -102,6 +103,9 @@ export const HeroHeader = () => {
                                         <span>Get Started</span>
                                     </Link>
                                 </Button>
+                                <div className="hidden lg:block">
+                                    <ModeToggle />
+                                </div>
                             </div>
                         </div>
                     </div>
