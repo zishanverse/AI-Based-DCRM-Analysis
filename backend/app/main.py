@@ -37,6 +37,7 @@ ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
     "https://ai-based-dcrm-analysis.vercel.app",
+    "https://ai-based-dcrm-analysis.onrender.com",
 ]
 
 # Add origins from environment variable (comma separated)

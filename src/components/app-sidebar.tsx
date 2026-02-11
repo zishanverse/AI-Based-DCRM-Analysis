@@ -34,9 +34,9 @@ import {
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "zishan",
+    email: "zishanverse@gmail.com",
+    avatar: "https://res.cloudinary.com/deepcnbrz/image/upload/v1719376369/Picsart_23-10-09_10-27-27-667_nngyyr.jpg",
   },
   navMain: [
     {
