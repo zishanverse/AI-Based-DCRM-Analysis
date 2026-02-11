@@ -1,8 +1,0 @@
-Raw repr: 'postgresql://postgres:oSvnhy0VwoPhKZg8@db.cxmpsvvkqmppbvokvpqu.supabase.co:5432/postgres'
-Length: 88
-Scheme: postgresql
-Netloc: postgres:oSvnhy0VwoPhKZg8@db.cxmpsvvkqmppbvokvpqu.supabase.co:5432
-Safe Netloc: postgres:******@db.cxmpsvvkqmppbvokvpqu.supabase.co:5432
-Hostname: db.cxmpsvvkqmppbvokvpqu.supabase.co
-Port: 5432
-Path: /postgres

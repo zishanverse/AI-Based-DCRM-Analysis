@@ -50,7 +50,7 @@ next-env.d.ts
 
 
 # Data
-backend/DCRM CSV files/DCRM/DCRM/
+backend/DCRM CSV files/
 
 # Sensitive & Temp
 *.sql
