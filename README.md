@@ -165,4 +165,4 @@ npx prisma studio
 
 make the whole project at light theme and add the option to make it dark 
 
-make sure to make the waveform proper visible on dark mode also . 
+make sure to make the waveform visible and proper on dark mode also.
